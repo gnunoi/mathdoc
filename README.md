@@ -1,2 +1,9 @@
 # MathDoc Application
-## 整数的四则运算
+## Release V0.1
+
+实现整数的四则运算，二项式
+
+## Release V0.2
+
+实现实数的四则运算，多项式（二到五项式）
+
