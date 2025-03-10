@@ -8,7 +8,7 @@ import random
 import getpass
 import os
 import ntplib
-import zoneinfo
+from time import sleep
 from threading import Thread
 from datetime import datetime
 from math import isclose
@@ -26,9 +26,9 @@ import xlsxwriter
 class MathQuizApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.version_number = "2025.03.02"
-        self.magic_time = "2025-12-31"
-        self.GetNetTimeInThread(self.HandleTime)
+        self.version_number = "2025.03.10"
+        self.magic_date = "2025-02-28" # 月份2位，不满2位补0
+        self.authorization = None
         self.home = self.GetHome()
         self.num_range = [10, 99, 10, 50]
         self.question_number = 1
@@ -56,11 +56,7 @@ class MathQuizApp(QWidget):
         self.LoadSettings()
         self.OpenWorkbook()
         self.initUI()
-        self.adjustWindowSize()
-
-    def adjustWindowSize(self):
-        screen = QDesktopWidget().screenGeometry()
-        self.setGeometry(0, 0, screen.width(), screen.height())
+        self.SetWindowSize()
 
     def GetNetTime(self):
         servers = ['ntp.aliyun.com', 'time.hicloud.com', 'ntp.ntsc.ac.cn',
@@ -81,16 +77,25 @@ class MathQuizApp(QWidget):
                 print(f"Error fetching NTP time: {e}")
         return None
 
+
     def GetNetTimeInThread(self, callback):
         def wrapper():
             callback(self.GetNetTime())
-
         Thread(target=wrapper).start()
 
-    def HandleTime(self, net_time):
-        if net_time and net_time > self.magic_time:
-            QMessageBox.warning(self, "软件超过使用期", "请联系软件作者")
-            self.ExitApp()
+    # 回调函数
+    def HandleAuthorization(self, net_time):
+        sleep(30)
+        print(net_time)
+        print(self.magic_date)
+        if net_time and net_time > self.magic_date:
+            self.authorization = False
+        else:
+            self.authorization = True
+
+    def SetWindowSize(self):
+        screen = QDesktopWidget().screenGeometry()
+        self.setGeometry(0, 0, screen.width(), screen.height())
 
     def GetHome(self):
         return os.path.expanduser("~")
@@ -210,7 +215,6 @@ class MathQuizApp(QWidget):
     def initUI(self):
         self.setWindowTitle(f'初中数学练习软件 版本：V{self.version_number}')
         main_layout = QVBoxLayout()
-
         control_panel = QHBoxLayout()
 
         # 算术项式
@@ -297,6 +301,9 @@ class MathQuizApp(QWidget):
         self.apply_styles()
         self.next_question()
 
+        # 判断软件是否超过有效期
+        self.GetNetTimeInThread(self.HandleAuthorization)
+
     def apply_styles(self):
         style = """
         QGroupBox {
@@ -343,6 +350,10 @@ class MathQuizApp(QWidget):
         return parts
 
     def generate_question(self):
+        if self.authorization == False:
+            QMessageBox.warning(self, "提醒", "软件超过使用期，请联系软件作者",
+                                QMessageBox.Yes | QMessageBox.No)
+            self.ExitApp()
         while True:
             current_op = self.operator if self.operator != 4 else random.choice([0, 1, 2, 3])
 
