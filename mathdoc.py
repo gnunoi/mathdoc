@@ -27,7 +27,10 @@ from question import *
 class MathQuizApp(QWidget):
     def __init__(self):
         super().__init__()
+        self.appname = "数字博士"
+        self.author = "致慧星空工作室出品"
         self.version_number = "2025.03.10"
+        self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28" # 月份2位，不满2位补0
         self.authorization = None
         self.home = self.GetHome()
@@ -221,7 +224,7 @@ class MathQuizApp(QWidget):
             self.workbook.close()
 
     def initUI(self):
-        self.setWindowTitle(f'初中数学练习软件 版本：V{self.version_number}')
+        self.setWindowTitle(self.title)
         main_layout = QVBoxLayout()
         control_panel = QHBoxLayout()
 
