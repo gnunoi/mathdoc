@@ -29,12 +29,13 @@ class MathQuizApp(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.03.10"
+        self.version_number = "2025.03.11"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28" # 月份2位，不满2位补0
         self.authorization = None
+        self.os = self.GetOS()
         self.home = self.GetHome()
-        self.num_range = [10, 99, 10, 50]
+        self.num_range = [10, 30, 2, 10]
         self.q = Question()
         self.ops=[['+'], ['-'], ['*'], ['/'], ['+', '-', '*', '/']]
         self.question_number = 1
@@ -42,7 +43,7 @@ class MathQuizApp(QWidget):
         self.correct_answer = None
         self.error_count = 0
         self.correct_number = 0
-        self.config_filename = "mathapp.ini"
+        self.config_filename = "mathdoc.ini"
         self.file_path = None
         self.workbook = None
         self.worksheet = None
@@ -56,12 +57,16 @@ class MathQuizApp(QWidget):
         self.start_time = None
         self.end_time = None
         self.last_operator = None
-        self.base_font = QFont("PingFang SC", 24)  # 修改为24号字
-        self.big_font = QFont("Arial", 32)
+        self.base_font = QFont("SimSun", 20)  # 修改为24号字
+        self.big_font = QFont("Arial", 28)
         self.LoadSettings()
         self.OpenWorkbook()
         self.initUI()
         self.SetWindowSize()
+
+    def GetOS(self):
+        print(os.name)
+        return os.name
 
     def GetNetTime(self):
         servers = ['ntp.aliyun.com', 'time.hicloud.com', 'ntp.ntsc.ac.cn',
@@ -119,10 +124,10 @@ class MathQuizApp(QWidget):
                 self.operator = int(config['设置']['运算符'])
                 self.q.term_count = int(config['设置']['项数'])
                 self.bracket_prob = int(config['设置']['括号概率'])
-                print(f"000 term_count = {self.q.term_count}")
+                # print(f"000 term_count = {self.q.term_count}")
             except Exception as e:
                 QMessageBox.warning(self, '警告', f'配置文件错误: {str(e)}')
-        self.q.Set(range=self.num_range)
+        self.q.Set(range=self.num_range, user_operators=self.ops[self.operator])
 
     def SaveSettings(self):
         config = configparser.ConfigParser()
@@ -172,6 +177,7 @@ class MathQuizApp(QWidget):
         desktop_path = os.path.join(self.home, 'Desktop')
         filename = f"{username}_{current_datetime}.xlsx"
         self.file_path = os.path.join(desktop_path, filename)
+        # self.file_path = filename
 
         # 创建工作簿和工作表
         current_date = datetime.now().strftime("%Y-%m-%d")
@@ -309,7 +315,8 @@ class MathQuizApp(QWidget):
         main_layout.addLayout(btn_layout)
 
         self.setLayout(main_layout)
-        self.apply_styles()
+        if self.os == "posix":
+            self.apply_styles()
         self.next_question()
 
         # 判断软件是否超过有效期
@@ -361,7 +368,7 @@ class MathQuizApp(QWidget):
         return parts
 
     def generate_question(self):
-        print("term_count = {}".format(self.q.term_count))
+        # print("term_count = {}".format(self.q.term_count))
         if self.authorization == False:
             QMessageBox.warning(self, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
@@ -436,5 +443,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MathQuizApp()
     app.aboutToQuit.connect(window.ExitApp)
-    window.show()
+    # window.show()
+    window.showMaximized()
     sys.exit(app.exec())

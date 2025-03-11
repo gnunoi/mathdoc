@@ -44,6 +44,7 @@ class Question():
     def Generate(self):
         self.numbers = []
         self.operators = []
+        # print(self.user_operators)
         for i in range(self.term_count):
             self.numbers.append(random.randint(self.range[0], self.range[1]))
             if i < self.term_count - 1:
