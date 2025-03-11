@@ -22,15 +22,18 @@ from PyQt5.QtCore import Qt
 import configparser
 import xlsxwriter
 
+from question import *
 
 class MathQuizApp(QWidget):
     def __init__(self):
         super().__init__()
         self.version_number = "2025.03.10"
-        self.magic_date = "2025-02-28" # 月份2位，不满2位补0
+        self.magic_date = "2025-12-28" # 月份2位，不满2位补0
         self.authorization = None
         self.home = self.GetHome()
         self.num_range = [10, 99, 10, 50]
+        self.q = Question()
+        self.ops=[['+'], ['-'], ['*'], ['/'], ['+', '-', '*', '/']]
         self.question_number = 1
         self.current_question = None
         self.correct_answer = None
@@ -41,12 +44,11 @@ class MathQuizApp(QWidget):
         self.workbook = None
         self.worksheet = None
         self.current_row = 0
-        self.column_widths = [8, 30, 12, 12, 10, 12, 12, 12]
+        self.column_widths = [12, 12, 12, 12, 12, 12, 12, 12]
         self.num_edit = []
         self.radio_operator = []
         self.radio_terms = []
         self.operator = 0
-        self.term_count = 2
         self.bracket_prob = 30
         self.start_time = None
         self.end_time = None
@@ -85,8 +87,8 @@ class MathQuizApp(QWidget):
 
     # 回调函数
     def HandleAuthorization(self, net_time):
-        sleep(30)
-        print(net_time)
+        # sleep(30)
+        # print(net_time)
         print(self.magic_date)
         if net_time and net_time > self.magic_date:
             self.authorization = False
@@ -112,26 +114,28 @@ class MathQuizApp(QWidget):
                     int(config['设置']['乘除数最大值'])
                 ]
                 self.operator = int(config['设置']['运算符'])
-                self.term_count = int(config['设置']['项数'])
+                self.q.term_count = int(config['设置']['项数'])
                 self.bracket_prob = int(config['设置']['括号概率'])
+                print(f"000 term_count = {self.q.term_count}")
             except Exception as e:
                 QMessageBox.warning(self, '警告', f'配置文件错误: {str(e)}')
+        self.q.Set(range=self.num_range)
 
     def SaveSettings(self):
         config = configparser.ConfigParser()
         config['设置'] = {
-            '加减数最小值': self.num_range[0],
-            '加减数最大值': self.num_range[1],
-            '乘除数最小值': self.num_range[2],
-            '乘除数最大值': self.num_range[3],
+            '加减数最小值': self.q.range[0],
+            '加减数最大值': self.q.range[1],
+            '乘除数最小值': self.q.range[2],
+            '乘除数最大值': self.q.range[3],
             '运算符': self.operator,
-            '项数': self.term_count,
+            '项数': self.q.term_count,
             '括号概率': self.bracket_prob
         }
         with open(self.config_filename, 'w') as f:
             config.write(f)
 
-    def UpdateConfig(self):
+    def UpdateSettings(self):
         for i in range(4):
             try:
                 self.num_range[i] = int(self.num_edit[i].text())
@@ -143,14 +147,18 @@ class MathQuizApp(QWidget):
                 self.num_range[pair[0]], self.num_range[pair[1]] = self.num_range[pair[1]], self.num_range[pair[0]]
                 self.num_edit[pair[0]].setText(str(self.num_range[pair[0]]))
                 self.num_edit[pair[1]].setText(str(self.num_range[pair[1]]))
-
         for i in range(5):
             if self.radio_operator[i].isChecked():
                 self.operator = i
+        print(self.operator)
+        print(self.ops[self.operator])
 
         for i in range(4):
             if self.radio_terms[i].isChecked():
                 self.term_count = i + 2
+        self.q.Set(range = self.num_range,
+                   term_count=self.term_count,
+                   user_operators=self.ops[self.operator])
 
     def OpenWorkbook(self):
         # 获取当前用户名
@@ -194,13 +202,13 @@ class MathQuizApp(QWidget):
         })
         self.Append([
             '题号', '题目', '用户答案', '正确答案', '是否正确',
-            '开始时间', '结束时间', '用时（秒）'
+            '开始时间', '结束时间', '用时(秒)'
         ])
         self.worksheet.freeze_panes(1, 1)  # 冻结第一行第一列
 
     def Append(self, data):
         for idx, value in enumerate(data):
-            cell_len = len(str(value)) * 2.5
+            cell_len = len(str(value)) * 3
             self.column_widths[idx] = max(self.column_widths[idx], cell_len)
 
         self.worksheet.write_row(self.current_row, 0, data, self.cell_format)
@@ -222,10 +230,10 @@ class MathQuizApp(QWidget):
         term_group.setFont(self.base_font)
         term_layout = QVBoxLayout()
         self.radio_terms = [QRadioButton(f'{i + 2}项式') for i in range(4)]
-        self.radio_terms[self.term_count - 2].setChecked(True)
+        self.radio_terms[self.q.term_count - 2].setChecked(True)
         for rb in self.radio_terms:
             rb.setFont(self.base_font)
-            rb.toggled.connect(self.UpdateConfig)
+            rb.toggled.connect(self.UpdateSettings)
             term_layout.addWidget(rb)
         term_group.setLayout(term_layout)
         control_panel.addWidget(term_group, 1)
@@ -242,7 +250,7 @@ class MathQuizApp(QWidget):
         self.radio_operator[self.operator].setChecked(True)
         for rb in self.radio_operator:
             rb.setFont(self.base_font)
-            rb.toggled.connect(self.UpdateConfig)
+            rb.toggled.connect(self.UpdateSettings)
             operator_layout.addWidget(rb)
         operator_group.setLayout(operator_layout)
         control_panel.addWidget(operator_group, 1)
@@ -258,7 +266,7 @@ class MathQuizApp(QWidget):
             self.num_edit[i].setFixedWidth(120)
             self.num_edit[i].setAlignment(Qt.AlignCenter)
             range_layout.addRow(QLabel(labels[i], font=self.base_font), self.num_edit[i])
-            self.num_edit[i].editingFinished.connect(self.UpdateConfig)
+            self.num_edit[i].editingFinished.connect(self.UpdateSettings)
         range_group.setLayout(range_layout)
         control_panel.addWidget(range_group, 2)
 
@@ -350,48 +358,12 @@ class MathQuizApp(QWidget):
         return parts
 
     def generate_question(self):
+        print("term_count = {}".format(self.q.term_count))
         if self.authorization == False:
-            QMessageBox.warning(self, "提醒", "软件超过使用期，请联系软件作者",
-                                QMessageBox.Yes | QMessageBox.No)
+            QMessageBox.warning(self, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
-        while True:
-            current_op = self.operator if self.operator != 4 else random.choice([0, 1, 2, 3])
-
-            # 避免连续乘除
-            if self.last_operator in [2] and current_op in [2]:
-                current_op = random.choice([0, 1, 3])
-            if self.last_operator in [3] and current_op in [3]:
-                current_op = random.choice([0, 1, 2])
-
-            nums = [random.randint(self.num_range[i % 2 * 2], self.num_range[i % 2 * 2 + 1])
-                    for i in range(self.term_count)]
-            ops = []
-            for _ in range(self.term_count - 1):
-                if current_op == 0:
-                    ops.append('+')
-                elif current_op == 1:
-                    ops.append('-')
-                elif current_op == 2:
-                    ops.append('×')
-                else:
-                    ops.append('÷')
-
-            parts = []
-            for i in range(self.term_count * 2 - 1):
-                parts.append(str(nums[i // 2]) if i % 2 == 0 else ops[i // 2])
-
-            parts = self.add_brackets(parts)
-            expr = ' '.join(parts)
-
-            try:
-                calc_expr = expr.replace('×', '*').replace('÷', '/')
-                answer = round(eval(calc_expr), 2)
-                if int(answer) == answer:
-                    answer = int(answer)
-                self.last_operator = current_op
-                return f"{expr} = ", answer
-            except:
-                continue
+        self.q.Generate()
+        return (self.q.question, self.q.correct_answer)
 
     def next_question(self):
         self.current_question, self.correct_answer = self.generate_question()
@@ -421,7 +393,7 @@ class MathQuizApp(QWidget):
             return
 
         is_correct = isclose(user_num, self.correct_answer, rel_tol=1e-9)
-        time_used = round((self.end_time - self.start_time).total_seconds(), 2)
+        time_used = round((self.end_time - self.start_time).total_seconds(), 1)
 
         self.Append([
             self.question_number,

@@ -21,7 +21,7 @@ class Question():
         self.tips = None # 提示
         self.Generate()
 
-    def Set(self, term_count=None, range=None, user_operators=None):
+    def Set(self, term_count, range, user_operators):
         if term_count is not None:
             self.term_count = term_count
         if range is not None:
