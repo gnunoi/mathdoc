@@ -48,7 +48,7 @@ class MathQuizApp(QWidget):
         self.workbook = None
         self.worksheet = None
         self.current_row = 0
-        self.column_widths = [12, 12, 12, 12, 12, 12, 12, 12]
+        self.column_widths = [12, 30, 12, 12, 12, 12, 12, 15]
         self.num_edit = []
         self.radio_operator = []
         self.radio_terms = []
@@ -195,15 +195,13 @@ class MathQuizApp(QWidget):
             })
         # 设置所有列的默认格式（从第0列到第16383列）
         self.worksheet.set_column(0, 100, None, format)
-
-        # 设置 B 列（列索引从0开始，B列对应索引1）的列宽为25字符
-        self.worksheet.set_column(1, 1, 25, format)  # 参数：起始列、结束列、宽度
         # 设置行高
         row_height = 25  # 单位：点（points）
-        for row in range(0,1000):
-            self.worksheet.set_row(row, row_height)
-
+        for col in range(8):
+            self.worksheet.set_column(col, col, self.column_widths[col], format)
         self.worksheet.set_zoom(150)
+        for row in range(0, 1000):
+            self.worksheet.set_row(row, row_height)
         self.cell_format = self.workbook.add_format({
             "bg_color": "#FFFFFF",
             "border": 1,
@@ -220,16 +218,17 @@ class MathQuizApp(QWidget):
 
     def Append(self, data):
         for idx, value in enumerate(data):
-            cell_len = len(str(value)) * 3
-            self.column_widths[idx] = max(self.column_widths[idx], cell_len)
-
+            print(idx, value)
+            cell_len = len(str(value)) * 1.5
+            print(f"cell_len = {cell_len}")
         self.worksheet.write_row(self.current_row, 0, data, self.cell_format)
         self.current_row += 1
 
     def SaveWorkbook(self):
         if self.workbook:
-            # for col_num, width in enumerate(self.column_widths):
-            #     self.worksheet.set_column(col_num, col_num, width * 1.2, self.cell_format)
+            # 设置自动筛选
+            # 参数：起始单元格，结束单元格（行列从 0 开始计数）
+            self.worksheet.autofilter(0, 0, self.current_row-1, 7)
             self.workbook.close()
 
     def initUI(self):
