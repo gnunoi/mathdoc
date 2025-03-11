@@ -57,8 +57,11 @@ class MathQuizApp(QWidget):
         self.start_time = None
         self.end_time = None
         self.last_operator = None
-        self.base_font = QFont("SimSun", 20)  # 修改为24号字
-        self.big_font = QFont("Arial", 28)
+        if self.os == "nt":
+            self.base_font = QFont("SimSun", 24)  # 修改为24号字
+        else:
+            self.base_font = QFont("Pingfang SC", 24)  # 修改为24号字
+        self.big_font = QFont("Arial", 32)
         self.LoadSettings()
         self.OpenWorkbook()
         self.initUI()
@@ -317,6 +320,7 @@ class MathQuizApp(QWidget):
         self.setLayout(main_layout)
         if self.os == "posix":
             self.apply_styles()
+        self.answer_input.setFont(self.big_font)
         self.next_question()
 
         # 判断软件是否超过有效期
@@ -351,7 +355,7 @@ class MathQuizApp(QWidget):
             border: 3px solid #0078D7;
             border-radius: 8px;
             padding: 10px;
-            font-size: 32px;
+            font-size: 24px;
         }
         """
         self.setStyleSheet(style)
