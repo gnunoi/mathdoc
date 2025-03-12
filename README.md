@@ -19,3 +19,6 @@
 
 ## [Release V0.3.2](https://github.com/gnunoi/mathdoc/releases/tag/V0.3.2)
 增加难题本、习题本。
+
+## [Release V0.3.3](https://github.com/gnunoi/mathdoc/releases/tag/V0.3.3)
+错题本、难题本、习题本，增加导出数据的自动筛选。难题本选择用时前10%，或者用时前50的题目。
