@@ -10,3 +10,6 @@
 
 ## [Release V0.2.2](https://github.com/gnunoi/mathdoc/releases/tag/V0.2.2)
 核心逻辑与UI分离
+
+## [Release V0.3](https://github.com/gnunoi/mathdoc/releases/tag/V0.3)
+生成数据库，增加错题本功能。
