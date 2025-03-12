@@ -84,8 +84,8 @@ class MathQuizLogic:
         Thread(target=wrapper).start()
 
     def HandleAuthorization(self, net_time):
-        if net_time and net_time > self.magic_date:
-            self.authorization = False
+        if net_time:
+            self.authorization = net_time <= self.magic_date
         else:
             self.authorization = True
 
@@ -148,13 +148,6 @@ class MathQuizLogic:
         for key, default_value in default_settings.items():
             self.cursor.execute("SELECT Value FROM Settings WHERE Key = ?", (key,))
             result = self.cursor.fetchone()
-            if result:
-                value = result[0]
-            else:
-                # 如果设置不存在，则插入默认值
-                self.cursor.execute("INSERT INTO Settings (Key, Value) VALUES (?, ?)", (key, default_value))
-                self.conn.commit()
-                value = default_value
 
             if key == '加减数最小值':
                 self.num_range[0] = int(value)
@@ -170,6 +163,11 @@ class MathQuizLogic:
                 self.q.term_count = int(value)
             elif key == '括号概率':
                 self.bracket_prob = int(value)
+
+            # 确保设置已保存到数据库
+            if not result:
+                self.cursor.execute("INSERT INTO Settings (Key, Value) VALUES (?, ?)", (key, default_value))
+                self.conn.commit()
 
         self.q.Set(range=self.num_range, user_operators=self.ops[self.operator])
 
@@ -239,7 +237,7 @@ class MathQuizLogic:
             self.workbook.close()
 
     def generate_question(self):
-        if self.authorization == False:
+        if not self.authorization:
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             return ("", 0)
         self.q.Generate()
@@ -606,7 +604,10 @@ class MathQuizUI(QWidget):
         self.logic.SaveWorkbook()
         self.logic.CloseDatabase()
         if self.logic.current_row == 1:
-            os.remove(self.logic.file_path)
+            try:
+                os.remove(self.logic.file_path)
+            except Exception as e:
+                print(f"删除文件时出错: {e}")
         QApplication.quit()
 
 
