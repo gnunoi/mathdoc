@@ -1,4 +1,3 @@
-# mathdoc.py
 import sys
 import getpass
 import os
@@ -433,9 +432,12 @@ class MathQuizUI(QWidget):
         self.submit_btn = QPushButton("提交答案 (Enter)")
         self.submit_btn.setFont(self.logic.base_font)
         self.submit_btn.clicked.connect(self.submit_answer)
-        self.generate_error_btn = QPushButton("生成错题本")
+        self.generate_error_btn = QPushButton("导出错题本")
         self.generate_error_btn.setFont(self.logic.base_font)
         self.generate_error_btn.clicked.connect(lambda: self.export_workbook(1))  # 导出错题
+        self.generate_hard_btn = QPushButton("导出难题本")
+        self.generate_hard_btn.setFont(self.logic.base_font)
+        self.generate_hard_btn.clicked.connect(lambda: self.export_workbook(2))  # 导出难题
         self.generate_all_btn = QPushButton("导出习题本")
         self.generate_all_btn.setFont(self.logic.base_font)
         self.generate_all_btn.clicked.connect(lambda: self.export_workbook(0))  # 导出所有习题
@@ -445,6 +447,7 @@ class MathQuizUI(QWidget):
         btn_layout.addStretch(1)
         btn_layout.addWidget(self.submit_btn)
         btn_layout.addWidget(self.generate_error_btn)
+        btn_layout.addWidget(self.generate_hard_btn)
         btn_layout.addWidget(self.generate_all_btn)
         btn_layout.addWidget(self.exit_btn)
         btn_layout.addStretch(1)
@@ -545,8 +548,10 @@ class MathQuizUI(QWidget):
         current_date = datetime.now().strftime("%Y%m%d")
         if type == 0:
             filename = f"习题本{current_date}.xlsx"
-        else:
+        elif type == 1:
             filename = f"错题本{current_date}.xlsx"
+        elif type == 2:
+            filename = f"难题本{current_date}.xlsx"
         desktop_path = os.path.join(self.logic.home, 'Desktop')
         file_path = os.path.join(desktop_path, filename)
 
@@ -584,8 +589,13 @@ class MathQuizUI(QWidget):
 
         if type == 0:
             self.logic.cursor.execute("SELECT * FROM Exam01")
-        else:
+        elif type == 1:
             self.logic.cursor.execute("SELECT * FROM Exam01 WHERE IsCorrect = '错误'")
+        elif type == 2:
+            avg_time = self.get_average_time()
+            threshold = avg_time * 3
+            self.logic.cursor.execute(f"SELECT * FROM Exam01 WHERE TimeUsed >= {threshold}")
+
         data = self.logic.cursor.fetchall()
 
         for row_idx, row in enumerate(data, start=1):
@@ -604,6 +614,11 @@ class MathQuizUI(QWidget):
         workbook.close()
 
         QMessageBox.information(self, "导出成功", f"文件已生成，路径：{file_path}")
+
+    def get_average_time(self):
+        self.logic.cursor.execute("SELECT avg(TimeUsed) FROM Exam01")
+        result = self.logic.cursor.fetchone()
+        return result[0] if result and result[0] else 0
 
     def ExitApp(self):
         self.logic.SaveSettingsToDB()
