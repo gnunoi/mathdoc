@@ -41,7 +41,7 @@ class MathQuizLogic:
         self.workbook = None
         self.worksheet = None
         self.current_row = 0
-        self.column_widths = [12, 30, 12, 12, 12, 12, 12, 15]
+        self.column_widths = [12, 40, 12, 12, 12, 12, 12, 15]
         self.operator = 0
         self.bracket_prob = 30
         self.start_time = None
@@ -238,7 +238,7 @@ class MathQuizLogic:
     def SaveWorkbook(self):
         if self.workbook:
             self.worksheet.autofilter(0, 0, self.current_row - 1, 7)
-            self.workbook.close()
+            # self.workbook.close()
 
     def generate_question(self):
         self.q.Generate()
@@ -310,9 +310,10 @@ class MathQuizLogic:
         self.ReorganizeExamData()
 
     def CloseDatabase(self):
+        pass
         # 关闭数据库连接
-        if self.conn:
-            self.conn.close()
+        # if self.conn:
+        #     self.conn.close()
 
     def ReorganizeExamData(self):
         print("ReorganizeExamData()")
@@ -558,7 +559,6 @@ class MathQuizUI(QWidget):
         workbook = xlsxwriter.Workbook(file_path)
         worksheet = workbook.add_worksheet()
 
-        column_widths = [12, 30, 12, 12, 12, 22, 22, 15]
         format = workbook.add_format({
             "bg_color": "#FFFFFF",
             "align": "center",
@@ -574,7 +574,7 @@ class MathQuizUI(QWidget):
             "valign": "vcenter",
             "font_size": "12",
         })
-
+        column_widths = [12, 40, 12, 12, 12, 25, 25, 15]
         for col in range(8):
             worksheet.set_column(col, col, column_widths[col], format)
         worksheet.set_zoom(150)
@@ -597,6 +597,9 @@ class MathQuizUI(QWidget):
             self.logic.cursor.execute(f"SELECT * FROM Exam01 WHERE TimeUsed >= {threshold}")
 
         data = self.logic.cursor.fetchall()
+        rows = len(data)
+        cols = len(data[0])
+        print("rows = {}, cols = {}".format(rows, cols))
 
         for row_idx, row in enumerate(data, start=1):
             question_number = row[1]
@@ -608,9 +611,16 @@ class MathQuizUI(QWidget):
             end_time = row[7]
             time_used = row[8]
 
-            worksheet.write_row(row_idx, 0, [question_number, question, user_answer, correct_answer, is_correct, start_time, end_time, time_used], cell_format)
+            worksheet.write_row(
+                row_idx, 0, [question_number, question,
+                             user_answer, correct_answer, is_correct,
+                             start_time, end_time, time_used],
+                cell_format)
 
         worksheet.freeze_panes(1, 1)
+        # cols：增加了一列ID，导出到Excel表没有这列，从0开始计数。
+        # rows: 因为增加了一行标题行。
+        worksheet.autofilter(0, 0, rows, cols-2)
         workbook.close()
 
         QMessageBox.information(self, "导出成功", f"文件已生成，路径：{file_path}")
