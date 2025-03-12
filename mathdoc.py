@@ -134,6 +134,10 @@ class MathQuizLogic:
         self.conn.commit()
 
     def LoadSettingsFromDB(self):
+        desktop_path = os.path.join(self.home, 'Desktop')
+        ini_file = os.path.join(desktop_path, 'mathdoc.ini')
+        if os.path.exists(ini_file):
+            os.remove(ini_file)
         # 从数据库加载设置
         default_settings = {
             '加减数最小值': '10',
