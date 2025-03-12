@@ -8,5 +8,5 @@
 ## Release V0.2.1
 有数据的列设置合理的列宽。工作表设置自动筛选。
 
-## Release V0.2.2
+## [Release V0.2.2](https://github.com/gnunoi/mathdoc/releases/tag/V0.2.2)
 核心逻辑与UI分离
