@@ -1,16 +1,9 @@
-'''
-生成可执行文件的命令：
-Windows: pyinstaller --noupx -F -w -i favicon.ico mathapp.py
-MacOS: python3 setup.py py2app
-'''
-# mathdoc.py
 import sys
 import getpass
 import os
 import ntplib
 from threading import Thread
 from datetime import datetime
-from math import isclose
 
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
@@ -20,6 +13,7 @@ from PyQt5.QtCore import Qt
 
 import configparser
 import xlsxwriter
+import sqlite3
 
 from question import Question
 
@@ -59,6 +53,7 @@ class MathQuizLogic:
         self.big_font = QFont("Arial", 32)
         self.LoadSettings()
         self.OpenWorkbook()
+        self.InitDatabase()
         self.GetNetTimeInThread(self.HandleAuthorization)
 
     def GetOS(self):
@@ -197,7 +192,10 @@ class MathQuizLogic:
         except:
             return (False, "请输入有效数字")
 
-        is_correct = isclose(user_num, self.correct_answer, rel_tol=1e-9)
+        if user_num == self.correct_answer:
+            is_correct = True
+        else:
+            is_correct = False
         time_used = round((self.end_time - self.start_time).total_seconds(), 1)
 
         self.Append([
@@ -211,6 +209,16 @@ class MathQuizLogic:
             time_used
         ])
 
+        self.SaveToDatabase(
+            self.question_number,
+            self.current_question.strip(),
+            user_num,
+            self.correct_answer,
+            is_correct,
+            self.start_time,
+            self.end_time,
+            time_used)
+
         if is_correct:
             self.correct_number += 1
             self.question_number += 1
@@ -223,6 +231,45 @@ class MathQuizLogic:
                 return (False, f"正确答案是：{self.correct_answer}")
             else:
                 return (False, "请再试一次")
+
+    def InitDatabase(self):
+        # 初始化 SQLite 数据库
+        print(f"{self.home}")
+        self.db_path = os.path.join(self.home, "Desktop", "mathdoc.db")
+        print(f"{self.db_path}")
+        self.conn = sqlite3.connect(self.db_path)
+        self.cursor = self.conn.cursor()
+        self.CreateTable()
+
+    def CreateTable(self):
+        # 创建表格 Exam01，如果不存在则创建
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Exam01 (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            QuestionNumber INTEGER,
+            Question TEXT,
+            UserAnswer TEXT,
+            CorrectAnswer TEXT,
+            IsCorrect TEXT,
+            StartTime TEXT,
+            EndTime TEXT,
+            TimeUsed REAL
+        )
+        ''')
+        self.conn.commit()
+
+    def SaveToDatabase(self, question_number, question, user_answer, correct_answer, is_correct, start_time, end_time, time_used):
+        # 将记录保存到数据库
+        self.cursor.execute('''
+        INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, StartTime, EndTime, TimeUsed)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (question_number, question, str(user_answer), str(correct_answer), "正确" if is_correct else "错误", start_time.strftime("%Y-%m-%d %H:%M:%S"), end_time.strftime("%Y-%m-%d %H:%M:%S"), time_used))
+        self.conn.commit()
+
+    def CloseDatabase(self):
+        # 关闭数据库连接
+        if self.conn:
+            self.conn.close()
 
 class MathQuizUI(QWidget):
     def __init__(self, logic):
@@ -307,11 +354,15 @@ class MathQuizUI(QWidget):
         self.submit_btn = QPushButton("提交答案 (Enter)")
         self.submit_btn.setFont(self.logic.base_font)
         self.submit_btn.clicked.connect(self.submit_answer)
+        self.generate_btn = QPushButton("生成错题本")
+        self.generate_btn.setFont(self.logic.base_font)
+        self.generate_btn.clicked.connect(self.generate_error_workbook)
         self.exit_btn = QPushButton("退出程序")
         self.exit_btn.setFont(self.logic.base_font)
         self.exit_btn.clicked.connect(self.ExitApp)
         btn_layout.addStretch(1)
         btn_layout.addWidget(self.submit_btn)
+        btn_layout.addWidget(self.generate_btn)
         btn_layout.addWidget(self.exit_btn)
         btn_layout.addStretch(1)
         main_layout.addLayout(btn_layout)
@@ -319,7 +370,7 @@ class MathQuizUI(QWidget):
         self.setLayout(main_layout)
         if self.logic.os == "posix":
             self.apply_styles()
-        self.answer_input.setFont(self.logic.big_font)
+        self.answer_input.setFont(self.logic.base_font)
         self.UpdateQuestion()
 
     def apply_styles(self):
@@ -404,9 +455,78 @@ class MathQuizUI(QWidget):
         else:
             QMessageBox.warning(self, "答案错误", result[1])
 
+    def generate_error_workbook(self):
+        # 获取当前日期
+        current_date = datetime.now().strftime("%Y%m%d")
+        # 文件名格式为“错题本20250312”
+        filename = f"错题本{current_date}.xlsx"
+        # 保存到桌面
+        desktop_path = os.path.join(self.logic.home, 'Desktop')
+        file_path = os.path.join(desktop_path, filename)
+
+        # 打开工作簿
+        workbook = xlsxwriter.Workbook(file_path)
+        worksheet = workbook.add_worksheet("错题记录")
+
+        # 设置列宽和格式
+        column_widths = [12, 30, 12, 12, 12, 22, 22, 15]
+        format = workbook.add_format({
+            "bg_color": "#FFFFFF",
+            "align": "center",
+            "valign": "vcenter",
+            "font_size": "12",
+        })
+        worksheet.set_column(0, 100, None, format)
+        cell_format = workbook.add_format({
+            "bg_color": "#FFFFFF",
+            "border": 1,
+            "border_color": "black",
+            "align": "center",
+            "valign": "vcenter",
+            "font_size": "12",
+        })
+
+        for col in range(8):
+            worksheet.set_column(col, col, column_widths[col], format)
+        worksheet.set_zoom(150)
+        for row in range(0, 1000):
+            worksheet.set_row(row, 25)
+
+        # 写入表头
+        headers = [
+            '题号', '题目', '用户答案', '正确答案', '是否正确',
+            '开始时间', '结束时间', '用时(秒)'
+        ]
+        worksheet.write_row(0, 0, headers, cell_format)
+
+        # 查询数据库中的错题
+        self.logic.cursor.execute("SELECT * FROM Exam01 WHERE IsCorrect = '错误'")
+        errors = self.logic.cursor.fetchall()
+
+        # 写入错题数据
+        for row_idx, error in enumerate(errors, start=1):
+            data = [
+                error[1],  # QuestionNumber
+                error[2],  # Question
+                error[3],  # UserAnswer
+                error[4],  # CorrectAnswer
+                error[5],  # IsCorrect
+                error[6],  # StartTime
+                error[7],  # EndTime
+                error[8]   # TimeUsed
+            ]
+            worksheet.write_row(row_idx, 0, data, cell_format)
+        worksheet.freeze_panes(1, 1)
+        # 保存并关闭工作簿
+        workbook.close()
+
+        # 提示用户
+        QMessageBox.information(self, "生成成功", f"错题本已生成，文件路径：{file_path}")
+
     def ExitApp(self):
         self.logic.SaveSettings()
         self.logic.SaveWorkbook()
+        self.logic.CloseDatabase()
         QApplication.quit()
 
 if __name__ == '__main__':
