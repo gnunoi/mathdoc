@@ -47,9 +47,6 @@ class MathQuizLogic:
         self.worksheet = None
         self.current_row = 0
         self.column_widths = [12, 30, 12, 12, 12, 12, 12, 15]
-        self.num_edit = []
-        self.radio_operator = []
-        self.radio_terms = []
         self.operator = 0
         self.bracket_prob = 30
         self.start_time = None
@@ -132,28 +129,6 @@ class MathQuizLogic:
         }
         with open(self.config_filename, 'w') as f:
             config.write(f)
-
-    def UpdateSettings(self):
-        for i in range(4):
-            try:
-                self.num_range[i] = int(self.num_edit[i].text())
-            except:
-                pass
-
-        for pair in [(0, 1), (2, 3)]:
-            if self.num_range[pair[0]] > self.num_range[pair[1]]:
-                self.num_range[pair[0]], self.num_range[pair[1]] = self.num_range[pair[1]], self.num_range[pair[0]]
-                self.num_edit[pair[0]].setText(str(self.num_range[pair[0]]))
-                self.num_edit[pair[1]].setText(str(self.num_range[pair[1]]))
-        for i in range(5):
-            if self.radio_operator[i].isChecked():
-                self.operator = i
-        for i in range(4):
-            if self.radio_terms[i].isChecked():
-                self.q.term_count = i + 2
-        self.q.Set(range=self.num_range,
-                   term_count=self.q.term_count,
-                   user_operators=self.ops[self.operator])
 
     def OpenWorkbook(self):
         username = getpass.getuser()
@@ -382,7 +357,32 @@ class MathQuizUI(QWidget):
         self.setStyleSheet(style)
 
     def UpdateSettings(self):
-        self.logic.UpdateSettings()
+        # 更新数值范围
+        for i in range(4):
+            try:
+                self.logic.num_range[i] = int(self.logic.num_edit[i].text())
+            except:
+                pass
+
+        # 更新运算符
+        for i in range(5):
+            if self.radio_operator[i].isChecked():
+                self.logic.operator = i
+
+        # 更新项数
+        for i in range(4):
+            if self.radio_terms[i].isChecked():
+                self.logic.q.term_count = i + 2
+
+        # 更新题目生成器
+        self.logic.q.Set(
+            range=self.logic.num_range,
+            term_count=self.logic.q.term_count,
+            user_operators=self.logic.ops[self.logic.operator]
+        )
+
+        # 保存设置
+        self.logic.SaveSettings()
 
     def UpdateQuestion(self):
         question = self.logic.next_question()
