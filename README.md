@@ -13,3 +13,7 @@
 
 ## [Release V0.3](https://github.com/gnunoi/mathdoc/releases/tag/V0.3)
 生成数据库，增加错题本功能。
+
+## [Release V0.3.1](https://github.com/gnunoi/mathdoc/releases/tag/V0.3.1)
+
+没有做题生成的空工作簿，直接删除。
