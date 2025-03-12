@@ -21,7 +21,7 @@ class Question():
         self.tips = None # 提示
         self.Generate()
 
-    def Set(self, term_count, range, user_operators):
+    def Set(self, term_count=None, range=None, user_operators=None):
         if term_count is not None:
             self.term_count = term_count
         if range is not None:
@@ -44,6 +44,7 @@ class Question():
     def Generate(self):
         self.numbers = []
         self.operators = []
+        # print(self.user_operators)
         for i in range(self.term_count):
             self.numbers.append(random.randint(self.range[0], self.range[1]))
             if i < self.term_count - 1:
