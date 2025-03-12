@@ -148,6 +148,7 @@ class MathQuizLogic:
         for key, default_value in default_settings.items():
             self.cursor.execute("SELECT Value FROM Settings WHERE Key = ?", (key,))
             result = self.cursor.fetchone()
+            value = result[0] if result else default_value
 
             if key == '加减数最小值':
                 self.num_range[0] = int(value)
