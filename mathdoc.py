@@ -349,6 +349,7 @@ class MathQuizLogic:
         except Exception as e:
             print(f"整理Exam01表数据时出错: {e}")
 
+
 class MathQuizUI(QWidget):
     def __init__(self, logic):
         super().__init__()
@@ -432,15 +433,19 @@ class MathQuizUI(QWidget):
         self.submit_btn = QPushButton("提交答案 (Enter)")
         self.submit_btn.setFont(self.logic.base_font)
         self.submit_btn.clicked.connect(self.submit_answer)
-        self.generate_btn = QPushButton("生成错题本")
-        self.generate_btn.setFont(self.logic.base_font)
-        self.generate_btn.clicked.connect(self.generate_error_workbook)
+        self.generate_error_btn = QPushButton("生成错题本")
+        self.generate_error_btn.setFont(self.logic.base_font)
+        self.generate_error_btn.clicked.connect(lambda: self.export_workbook(1))  # 导出错题
+        self.generate_all_btn = QPushButton("导出习题本")
+        self.generate_all_btn.setFont(self.logic.base_font)
+        self.generate_all_btn.clicked.connect(lambda: self.export_workbook(0))  # 导出所有习题
         self.exit_btn = QPushButton("退出程序")
         self.exit_btn.setFont(self.logic.base_font)
         self.exit_btn.clicked.connect(self.ExitApp)
         btn_layout.addStretch(1)
         btn_layout.addWidget(self.submit_btn)
-        btn_layout.addWidget(self.generate_btn)
+        btn_layout.addWidget(self.generate_error_btn)
+        btn_layout.addWidget(self.generate_all_btn)
         btn_layout.addWidget(self.exit_btn)
         btn_layout.addStretch(1)
         main_layout.addLayout(btn_layout)
@@ -536,20 +541,18 @@ class MathQuizUI(QWidget):
         else:
             QMessageBox.warning(self, "答案错误", result[1])
 
-    def generate_error_workbook(self):
-        # 获取当前日期
+    def export_workbook(self, type):
         current_date = datetime.now().strftime("%Y%m%d")
-        # 文件名格式为“错题本20250312”
-        filename = f"错题本{current_date}.xlsx"
-        # 保存到桌面
+        if type == 0:
+            filename = f"习题本{current_date}.xlsx"
+        else:
+            filename = f"错题本{current_date}.xlsx"
         desktop_path = os.path.join(self.logic.home, 'Desktop')
         file_path = os.path.join(desktop_path, filename)
 
-        # 打开工作簿
         workbook = xlsxwriter.Workbook(file_path)
-        worksheet = workbook.add_worksheet("错题记录")
+        worksheet = workbook.add_worksheet()
 
-        # 设置列宽和格式
         column_widths = [12, 30, 12, 12, 12, 22, 22, 15]
         format = workbook.add_format({
             "bg_color": "#FFFFFF",
@@ -573,36 +576,34 @@ class MathQuizUI(QWidget):
         for row in range(0, 1000):
             worksheet.set_row(row, 25)
 
-        # 写入表头
         headers = [
             '题号', '题目', '用户答案', '正确答案', '是否正确',
             '开始时间', '结束时间', '用时(秒)'
         ]
         worksheet.write_row(0, 0, headers, cell_format)
 
-        # 查询数据库中的错题
-        self.logic.cursor.execute("SELECT * FROM Exam01 WHERE IsCorrect = '错误'")
-        errors = self.logic.cursor.fetchall()
+        if type == 0:
+            self.logic.cursor.execute("SELECT * FROM Exam01")
+        else:
+            self.logic.cursor.execute("SELECT * FROM Exam01 WHERE IsCorrect = '错误'")
+        data = self.logic.cursor.fetchall()
 
-        # 写入错题数据
-        for row_idx, error in enumerate(errors, start=1):
-            data = [
-                error[1],  # QuestionNumber
-                error[2],  # Question
-                error[3],  # UserAnswer
-                error[4],  # CorrectAnswer
-                error[5],  # IsCorrect
-                error[6],  # StartTime
-                error[7],  # EndTime
-                error[8]  # TimeUsed
-            ]
-            worksheet.write_row(row_idx, 0, data, cell_format)
+        for row_idx, row in enumerate(data, start=1):
+            question_number = row[1]
+            question = row[2]
+            user_answer = row[3]
+            correct_answer = row[4]
+            is_correct = row[5]
+            start_time = row[6]
+            end_time = row[7]
+            time_used = row[8]
+
+            worksheet.write_row(row_idx, 0, [question_number, question, user_answer, correct_answer, is_correct, start_time, end_time, time_used], cell_format)
+
         worksheet.freeze_panes(1, 1)
-        # 保存并关闭工作簿
         workbook.close()
 
-        # 提示用户
-        QMessageBox.information(self, "生成成功", f"错题本已生成，文件路径：{file_path}")
+        QMessageBox.information(self, "导出成功", f"文件已生成，路径：{file_path}")
 
     def ExitApp(self):
         self.logic.SaveSettingsToDB()
