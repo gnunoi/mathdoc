@@ -238,9 +238,6 @@ class MathQuizLogic:
             self.workbook.close()
 
     def generate_question(self):
-        if not self.authorization:
-            QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
-            return ("", 0)
         self.q.Generate()
         return (self.q.question, self.q.correct_answer)
 
@@ -513,6 +510,9 @@ class MathQuizUI(QWidget):
         self.logic.SaveSettingsToDB()
 
     def UpdateQuestion(self):
+        if self.logic.authorization == False:
+            QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
+            self.ExitApp()
         question = self.logic.next_question()
         self.question_label.setText(f"当前题目：\n{question}")
 
