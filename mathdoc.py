@@ -21,7 +21,7 @@ class MathQuizLogic:
     def __init__(self):
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.03.11"
+        self.version_number = "2025.03.12"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.authorization = None
@@ -170,6 +170,8 @@ class MathQuizLogic:
         if self.workbook:
             self.worksheet.autofilter(0, 0, self.current_row-1, 7)
             self.workbook.close()
+            if self.current_row == 1:
+                os.remove(self.file_path)
 
     def generate_question(self):
         if self.authorization == False:
