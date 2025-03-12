@@ -1,3 +1,4 @@
+# mathdoc.py
 import sys
 import getpass
 import os
@@ -16,6 +17,7 @@ import xlsxwriter
 import sqlite3
 
 from question import Question
+
 
 class MathQuizLogic:
     def __init__(self):
@@ -51,9 +53,9 @@ class MathQuizLogic:
         else:
             self.base_font = QFont("Pingfang SC", 24)  # 修改为24号字
         self.big_font = QFont("Arial", 32)
-        self.LoadSettings()
-        self.OpenWorkbook()
         self.InitDatabase()
+        self.LoadSettingsFromDB()
+        self.OpenWorkbook()
         self.GetNetTimeInThread(self.HandleAuthorization)
 
     def GetOS(self):
@@ -78,6 +80,7 @@ class MathQuizLogic:
     def GetNetTimeInThread(self, callback):
         def wrapper():
             callback(self.GetNetTime())
+
         Thread(target=wrapper).start()
 
     def HandleAuthorization(self, net_time):
@@ -93,37 +96,99 @@ class MathQuizLogic:
     def GetHome(self):
         return os.path.expanduser("~")
 
-    def LoadSettings(self):
-        config = configparser.ConfigParser()
-        if os.path.exists(self.config_filename):
-            try:
-                config.read(self.config_filename)
-                self.num_range = [
-                    int(config['设置']['加减数最小值']),
-                    int(config['设置']['加减数最大值']),
-                    int(config['设置']['乘除数最小值']),
-                    int(config['设置']['乘除数最大值'])
-                ]
-                self.operator = int(config['设置']['运算符'])
-                self.q.term_count = int(config['设置']['项数'])
-                self.bracket_prob = int(config['设置']['括号概率'])
-            except Exception as e:
-                QMessageBox.warning(None, '警告', f'配置文件错误: {str(e)}')
+    def InitDatabase(self):
+        # 初始化 SQLite 数据库
+        print(f"{self.home}")
+        self.db_path = os.path.join(self.home, "Desktop", "mathdoc.db")
+        print(f"{self.db_path}")
+        self.conn = sqlite3.connect(self.db_path)
+        self.cursor = self.conn.cursor()
+        self.CreateTable()
+        self.CreateSettingsTable()
+
+    def CreateTable(self):
+        # 创建表格 Exam01，如果不存在则创建
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Exam01 (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            QuestionNumber INTEGER,
+            Question TEXT,
+            UserAnswer TEXT,
+            CorrectAnswer TEXT,
+            IsCorrect TEXT,
+            StartTime TEXT,
+            EndTime TEXT,
+            TimeUsed REAL
+        )
+        ''')
+        self.conn.commit()
+
+    def CreateSettingsTable(self):
+        # 创建表格 Settings，如果不存在则创建
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Settings (
+            Key TEXT PRIMARY KEY,
+            Value TEXT
+        )
+        ''')
+        self.conn.commit()
+
+    def LoadSettingsFromDB(self):
+        # 从数据库加载设置
+        default_settings = {
+            '加减数最小值': '10',
+            '加减数最大值': '30',
+            '乘除数最小值': '2',
+            '乘除数最大值': '10',
+            '运算符': '0',
+            '项数': '2',
+            '括号概率': '30'
+        }
+
+        for key, default_value in default_settings.items():
+            self.cursor.execute("SELECT Value FROM Settings WHERE Key = ?", (key,))
+            result = self.cursor.fetchone()
+            if result:
+                value = result[0]
+            else:
+                # 如果设置不存在，则插入默认值
+                self.cursor.execute("INSERT INTO Settings (Key, Value) VALUES (?, ?)", (key, default_value))
+                self.conn.commit()
+                value = default_value
+
+            if key == '加减数最小值':
+                self.num_range[0] = int(value)
+            elif key == '加减数最大值':
+                self.num_range[1] = int(value)
+            elif key == '乘除数最小值':
+                self.num_range[2] = int(value)
+            elif key == '乘除数最大值':
+                self.num_range[3] = int(value)
+            elif key == '运算符':
+                self.operator = int(value)
+            elif key == '项数':
+                self.q.term_count = int(value)
+            elif key == '括号概率':
+                self.bracket_prob = int(value)
+
         self.q.Set(range=self.num_range, user_operators=self.ops[self.operator])
 
-    def SaveSettings(self):
-        config = configparser.ConfigParser()
-        config['设置'] = {
-            '加减数最小值': self.q.range[0],
-            '加减数最大值': self.q.range[1],
-            '乘除数最小值': self.q.range[2],
-            '乘除数最大值': self.q.range[3],
-            '运算符': self.operator,
-            '项数': self.q.term_count,
-            '括号概率': self.bracket_prob
+    def SaveSettingsToDB(self):
+        # 将设置保存到数据库
+        settings = {
+            '加减数最小值': str(self.q.range[0]),
+            '加减数最大值': str(self.q.range[1]),
+            '乘除数最小值': str(self.q.range[2]),
+            '乘除数最大值': str(self.q.range[3]),
+            '运算符': str(self.operator),
+            '项数': str(self.q.term_count),
+            '括号概率': str(self.bracket_prob)
         }
-        with open(self.config_filename, 'w') as f:
-            config.write(f)
+
+        for key, value in settings.items():
+            self.cursor.execute("INSERT OR REPLACE INTO Settings (Key, Value) VALUES (?, ?)", (key, value))
+
+        self.conn.commit()
 
     def OpenWorkbook(self):
         username = getpass.getuser()
@@ -135,6 +200,7 @@ class MathQuizLogic:
         self.workbook = xlsxwriter.Workbook(self.file_path)
         current_date = datetime.now().strftime("%Y-%m-%d")
         self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
+        print(self.worksheet)
 
         format = self.workbook.add_format({
             "bg_color": "#FFFFFF",
@@ -163,15 +229,14 @@ class MathQuizLogic:
         self.worksheet.freeze_panes(1, 1)
 
     def Append(self, data):
+        print(self.worksheet)
         self.worksheet.write_row(self.current_row, 0, data, self.cell_format)
         self.current_row += 1
 
     def SaveWorkbook(self):
         if self.workbook:
-            self.worksheet.autofilter(0, 0, self.current_row-1, 7)
+            self.worksheet.autofilter(0, 0, self.current_row - 1, 7)
             self.workbook.close()
-            if self.current_row == 1:
-                os.remove(self.file_path)
 
     def generate_question(self):
         if self.authorization == False:
@@ -234,44 +299,55 @@ class MathQuizLogic:
             else:
                 return (False, "请再试一次")
 
-    def InitDatabase(self):
-        # 初始化 SQLite 数据库
-        print(f"{self.home}")
-        self.db_path = os.path.join(self.home, "Desktop", "mathdoc.db")
-        print(f"{self.db_path}")
-        self.conn = sqlite3.connect(self.db_path)
-        self.cursor = self.conn.cursor()
-        self.CreateTable()
-
-    def CreateTable(self):
-        # 创建表格 Exam01，如果不存在则创建
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Exam01 (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            QuestionNumber INTEGER,
-            Question TEXT,
-            UserAnswer TEXT,
-            CorrectAnswer TEXT,
-            IsCorrect TEXT,
-            StartTime TEXT,
-            EndTime TEXT,
-            TimeUsed REAL
-        )
-        ''')
-        self.conn.commit()
-
-    def SaveToDatabase(self, question_number, question, user_answer, correct_answer, is_correct, start_time, end_time, time_used):
+    def SaveToDatabase(self, question_number, question, user_answer, correct_answer, is_correct, start_time, end_time,
+                       time_used):
         # 将记录保存到数据库
         self.cursor.execute('''
         INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, StartTime, EndTime, TimeUsed)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (question_number, question, str(user_answer), str(correct_answer), "正确" if is_correct else "错误", start_time.strftime("%Y-%m-%d %H:%M:%S"), end_time.strftime("%Y-%m-%d %H:%M:%S"), time_used))
+        ''', (question_number, question, str(user_answer), str(correct_answer), "正确" if is_correct else "错误",
+              start_time.strftime("%Y-%m-%d %H:%M:%S"), end_time.strftime("%Y-%m-%d %H:%M:%S"), time_used))
         self.conn.commit()
+        self.ReorganizeExamData()
 
     def CloseDatabase(self):
         # 关闭数据库连接
         if self.conn:
             self.conn.close()
+
+    def ReorganizeExamData(self):
+        print("ReorganizeExamData()")
+        try:
+            # 获取当前Exam01表中的所有数据，并按StartTime排序
+            self.cursor.execute("SELECT * FROM Exam01 ORDER BY ID")
+            data = self.cursor.fetchall()
+
+            if not data:
+                print("Exam01表中没有数据需要整理")
+                return
+
+            # 初始化新的QuestionNumber
+            new_question_number = 1
+            previous_question = data[0][2]  # 第一行的Question
+
+            # 遍历数据，整理QuestionNumber
+            for row in data:
+                current_id = row[0]
+                current_question = row[2]
+
+                print(current_question, previous_question)
+                # 如果当前Question与上一行不同，则递增new_question_number
+                if current_question != previous_question:
+                    new_question_number += 1
+                # 更新当前行的QuestionNumber
+                self.cursor.execute("UPDATE Exam01 SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
+                previous_question = current_question
+            # 提交更改
+            self.conn.commit()
+            print("Exam01表数据整理完成")
+
+        except Exception as e:
+            print(f"整理Exam01表数据时出错: {e}")
 
 class MathQuizUI(QWidget):
     def __init__(self, logic):
@@ -434,8 +510,8 @@ class MathQuizUI(QWidget):
             user_operators=self.logic.ops[self.logic.operator]
         )
 
-        # 保存设置
-        self.logic.SaveSettings()
+        # 保存设置到数据库
+        self.logic.SaveSettingsToDB()
 
     def UpdateQuestion(self):
         question = self.logic.next_question()
@@ -515,7 +591,7 @@ class MathQuizUI(QWidget):
                 error[5],  # IsCorrect
                 error[6],  # StartTime
                 error[7],  # EndTime
-                error[8]   # TimeUsed
+                error[8]  # TimeUsed
             ]
             worksheet.write_row(row_idx, 0, data, cell_format)
         worksheet.freeze_panes(1, 1)
@@ -526,10 +602,13 @@ class MathQuizUI(QWidget):
         QMessageBox.information(self, "生成成功", f"错题本已生成，文件路径：{file_path}")
 
     def ExitApp(self):
-        self.logic.SaveSettings()
+        self.logic.SaveSettingsToDB()
         self.logic.SaveWorkbook()
         self.logic.CloseDatabase()
+        if self.logic.current_row == 1:
+            os.remove(self.logic.file_path)
         QApplication.quit()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
