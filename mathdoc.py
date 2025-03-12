@@ -592,9 +592,17 @@ class MathQuizUI(QWidget):
         elif type == 1:
             self.logic.cursor.execute("SELECT * FROM Exam01 WHERE IsCorrect = '错误'")
         elif type == 2:
-            avg_time = self.get_average_time()
-            threshold = avg_time * 3
-            self.logic.cursor.execute(f"SELECT * FROM Exam01 WHERE TimeUsed >= {threshold}")
+            # 获取所有TimeUsed值并排序
+            self.logic.cursor.execute("SELECT TimeUsed FROM Exam01 ORDER BY TimeUsed DESC")
+            time_used_list = self.logic.cursor.fetchall()
+            total_count = len(time_used_list)
+            threshold_index = min(int(total_count * 0.1), 50)  # 取前10%的索引
+            if threshold_index == 0:
+                threshold = float('inf')
+            else:
+                threshold = time_used_list[threshold_index - 1][0] if time_used_list else float('inf')
+            # 筛选TimeUsed大于等于threshold的记录
+            self.logic.cursor.execute(f"SELECT * FROM Exam01 WHERE TimeUsed >= {threshold} ORDER BY TimeUsed DESC ")
 
         data = self.logic.cursor.fetchall()
         rows = len(data)
@@ -625,22 +633,16 @@ class MathQuizUI(QWidget):
 
         QMessageBox.information(self, "导出成功", f"文件已生成，路径：{file_path}")
 
-    def get_average_time(self):
-        self.logic.cursor.execute("SELECT avg(TimeUsed) FROM Exam01")
-        result = self.logic.cursor.fetchone()
-        return result[0] if result and result[0] else 0
-
     def ExitApp(self):
         self.logic.SaveSettingsToDB()
         self.logic.SaveWorkbook()
         self.logic.CloseDatabase()
         if self.logic.current_row == 1:
             try:
-                os.remove(self.logic.file_path)
+                if os.path.exists(self.logic.file_path): os.remove(self.logic.file_path)
             except Exception as e:
                 print(f"删除文件时出错: {e}")
         QApplication.quit()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
