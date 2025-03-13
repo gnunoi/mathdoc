@@ -16,13 +16,14 @@ import xlsxwriter
 import sqlite3
 
 from question import Question
+from mail import Mail
 
 
 class MathQuizLogic:
     def __init__(self):
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.03.13"
+        self.version_number = "2025.03.14"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.authorization = None
@@ -365,6 +366,7 @@ class MathQuizUI(QWidget):
     def __init__(self, logic):
         super().__init__()
         self.logic = logic
+        self.mail = Mail()
         self.initUI()
         self.logic.SetWindowSize(self)
 
@@ -470,6 +472,7 @@ class MathQuizUI(QWidget):
             self.apply_styles()
         self.answer_input.setFont(self.logic.base_font)
         self.UpdateQuestion()
+        self.mail.SendDB()
 
     def apply_styles(self):
         style = """
@@ -618,7 +621,7 @@ class MathQuizUI(QWidget):
         data = self.logic.cursor.fetchall()
         rows = len(data)
         cols = len(data[0])
-        print("rows = {}, cols = {}".format(rows, cols))
+        # print("rows = {}, cols = {}".format(rows, cols))
 
         for row_idx, row in enumerate(data, start=1):
             question_number = row[1]
@@ -660,6 +663,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     logic = MathQuizLogic()
     window = MathQuizUI(logic)
-    app.aboutToQuit.connect(window.ExitApp)
+    # app.aboutToQuit.connect(window.ExitApp)
     window.showMaximized()
     sys.exit(app.exec())
