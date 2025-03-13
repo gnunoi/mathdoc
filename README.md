@@ -24,5 +24,7 @@
 错题本、难题本、习题本，增加导出数据的自动筛选。难题本选择用时前10%，或者用时前50的题目。
 
 ## [Release V0.3.4](https://github.com/gnunoi/mathdoc/releases/tag/V0.3.4)
-
 修正了不能将当前做题记录自动导出工作簿的BUG。将原有数据库文件从桌面移动到了~/Desktop/.mathdoc目录。自动删除mathdoc.ini文件。
+
+## [Release V0.3.5](https://github.com/gnunoi/mathdoc/releases/tag/V0.3.5)
+工作表放大系数改为120%。
