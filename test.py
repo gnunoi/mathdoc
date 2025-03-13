@@ -1,124 +1,130 @@
+import sys
 import random
+from fractions import Fraction
+from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, QPushButton,
+                             QVBoxLayout, QHBoxLayout, QMessageBox)
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 
 
-class Question():
-    def __init__(self, term_count=2, range=None, user_operators=None):
-        self.term_count = term_count # 多项式的项数
-        if range is None:
-            self.range = [10, 50, 5, 10]
+class FractionMathApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+        self.generate_question()
+
+    def initUI(self):
+        self.setWindowTitle('分数运算练习')
+        self.setGeometry(100, 100, 600, 300)
+
+        # 创建控件
+        self.question_label = QLabel(self)
+        self.question_label.setFont(QFont('Arial', 16))
+        self.question_label.setAlignment(Qt.AlignCenter)
+
+        self.answer_input = QLineEdit(self)
+        self.answer_input.setFont(QFont('Arial', 14))
+        self.answer_input.setPlaceholderText("输入你的答案，例如：3/4 或 5")
+
+        self.submit_button = QPushButton('提交答案', self)
+        self.submit_button.setFont(QFont('Arial', 12))
+        self.submit_button.clicked.connect(self.check_answer)
+
+        # 布局
+        main_layout = QVBoxLayout()
+
+        question_layout = QHBoxLayout()
+        question_layout.addWidget(self.question_label)
+
+        input_layout = QHBoxLayout()
+        input_layout.addWidget(self.answer_input)
+        input_layout.addWidget(self.submit_button)
+
+        main_layout.addLayout(question_layout)
+        main_layout.addLayout(input_layout)
+
+        self.setLayout(main_layout)
+
+    def generate_question(self):
+        """生成一个随机的分数运算题"""
+        # 随机选择运算符
+        operators = ['+', '-', '*', '/']
+        operator = random.choice(operators)
+
+        # 生成两个随机分数
+        numerator1 = random.randint(1, 10)
+        denominator1 = random.randint(2, 10)
+        fraction1 = Fraction(numerator1, denominator1)
+
+        numerator2 = random.randint(1, 10)
+        denominator2 = random.randint(2, 10)
+        fraction2 = Fraction(numerator2, denominator2)
+
+        # 计算正确答案
+        if operator == '+':
+            correct_answer = fraction1 + fraction2
+        elif operator == '-':
+            correct_answer = fraction1 - fraction2
+        elif operator == '*':
+            correct_answer = fraction1 * fraction2
+        elif operator == '/':
+            correct_answer = fraction1 / fraction2
+
+        # 格式化正确答案为字符串
+        if correct_answer.denominator == 1:
+            correct_answer_str = str(correct_answer.numerator)
         else:
-            self.range = range # 操作数取值范围
-        if user_operators is None:
-            self.user_operators = ['+', '-', '*', '/']
-        else:
-            self.user_operators = user_operators
-        self.numbers = [] # 操作数
-        self.operators = [] # 运算符
-        self.expression = None # 表达式
-        self.question = None # 题干
-        self.correct_answer = None # 正确答案
-        self.user_answer = None # 用户答案
-        self.tips = None # 提示
-        self.Generate()
+            correct_answer_str = f"{correct_answer.numerator}/{correct_answer.denominator}"
 
-    def Set(self, term_count=None, range=None, user_operators=None):
-        if term_count is not None:
-            self.term_count = term_count
-        if range is not None:
-            self.range = range
-        if user_operators is not None:
-            self.user_operators = user_operators
-        self.Generate()
+        # 格式化问题
+        question = f"{numerator1}/{denominator1} {operator} {numerator2}/{denominator2} = ?"
 
-    def Print(self):
-        # print("term_count = {}".format(self.term_count))
-        # print("range = {}".format(self.range))
-        # print("user_operators = {}".format(self.user_operators))
-        # print("numbers = {}".format(self.numbers))
-        # print("opeators = {}".format(self.operators))
-        # print("expresssion = {}".format(self.expression))
-        print("question = {}".format(self.question))
-        print("correct_answer = {}".format(self.correct_answer))
-        # print("user_answer = {}".format(self.correct_answer))
+        # 更新界面
+        self.question_label.setText(question)
+        self.correct_answer = correct_answer_str
+        self.answer_input.clear()
+        self.answer_input.setFocus()
 
-    def Generate(self):
-        self.numbers = []
-        self.operators = []
-        # print(self.user_operators)
-        for i in range(self.term_count):
-            self.numbers.append(random.randint(self.range[0], self.range[1]))
-            if i < self.term_count - 1:
-                self.operators.append(random.choice(self.user_operators))
+    def check_answer(self):
+        """检查用户输入的答案是否正确"""
+        user_answer = self.answer_input.text().strip()
 
-        self.Validate()
-        self.GenerateExpression()
+        if not user_answer:
+            QMessageBox.warning(self, '警告', '请输入答案！')
+            return
 
-    # 生成表达式
-    def GenerateExpression(self):
-        expr = str(self.numbers[0])
-        for i in range(1, len(self.numbers)):
-            op = self.operators[i-1]
-            num = self.numbers[i]
-            expr += f" {op} ({num})" if num < 0 else f" {op} {num}"
-        self.expression = expr
-        self.Evaluate()
-        self.question = expr.replace('*', '×').replace('/', '÷') + " ="
-        return self.expression
-
-    # 在range[2]与range[3]之间，生成随机的乘除数
-    def Divisor(self):
-        num = random.randint(self.range[2], self.range[3])
-        while num == 0:
-            num = random.randint(self.range[2], self.range[3])
-        return num
-
-    def Validate(self):
-        count = self.term_count
-        # 检查乘除数的取值范围
-        for i in range(count - 2, -1, -1):  # 开始值, 结束值(不包含）,步长
-            if self.operators[i] in ['*', '/']:
-                self.numbers[i + 1] = self.Divisor()
-                self.numbers[i] = self.Divisor()
-
-        # 检查整除
-        flag = 0
-        for i in range(count - 2, -1, -1):  # 开始值, 结束值(不包含）,步长
-            if self.operators[i] == '/':
-                if flag == 0:
-                    flag = 1
-                    num = self.numbers[i + 1] * self.numbers[i]
-                else:
-                    num *= self.numbers[i]
-                if i == 0:
-                    self.numbers[i] = num
-            else:
-                if flag == 1:
-                    self.numbers[i + 1] = num
-                    flag = 0
-
-    def Evaluate(self):
         try:
-            result = eval(self.expression)
-            # 判断是否是整数或可转换为整数的浮点数
-            if isinstance(result, int):
-                self.correct_answer = result
-            elif isinstance(result, float):
-                if result.is_integer():
-                    self.correct_answer = int(result)
-                else:
-                    self.correct_answer = result
+            # 将用户答案转换为分数形式
+            if '/' in user_answer:
+                numerator, denominator = user_answer.split('/')
+                user_fraction = Fraction(int(numerator), int(denominator))
             else:
-                return "结果不是数字类型"
-        except Exception as e:
-            return f"错误: {e}"
+                user_fraction = Fraction(int(user_answer), 1)
 
-if __name__ == "__main__":
-    q = Question(term_count = 3, range=[5,20,5,10], user_operators=['+'])
-    q.Print()
-    q.Set(term_count = 4, range = [-100, 100, 5, 20], user_operators=['+', '-', '*', '/'])
-    q.Print()
-    for i in range(100):
-        q.Generate()
-        print("{}: {} {} ".format(i+1, q.question, q.correct_answer))
+            # 将正确答案转换为分数形式
+            if '/' in self.correct_answer:
+                correct_numerator, correct_denominator = self.correct_answer.split('/')
+                correct_fraction = Fraction(int(correct_numerator), int(correct_denominator))
+            else:
+                correct_fraction = Fraction(int(self.correct_answer), 1)
+
+            # 比较答案
+            if user_fraction == correct_fraction:
+                QMessageBox.information(self, '恭喜', '回答正确！')
+                self.generate_question()  # 生成下一题
+            else:
+                QMessageBox.warning(self, '错误', f'回答错误！正确答案是：{self.correct_answer}')
+                self.answer_input.clear()
+                self.answer_input.setFocus()
+
+        except:
+            QMessageBox.warning(self, '错误', '请输入有效的分数格式，例如：3/4 或 5')
+            self.answer_input.clear()
+            self.answer_input.setFocus()
 
 
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = FractionMathApp()
+    ex.show()
+    sys.exit(app.exec_())

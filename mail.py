@@ -58,7 +58,10 @@ class Mail():
         # print(self.Server)
         # print(self.Port)
         # print(self.Database)
-        self.Send(self.Database)
+        try:
+            self.Send(self.Database)
+        except Exception as e:
+            print(e)
 
     def Encode(self, s):
         rs = s[::-1] # 字符串逆序
