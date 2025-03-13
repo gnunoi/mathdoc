@@ -568,7 +568,7 @@ class MathQuizUI(QWidget):
         file_path = os.path.join(desktop_path, filename)
 
         workbook = xlsxwriter.Workbook(file_path)
-        worksheet = workbook.add_worksheet()
+        worksheet = workbook.add_worksheet(filename.replace('.xlsx', ''))
 
         format = workbook.add_format({
             "bg_color": "#FFFFFF",
