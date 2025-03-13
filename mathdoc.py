@@ -224,7 +224,7 @@ class MathQuizLogic:
         self.worksheet.set_column(0, 100, None, format)
         for col in range(8):
             self.worksheet.set_column(col, col, self.column_widths[col], format)
-        self.worksheet.set_zoom(150)
+        self.worksheet.set_zoom(120)
         for row in range(0, 1000):
             self.worksheet.set_row(row, 25)
         self.cell_format = self.workbook.add_format({
@@ -588,7 +588,7 @@ class MathQuizUI(QWidget):
         column_widths = [12, 40, 12, 12, 12, 25, 25, 15]
         for col in range(8):
             worksheet.set_column(col, col, column_widths[col], format)
-        worksheet.set_zoom(150)
+        worksheet.set_zoom(120)
         for row in range(0, 1000):
             worksheet.set_row(row, 25)
 
