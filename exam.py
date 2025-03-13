@@ -302,16 +302,15 @@ class Exam:
         ''', (question_number, question, str(user_answer), str(correct_answer), "正确" if is_correct else "错误",
               start_time.strftime("%Y-%m-%d %H:%M:%S"), end_time.strftime("%Y-%m-%d %H:%M:%S"), time_used))
         self.conn.commit()
-        self.ReorganizeExamData()
 
     def CloseDatabase(self):
-        pass
+        # 整理数据表
+        self.ReorganizeExamData()
         # 关闭数据库连接
-        # if self.conn:
-        #     self.conn.close()
+        if self.conn:
+            self.conn.close()
 
     def ReorganizeExamData(self):
-        # print("ReorganizeExamData()")
         try:
             # 获取当前Exam01表中的所有数据，并按StartTime排序
             self.cursor.execute("SELECT * FROM Exam01 ORDER BY ID")
