@@ -1,6 +1,7 @@
 import sys
 import getpass
 import os
+import shutil
 import ntplib
 from threading import Thread
 from datetime import datetime
@@ -11,7 +12,6 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
-import configparser
 import xlsxwriter
 import sqlite3
 
@@ -97,9 +97,20 @@ class MathQuizLogic:
 
     def InitDatabase(self):
         # 初始化 SQLite 数据库
-        print(f"{self.home}")
-        self.db_path = os.path.join(self.home, "Desktop", "mathdoc.db")
-        print(f"{self.db_path}")
+        # print(f"{self.home}")
+        desktop_path = os.path.join(self.home, "Desktop")
+        # print(desktop_path)
+        ini_file = os.path.join(desktop_path, "mathdoc.ini")
+        if os.path.exists(ini_file):
+            os.remove(ini_file)
+        db_folder = os.path.join(desktop_path, ".mathdoc")
+        if not os.path.exists(db_folder):
+            os.mkdir(db_folder)
+        old_db = os.path.join(desktop_path, "mathdoc.db")
+        if os.path.exists(old_db):
+            shutil.move(old_db, db_folder)
+        self.db_path = os.path.join(db_folder, "mathdoc.db")
+        # print(f"{self.db_path}")
         self.conn = sqlite3.connect(self.db_path)
         self.cursor = self.conn.cursor()
         self.CreateTable()
@@ -202,7 +213,7 @@ class MathQuizLogic:
         self.workbook = xlsxwriter.Workbook(self.file_path)
         current_date = datetime.now().strftime("%Y-%m-%d")
         self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
-        print(self.worksheet)
+        # print(self.worksheet)
 
         format = self.workbook.add_format({
             "bg_color": "#FFFFFF",
@@ -231,14 +242,14 @@ class MathQuizLogic:
         self.worksheet.freeze_panes(1, 1)
 
     def Append(self, data):
-        print(self.worksheet)
+        # print(self.worksheet)
         self.worksheet.write_row(self.current_row, 0, data, self.cell_format)
         self.current_row += 1
 
     def SaveWorkbook(self):
         if self.workbook:
             self.worksheet.autofilter(0, 0, self.current_row - 1, 7)
-            # self.workbook.close()
+            self.workbook.close()
 
     def generate_question(self):
         self.q.Generate()
@@ -316,7 +327,7 @@ class MathQuizLogic:
         #     self.conn.close()
 
     def ReorganizeExamData(self):
-        print("ReorganizeExamData()")
+        # print("ReorganizeExamData()")
         try:
             # 获取当前Exam01表中的所有数据，并按StartTime排序
             self.cursor.execute("SELECT * FROM Exam01 ORDER BY ID")
@@ -335,7 +346,7 @@ class MathQuizLogic:
                 current_id = row[0]
                 current_question = row[2]
 
-                print(current_question, previous_question)
+                # print(current_question, previous_question)
                 # 如果当前Question与上一行不同，则递增new_question_number
                 if current_question != previous_question:
                     new_question_number += 1
@@ -638,6 +649,7 @@ class MathQuizUI(QWidget):
         self.logic.SaveWorkbook()
         self.logic.CloseDatabase()
         if self.logic.current_row == 1:
+            # print(f"self.logic.current_row = {self.logic.current_row}")
             try:
                 if os.path.exists(self.logic.file_path): os.remove(self.logic.file_path)
             except Exception as e:
