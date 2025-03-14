@@ -243,9 +243,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MathQuizUI()
     window.showMaximized()
-    # 创建并启动线程
-    email_thread = Thread(target=window.exam.mail.SendDB)
-    email_thread.start()
-    # 等待线程完成（可选）
-    # email_thread.join()
+    window.exam.SubmitHomework()
     sys.exit(app.exec())
