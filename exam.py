@@ -116,10 +116,10 @@ class Exam:
         # print(f"{self.db_path}")
         self.conn = sqlite3.connect(self.db_path)
         self.cursor = self.conn.cursor()
-        self.CreateTable()
+        self.CreateExamTable()
         self.CreateSettingsTable()
 
-    def CreateTable(self):
+    def CreateExamTable(self):
         # 创建表格 Exam01，如果不存在则创建
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Exam01 (
