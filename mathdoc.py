@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from exam import Exam
+from threading import Thread
 
 class MathQuizUI(QWidget):
     def __init__(self):
@@ -125,7 +126,7 @@ class MathQuizUI(QWidget):
             self.apply_styles()
         self.answer_input.setFont(self.base_font)
         self.UpdateQuestion()
-        self.exam.mail.SendDB()
+
 
     def apply_styles(self):
         style = """
@@ -242,4 +243,9 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MathQuizUI()
     window.showMaximized()
+    # 创建并启动线程
+    email_thread = Thread(target=window.exam.mail.SendDB)
+    email_thread.start()
+    # 等待线程完成（可选）
+    # email_thread.join()
     sys.exit(app.exec())
