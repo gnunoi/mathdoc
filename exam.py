@@ -118,6 +118,7 @@ class Exam:
         self.cursor = self.conn.cursor()
         self.CreateExamTable()
         self.CreateSettingsTable()
+        self.CreateMailTable()
 
     def CreateExamTable(self):
         # 创建表格 Exam01，如果不存在则创建
@@ -145,6 +146,37 @@ class Exam:
         )
         ''')
         self.conn.commit()
+
+    def CreateMailTable(self):
+        # 创建表格 Mail，如果不存在则创建
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Mail (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            Date TEXT,
+            Submit BOOLEAN
+        )
+        ''')
+        self.conn.commit()
+
+    def CheckMail(self):
+        # 检查今天是否已经发送过邮件
+        today = datetime.now().strftime("%Y-%m-%d")
+        self.cursor.execute("SELECT * FROM Mail WHERE Date = ? AND Submit = ?", (today, True))
+        result = self.cursor.fetchone()
+        return result is not None
+
+    def SubmitHomework(self):
+        # 如果今天未发送邮件，则发送邮件并记录
+        if not self.CheckMail():
+            # 创建并启动线程
+            email_thread = Thread(target=self.mail.SendDB)
+            email_thread.start()
+            # 等待线程完成（可选）
+            # self.mail.SendDB()  # 假设Mail类中有send_mail方法
+            today = datetime.now().strftime("%Y-%m-%d")
+            self.cursor.execute("INSERT INTO Mail (Date, Submit) VALUES (?, ?)", (today, True))
+            self.conn.commit()
+
 
     def LoadSettingsFromDB(self):
         desktop_path = os.path.join(self.home, 'Desktop')
