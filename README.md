@@ -30,4 +30,4 @@
 工作表放大系数改为120%。错题本、难题本、习题本的工作表进行命名。
 
 ## [Release V0.4](https://github.com/gnunoi/mathdoc/releases/tag/V0.4)
-提交作业。
+自动提交作业。
