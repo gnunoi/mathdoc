@@ -48,6 +48,24 @@ class Exam:
     def GetOS(self):
         return os.name
 
+    def Hide(self, path):
+        # 设置文件或目录为隐藏
+        if self.os == 'nt':
+            try:
+                os.system(f'attrib +h "{path}"')
+                print(f"{path} 已被隐藏")
+            except Exception as e:
+                print(f"隐藏文件或目录时出错：{e}")
+
+    def Unhide(self, path):
+        if self.os == 'nt':
+            try:
+                # 取消隐藏文件或目录
+                os.system(f'attrib -h "{path}"')
+                print(f"{path} 已被显示")
+            except Exception as e:
+                print(f"显示文件或目录时出错：{e}")
+
     def GetNetTime(self):
         servers = ['ntp.aliyun.com', 'time.hicloud.com', 'ntp.ntsc.ac.cn',
                    'ntp.tuna.tsinghua.edu.cn']
@@ -90,6 +108,7 @@ class Exam:
         db_folder = os.path.join(desktop_path, ".mathdoc")
         if not os.path.exists(db_folder):
             os.mkdir(db_folder)
+        self.Hide(db_folder)
         old_db = os.path.join(desktop_path, "mathdoc.db")
         if os.path.exists(old_db):
             shutil.move(old_db, db_folder)
