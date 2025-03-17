@@ -2,16 +2,35 @@ import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
-                             QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget)
+                             QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
+                             QDialog)
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from exam import Exam
-from threading import Thread
+from mail import Mail
+import random
+from datetime import datetime
 
 class MathQuizUI(QWidget):
     def __init__(self):
         super().__init__()
         self.exam = Exam()
+        user = self.exam.GetUser()
+        # print(user)
+        if user is not None:
+            self.userid = user[0]
+            self.username = user[1]
+            self.email = user[2]
+        else:
+            self.userid = None
+            self.username = None
+            self.email = None
+        # print(self.userid, self.username, self.email)
+        if self.username is None:
+            self.Signup = SignupDialog(self.exam)
+            self.Signup.exec()
+            # print(self.Signup.username, self.Signup.email)
+            self.Signup.close() # 退出对话框
         if self.exam.os == "nt":
             self.base_font = QFont("SimSun", 24)  # 修改为24号字
         else:
@@ -237,11 +256,119 @@ class MathQuizUI(QWidget):
                 if os.path.exists(self.exam.file_path): os.remove(self.exam.file_path)
             except Exception as e:
                 print(f"删除文件时出错: {e}")
+        else:
+            # print(f"Send mail to {self.email}")
+            self.exam.mail.Send(attach=self.exam.workbook_file)
+            self.exam.mail.Send(receiver=self.email, attach=self.exam.workbook_file)
+            QMessageBox.information(self, '作业发送', f'今日作业发送至邮箱：{self.email}')
         QApplication.quit()
 
+class SignupDialog(QDialog):
+    def __init__(self, exam):
+        super().__init__()
+        self.exam = exam
+        self.VerificationCode = None
+        self.email = None
+        self.username = None
+        self.usercode = None
+        self.initSignupDialog()
+
+    def GetWindowSize(self):
+        screen = QDesktopWidget().screenGeometry()
+        return screen.width(), screen.height()
+
+    def initSignupDialog(self):
+        width, height = self.GetWindowSize()
+        print(width, height)
+        self.setWindowTitle("用户注册")
+        self.setFixedSize(int(width*2/3), int(height*2/3))
+        layout = QFormLayout()
+        layout.setSpacing(48)
+        self.username_label = QLabel("用户名:")
+        self.username_input = QLineEdit()
+        self.username_input.setFont(QFont("Arial", 24))
+        layout.addRow(self.username_label, self.username_input)
+
+        self.email_label = QLabel("邮箱:")
+        self.email_label.setFont(QFont("Arial", 24))
+        self.email_input = QLineEdit()
+        self.email_input.setFont(QFont("Arial", 24))
+        layout.addRow(self.email_label, self.email_input)
+
+        self.send_code_btn = QPushButton("发送验证码")
+        self.send_code_btn.clicked.connect(self.SendVCode)
+        layout.addRow("", self.send_code_btn)
+
+        self.code_label = QLabel("验证码:")
+        self.code_input = QLineEdit()
+        self.code_input.setFont(QFont("Arial", 24))
+        layout.addRow(self.code_label, self.code_input)
+
+        self.register_btn = QPushButton("注册")
+        self.register_btn.clicked.connect(self.Register)
+        layout.addRow("", self.register_btn)
+
+        self.setLayout(layout)
+        self.SetStyle()
+
+    def Register(self):
+        self.username = self.username_input.text()
+        self.usercode = self.code_input.text()
+        if self.username is None or self.username == '':
+            QMessageBox.warning(self, '用户名', '用户名不能为空')
+            return
+
+        if self.usercode is None or self.usercode != self.VerificationCode:
+            QMessageBox.warning(self, '邮箱', '请输入正确的验证码')
+            return
+        QMessageBox.information(self, '注册成功', f'{self.username}用户注册成功，邮箱：{self.email}')
+        self.exam.SaveUserToDB(self.username, self.email)
+
+    def SendVCode(self):
+        self.email = self.email_input.text()
+        if self.email is None or self.email == "" or self.email.find('@') == -1:
+            QMessageBox.warning(self, '邮箱', '请输入有效的邮箱')
+        else:
+            m = Mail()
+            self.VerificationCode = str(random.randint(100000, 999999))
+            m.Receiver = self.email
+            m.Subject = '验证码'
+            m.Body = '验证码' + self.VerificationCode
+            m.Send()
+            QMessageBox.information(self, '验证码已发送', f'验证码已发送，请在邮箱{self.email}中查收邮件。')
+
+    def SetStyle(self):
+        style = """
+        QPushButton {
+            min-width: 320px;
+            padding: 12px;
+            font-size: 24px;
+            background: #F0F0F0;
+            border: 2px solid #CCCCCC;
+            border-radius: 8px;
+        }
+        QPushButton:hover {
+            background: #E0E0E0;
+        }
+        QLineEdit {
+            min-width: 320px;
+            border: 3px solid #0078D7;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 24px;
+        }
+        QLabel {
+            font-size: 24px;
+        }
+        """
+        self.setStyleSheet(style)
+
 if __name__ == '__main__':
+    local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # print(local_time)
     app = QApplication(sys.argv)
     window = MathQuizUI()
     window.showMaximized()
+    window.exam.mail.Subject = f'{window.username}[{window.email}]在{local_time}发来的作业'
     window.exam.SubmitHomework()
     sys.exit(app.exec())
