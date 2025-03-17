@@ -14,7 +14,7 @@ class Exam:
     def __init__(self):
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.03.14"
+        self.version_number = "2025.03.17"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.authorization = None
@@ -29,7 +29,7 @@ class Exam:
         self.error_count = 0
         self.correct_number = 0
         self.config_filename = "mathdoc.ini"
-        self.file_path = None
+        self.workbook_file = None
         self.workbook = None
         self.worksheet = None
         self.current_row = 0
@@ -76,7 +76,6 @@ class Exam:
                 utc_time = datetime.fromtimestamp(response.tx_time)
                 tz_time = utc_time.astimezone()
                 local_date = tz_time.strftime("%Y-%m-%d")
-                local_time = tz_time.strftime("%Y-%m-%d %H:%M:%S")
                 return local_date
             except Exception as e:
                 print(f"Error fetching NTP time: {e}")
@@ -119,6 +118,20 @@ class Exam:
         self.CreateExamTable()
         self.CreateSettingsTable()
         self.CreateMailTable()
+        self.CreateUsersTable()
+
+
+    def CreateUsersTable(self):
+        # print('Create Users Table...')
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Users (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            Username TEXT UNIQUE,
+            Email TEXT UNIQUE,
+            IsVerified BOOLEAN DEFAULT 0
+        )
+        ''')
+        self.conn.commit()
 
     def CreateExamTable(self):
         # 创建表格 Exam01，如果不存在则创建
@@ -177,6 +190,22 @@ class Exam:
             self.cursor.execute("INSERT INTO Mail (Date, Submit) VALUES (?, ?)", (today, True))
             self.conn.commit()
 
+    def GetUser(self):
+        # 检查是否有已注册的用户
+        self.cursor.execute("SELECT * FROM Users WHERE IsVerified = 1")
+        result = self.cursor.fetchone()
+        if result is not None:
+            # print(result)
+            return result
+        else:
+            return None, None, None
+
+    def SaveUserToDB(self, username, email):
+        try:
+            self.cursor.execute("INSERT INTO Users (Username, Email, IsVerified) VALUES (?, ?, 1)", (username, email))
+            self.conn.commit()
+        except sqlite3.IntegrityError:
+            QMessageBox.warning(None, "警告", "用户名或邮箱已存在！")
 
     def LoadSettingsFromDB(self):
         desktop_path = os.path.join(self.home, 'Desktop')
@@ -243,9 +272,9 @@ class Exam:
         current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
         desktop_path = os.path.join(self.home, 'Desktop')
         filename = f"{username}_{current_datetime}.xlsx"
-        self.file_path = os.path.join(desktop_path, filename)
+        self.workbook_file = os.path.join(desktop_path, filename)
 
-        self.workbook = xlsxwriter.Workbook(self.file_path)
+        self.workbook = xlsxwriter.Workbook(self.workbook_file)
         current_date = datetime.now().strftime("%Y-%m-%d")
         self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
         # print(self.worksheet)
@@ -403,9 +432,9 @@ class Exam:
         elif type == 2:
             filename = f"难题本{current_date}.xlsx"
         desktop_path = os.path.join(self.home, 'Desktop')
-        file_path = os.path.join(desktop_path, filename)
+        wbfile = os.path.join(desktop_path, filename)
 
-        workbook = xlsxwriter.Workbook(file_path)
+        workbook = xlsxwriter.Workbook(wbfile)
         worksheet = workbook.add_worksheet(filename.replace('.xlsx', ''))
 
         format = workbook.add_format({
