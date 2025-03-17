@@ -8,6 +8,7 @@ import sqlite3
 
 from question import Question
 from mail import Mail
+from PyQt5.QtWidgets import (QMessageBox)
 
 class Exam:
     def __init__(self):
@@ -109,8 +110,11 @@ class Exam:
             os.mkdir(db_folder)
         self.Hide(db_folder)
         old_db = os.path.join(desktop_path, "mathdoc.db")
-        if os.path.exists(old_db):
-            shutil.move(old_db, db_folder)
+        try:
+            if os.path.exists(old_db):
+                shutil.move(old_db, db_folder)
+        except OSError as e:
+            print(e)
         self.db_path = os.path.join(db_folder, "mathdoc.db")
         # print(f"{self.db_path}")
         self.conn = sqlite3.connect(self.db_path)
