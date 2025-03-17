@@ -3,6 +3,7 @@ import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+import random
 
 class Mail():
     def __init__(self):
@@ -16,23 +17,29 @@ class Mail():
         self.Port = 465  # 163邮箱使用SSL加密
         self.Home = os.path.expanduser("~")
         self.Database = os.path.join(self.Home, "Desktop", ".mathdoc", "mathdoc.db")  # 附件文件路径
+        self.postfix = {'移动': '139.com',
+                        '联通': 'wo.com.cn',
+                        '电信': '189.cn'}
 
-    def Send(self, attachment_path):
+    def Send(self, receiver=None, attach=None):
         # 创建MIMEMultipart对象
         msg = MIMEMultipart()
         msg['From'] = self.Sender
-        msg['To'] = self.Receiver
+        if receiver is None:
+            receiver = self.Receiver
+        msg['To'] = receiver
         msg['Subject'] = self.Subject
-
+        # print(msg['To'])
         # 添加邮件正文
-        msg.attach(MIMEText(self.Body, 'plain'))
+        if self.Body is not None:
+            msg.attach(MIMEText(self.Body, 'plain'))
 
         # 添加附件
-        if attachment_path:
+        if attach is not None:
             try:
-                with open(attachment_path, "rb") as attachment:
-                    part = MIMEApplication(attachment.read(), Name=attachment_path.split('/')[-1])
-                    part['Content-Disposition'] = f'attachment; filename="{attachment_path.split("/")[-1]}"'
+                with open(attach, "rb") as attachment:
+                    part = MIMEApplication(attachment.read(), Name=attach.split('/')[-1])
+                    part['Content-Disposition'] = f'attachment; filename="{attach.split("/")[-1]}"'
                     msg.attach(part)
             except Exception as e:
                 print(f"附件读取错误: {e}")
@@ -42,8 +49,8 @@ class Mail():
             # 创建SMTP会话
             server = smtplib.SMTP_SSL(self.Server, self.Port)  # 使用SSL加密
             server.login(self.Sender, self.Decode(self.Authority))  # 登录SMTP服务器
-            server.sendmail(self.Sender, self.Receiver, msg.as_string())  # 发送邮件
-            print("邮件发送成功！")
+            server.sendmail(self.Sender, receiver, msg.as_string())  # 发送邮件
+            # print("邮件发送成功！")
             return True
         except Exception as e:
             print(f"邮件发送失败: {e}")
@@ -59,7 +66,7 @@ class Mail():
         # print(self.Port)
         # print(self.Database)
         try:
-            self.Send(self.Database)
+            self.Send(attach=self.Database)
         except Exception as e:
             print(e)
 
@@ -90,9 +97,14 @@ class Mail():
         # 将十六进制字符串解码为原始字符串
         nstr = m.Decode(hex)
         print("解码后的字符串:", nstr)
+        m.Send()
+
 
 # 示例用法
 if __name__ == "__main__":
     m = Mail()
-    # m.TestCode()
-    m.SendDB()
+    m.Subject='验证码'
+    m.Body='验证码：' + str(random.randint(100000,999999))
+    m.Receiver = 'sunsdbh@126.com'
+    m.Send()
+    # m.SendDB()
