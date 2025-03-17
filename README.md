@@ -35,3 +35,5 @@
 ## [Release V0.4.1](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.1)
 修正未注册用户时，当次练习的工作簿文件名。
 
+## [Release V0.4.2](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.2)
+修正Windows平台发送邮件附件的文件名包含路径的问题。
