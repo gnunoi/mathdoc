@@ -21,7 +21,7 @@ class MathQuizUI(QWidget):
             self.Signup = SignupDialog(self.exam)
             self.Signup.exec()
             # print(self.Signup.username, self.Signup.email)
-            self.Signup.close() # 退出对话框
+            # self.Signup.close() # 退出对话框
             user = self.exam.GetUser()
             self.exam.username = user[1]
             self.exam = Exam()
@@ -331,6 +331,7 @@ class SignupDialog(QDialog):
             return
         QMessageBox.information(self, '注册成功', f'{self.username}用户注册成功，邮箱：{self.email}')
         self.exam.SaveUserToDB(self.username, self.email)
+        self.close() # 退出对话框
 
     def SendVCode(self):
         self.email = self.email_input.text()
@@ -341,7 +342,7 @@ class SignupDialog(QDialog):
             self.VerificationCode = str(random.randint(100000, 999999))
             m.Receiver = self.email
             m.Subject = '验证码'
-            m.Body = '验证码' + self.VerificationCode
+            m.Body = '验证码：\n' + self.VerificationCode
             m.Send()
             QMessageBox.information(self, '验证码已发送', f'验证码已发送，请在邮箱{self.email}中查收邮件。')
 
