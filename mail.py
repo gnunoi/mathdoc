@@ -35,11 +35,15 @@ class Mail():
             msg.attach(MIMEText(self.Body, 'plain'))
 
         # 添加附件
+        if os.name == 'posix':
+            sep = '/'
+        if os.name == 'nt':
+            sep = '\\'
         if attach is not None:
             try:
                 with open(attach, "rb") as attachment:
-                    part = MIMEApplication(attachment.read(), Name=attach.split('/')[-1])
-                    part['Content-Disposition'] = f'attachment; filename="{attach.split("/")[-1]}"'
+                    part = MIMEApplication(attachment.read(), Name=attach.split(sep)[-1])
+                    part['Content-Disposition'] = f'attachment; filename="{attach.split(sep)[-1]}"'
                     msg.attach(part)
             except Exception as e:
                 print(f"附件读取错误: {e}")
