@@ -17,20 +17,19 @@ class MathQuizUI(QWidget):
         self.exam = Exam()
         user = self.exam.GetUser()
         # print(user)
-        if user is not None:
-            self.userid = user[0]
-            self.username = user[1]
-            self.email = user[2]
-        else:
-            self.userid = None
-            self.username = None
-            self.email = None
-        # print(self.userid, self.username, self.email)
-        if self.username is None:
+        while user[0] is None:
             self.Signup = SignupDialog(self.exam)
             self.Signup.exec()
             # print(self.Signup.username, self.Signup.email)
             self.Signup.close() # 退出对话框
+            user = self.exam.GetUser()
+            self.exam.username = user[1]
+            self.exam = Exam()
+        self.userid = user[0]
+        self.username = user[1]
+        self.email = user[2]
+
+        # print(self.userid, self.username, self.email)
         if self.exam.os == "nt":
             self.base_font = QFont("SimSun", 24)  # 修改为24号字
         else:
@@ -143,7 +142,7 @@ class MathQuizUI(QWidget):
         self.setLayout(main_layout)
         if self.exam.os == "posix":
             self.apply_styles()
-        self.answer_input.setFont(self.base_font)
+        self.answer_input.setFont(self.big_font)
         self.UpdateQuestion()
 
 
@@ -253,7 +252,7 @@ class MathQuizUI(QWidget):
         if self.exam.current_row == 1:
             # print(f"self.exam.current_row = {self.exam.current_row}")
             try:
-                if os.path.exists(self.exam.file_path): os.remove(self.exam.file_path)
+                if os.path.exists(self.exam.workbook_file): os.remove(self.exam.workbook_file)
             except Exception as e:
                 print(f"删除文件时出错: {e}")
         else:
@@ -278,6 +277,10 @@ class SignupDialog(QDialog):
         return screen.width(), screen.height()
 
     def initSignupDialog(self):
+        if self.exam.os == "nt":
+            self.base_font = QFont("SimSun", 24)  # 修改为24号字
+        else:
+            self.base_font = QFont("Pingfang SC", 24)  # 修改为24号字
         width, height = self.GetWindowSize()
         print(width, height)
         self.setWindowTitle("用户注册")
@@ -285,31 +288,36 @@ class SignupDialog(QDialog):
         layout = QFormLayout()
         layout.setSpacing(48)
         self.username_label = QLabel("用户名:")
+        self.username_label.setFont(self.base_font)
         self.username_input = QLineEdit()
-        self.username_input.setFont(QFont("Arial", 24))
+        self.username_input.setFont(self.base_font)
         layout.addRow(self.username_label, self.username_input)
 
         self.email_label = QLabel("邮箱:")
-        self.email_label.setFont(QFont("Arial", 24))
+        self.email_label.setFont(self.base_font)
         self.email_input = QLineEdit()
-        self.email_input.setFont(QFont("Arial", 24))
+        self.email_input.setFont(self.base_font)
         layout.addRow(self.email_label, self.email_input)
 
         self.send_code_btn = QPushButton("发送验证码")
+        self.send_code_btn.setFont(self.base_font)
         self.send_code_btn.clicked.connect(self.SendVCode)
         layout.addRow("", self.send_code_btn)
 
         self.code_label = QLabel("验证码:")
+        self.code_label.setFont(self.base_font)
         self.code_input = QLineEdit()
-        self.code_input.setFont(QFont("Arial", 24))
+        self.code_input.setFont(self.base_font)
         layout.addRow(self.code_label, self.code_input)
 
         self.register_btn = QPushButton("注册")
+        self.register_btn.setFont(self.base_font)
         self.register_btn.clicked.connect(self.Register)
         layout.addRow("", self.register_btn)
 
         self.setLayout(layout)
-        self.SetStyle()
+        if self.exam.os == "posix":
+            self.SetStyle()
 
     def Register(self):
         self.username = self.username_input.text()
