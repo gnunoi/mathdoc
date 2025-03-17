@@ -1,4 +1,3 @@
-import getpass
 import os
 import shutil
 import ntplib
@@ -42,6 +41,7 @@ class Exam:
         self.mail = Mail()
         self.InitDatabase()
         self.LoadSettingsFromDB()
+        self.username = self.GetUser()[1]
         self.OpenWorkbook()
         self.GetNetTimeInThread(self.HandleAuthorization)
 
@@ -268,7 +268,7 @@ class Exam:
         self.conn.commit()
 
     def OpenWorkbook(self):
-        username = getpass.getuser()
+        username = self.username
         current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
         desktop_path = os.path.join(self.home, 'Desktop')
         filename = f"{username}_{current_datetime}.xlsx"
