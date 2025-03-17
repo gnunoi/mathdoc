@@ -32,3 +32,6 @@
 ## [Release V0.4](https://github.com/gnunoi/mathdoc/releases/tag/V0.4)
 用户注册。自动提交作业到注册用户的邮箱。
 
+## [Release V0.4.1](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.1)
+修正未注册用户时，当次练习的工作簿文件名。
+
