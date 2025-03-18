@@ -33,12 +33,15 @@ class Exam:
         self.workbook = None
         self.worksheet = None
         self.current_row = 0
-        self.column_widths = [12, 40, 12, 12, 12, 12, 12, 15]
+        self.column_widths = [12, 40, 12, 12, 12, 12, 12, 15, 40]
         self.operator = 0
         self.bracket_prob = 30
         self.start_time = None
         self.end_time = None
         self.last_operator = None
+        self.correct_answer = None
+        self.user_answer = None
+        self.tips = None
         self.mail = Mail()
         self.InitDatabase()
         self.LoadSettingsFromDB()
@@ -169,9 +172,11 @@ class Exam:
             IsCorrect TEXT,
             StartTime TEXT,
             EndTime TEXT,
-            TimeUsed REAL
+            TimeUsed REAL,
+            Tips TEXT
         )
         ''')
+        self.AddColumn('Exam01', 'Tips', 'TEXT')
         self.conn.commit()
 
     def CreateSettingsTable(self):
@@ -316,7 +321,7 @@ class Exam:
             "font_size": "12",
         })
         self.worksheet.set_column(0, 100, None, format)
-        for col in range(8):
+        for col in range(9):
             self.worksheet.set_column(col, col, self.column_widths[col], format)
         self.worksheet.set_zoom(120)
         for row in range(0, 1000):
@@ -331,7 +336,7 @@ class Exam:
         })
         self.Append([
             '题号', '题目', '用户答案', '正确答案', '是否正确',
-            '开始时间', '结束时间', '用时(秒)'
+            '开始时间', '结束时间', '用时(秒)', '错误提示'
         ])
         self.worksheet.freeze_panes(1, 1)
 
@@ -342,53 +347,57 @@ class Exam:
 
     def SaveWorkbook(self):
         if self.workbook:
-            self.worksheet.autofilter(0, 0, self.current_row - 1, 7)
+            self.worksheet.autofilter(0, 0, self.current_row - 1, 8)
             self.workbook.close()
 
-    def generate_question(self):
+    def GenerateQuestion(self):
         self.q.Generate()
         return (self.q.question, self.q.correct_answer)
 
-    def next_question(self):
-        self.current_question, self.correct_answer = self.generate_question()
+    def NextQuestion(self):
+        self.current_question, self.correct_answer = self.GenerateQuestion()
         self.start_time = datetime.now()
         return self.current_question
 
-    def submit_answer(self, user_input):
+    def SubmitAnswer(self, user_input):
         self.end_time = datetime.now()
         try:
-            user_num = float(user_input)
-            if user_num == int(user_num):
-                user_num = int(user_num)
+            user_answer = float(user_input)
+            if user_answer == int(user_answer):
+                user_answer = int(user_answer)
+                self.user_answer = user_answer
         except:
             return (False, "请输入有效数字")
 
-        if user_num == self.correct_answer:
+        if user_answer == self.correct_answer:
             is_correct = True
         else:
             is_correct = False
-        time_used = round((self.end_time - self.start_time).total_seconds(), 1)
+        self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
 
+        self.GenerateTips()
+        # print(self.tips)
         self.Append([
             self.question_number,
             self.current_question.strip(),
-            user_num,
+            self.user_answer,
             self.correct_answer,
             "正确" if is_correct else "错误",
             self.start_time.strftime("%H:%M:%S"),
             self.end_time.strftime("%H:%M:%S"),
-            time_used
+            self.time_used,
+            self.tips
         ])
-
         self.SaveToDatabase(
             self.question_number,
             self.current_question.strip(),
-            user_num,
+            self.user_answer,
             self.correct_answer,
             is_correct,
             self.start_time,
             self.end_time,
-            time_used)
+            self.time_used,
+            self.tips)
 
         if is_correct:
             self.correct_number += 1
@@ -399,18 +408,37 @@ class Exam:
             if self.error_count >= 3:
                 self.question_number += 1
                 self.error_count = 0
-                return (False, f"正确答案是：{self.correct_answer}")
+                return (False, f"正确答案是：{self.correct_answer}。请使用以下检查方法：{self.tips}")
             else:
-                return (False, "请再试一次")
+                return (False, f"请再试一次，请使用以下检查方法：{self.tips}")
+
+    def GenerateTips(self):
+        print(self.q.expression, self.user_answer, self.correct_answer)
+        tips = []
+        # 检查符号
+        exp = self.q.expression
+
+        # 检查个位数
+        if self.user_answer % 10 != self.correct_answer % 10:
+            tips.append('2. 检查个位数')
+            print('2. 检查个位数')
+        # 检查位数
+        if len(str(self.user_answer)) != len(str(self.correct_answer)):
+            tips.append('3. 检查位数')
+            print('3. 检查位数')
+        self.tips = '；'.join(tips)
+
 
     def SaveToDatabase(self, question_number, question, user_answer, correct_answer, is_correct, start_time, end_time,
-                       time_used):
+                       time_used, tips):
+        # print(tips)
         # 将记录保存到数据库
         self.cursor.execute('''
-        INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, StartTime, EndTime, TimeUsed)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (question_number, question, str(user_answer), str(correct_answer), "正确" if is_correct else "错误",
-              start_time.strftime("%Y-%m-%d %H:%M:%S"), end_time.strftime("%Y-%m-%d %H:%M:%S"), time_used))
+            INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, StartTime, EndTime, TimeUsed, Tips)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            (question_number, question, str(user_answer), str(correct_answer), "正确" if is_correct else "错误",
+            start_time.strftime("%Y-%m-%d %H:%M:%S"), end_time.strftime("%Y-%m-%d %H:%M:%S"), time_used, tips)
+        )
         self.conn.commit()
 
     def CloseDatabase(self):
