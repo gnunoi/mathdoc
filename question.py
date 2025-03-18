@@ -72,6 +72,7 @@ class Question():
             num = random.randint(self.range[2], self.range[3])
         return num
 
+    # 数值检查
     def Validate(self):
         count = self.term_count
         # 检查乘除数的取值范围
