@@ -293,11 +293,23 @@ class SignupDialog(QDialog):
         self.username_input.setFont(self.base_font)
         layout.addRow(self.username_label, self.username_input)
 
+        self.grade_label = QLabel("年级：")
+        self.grade_label.setFont(self.base_font)
+        self.grade_input = QLineEdit()
+        self.grade_input.setFont(self.base_font)
+        layout.addRow(self.grade_label, self.grade_input)
+
         self.email_label = QLabel("邮箱:")
         self.email_label.setFont(self.base_font)
         self.email_input = QLineEdit()
         self.email_input.setFont(self.base_font)
         layout.addRow(self.email_label, self.email_input)
+
+        self.mobile_label = QLabel("手机:")
+        self.mobile_label.setFont(self.base_font)
+        self.mobile_input = QLineEdit()
+        self.mobile_input.setFont(self.base_font)
+        layout.addRow(self.mobile_label, self.mobile_input)
 
         self.send_code_btn = QPushButton("发送验证码")
         self.send_code_btn.setFont(self.base_font)
@@ -322,6 +334,9 @@ class SignupDialog(QDialog):
     def Register(self):
         self.username = self.username_input.text()
         self.usercode = self.code_input.text()
+        self.grade = self.grade_input.text()
+        self.mobile = self.mobile_input.text()
+
         if self.username is None or self.username == '':
             QMessageBox.warning(self, '用户名', '用户名不能为空')
             return
@@ -329,8 +344,17 @@ class SignupDialog(QDialog):
         if self.usercode is None or self.usercode != self.VerificationCode:
             QMessageBox.warning(self, '邮箱', '请输入正确的验证码')
             return
+
+        if self.usercode is None or self.usercode != self.VerificationCode:
+            QMessageBox.warning(self, '邮箱', '请输入正确的验证码')
+            return
+
+        if self.usercode is None or self.usercode != self.VerificationCode:
+            QMessageBox.warning(self, '邮箱', '请输入正确的验证码')
+            return
+
         QMessageBox.information(self, '注册成功', f'{self.username}用户注册成功，邮箱：{self.email}')
-        self.exam.SaveUserToDB(self.username, self.email)
+        self.exam.SaveUserToDB(self.username, self.email, self.mobile, self.grade)
         self.close() # 退出对话框
 
     def SendVCode(self):
