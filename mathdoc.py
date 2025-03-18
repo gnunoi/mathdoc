@@ -229,6 +229,7 @@ class MathQuizUI(QWidget):
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
         question = self.exam.NextQuestion()
+        self.tips_label.setText('')
         self.question_label.setText(f"当前题目：\n{question}")
 
         total = self.exam.question_number - 1
@@ -246,7 +247,7 @@ class MathQuizUI(QWidget):
             self.UpdateQuestion()
         else:
             # QMessageBox.warning(self, "答案错误", result[1])
-            self.tips_label.setText(self.exam.tips)
+            self.tips_label.setText(f'检查提示：{self.exam.tips}')
 
 
     def ExportWorkbook(self, type=None):
