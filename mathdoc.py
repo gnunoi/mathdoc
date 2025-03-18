@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
                              QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
                              QDialog)
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import (QFont, QPalette, QColor)
 from PyQt5.QtCore import Qt
 from exam import Exam
 from mail import Mail
@@ -36,11 +36,16 @@ class MathQuizUI(QWidget):
             self.base_font = QFont("Pingfang SC", 24)  # 修改为24号字
         self.big_font = QFont("Arial", 32)
         self.initUI()
-        self.SetWindowSize(self)
+        self.GetScreenSize()
+        self.SetWindowSize()
 
-    def SetWindowSize(self, window):
+    def GetScreenSize(self):
         screen = QDesktopWidget().screenGeometry()
-        window.setGeometry(0, 0, screen.width(), screen.height())
+        self.width = screen.width()
+        self.height = screen.height()
+
+    def SetWindowSize(self):
+        self.setGeometry(0, 0, self.width, self.height)
 
     def initUI(self):
         self.setWindowTitle(self.exam.title)
@@ -104,8 +109,14 @@ class MathQuizUI(QWidget):
         self.answer_input = QLineEdit()
         self.answer_input.setFont(self.big_font)
         self.answer_input.setAlignment(Qt.AlignCenter)
-        self.answer_input.returnPressed.connect(self.submit_answer)
+        self.answer_input.returnPressed.connect(self.SubmitAnswer)
         main_layout.addWidget(self.answer_input, 1)
+
+        # 提示栏
+        self.tips_label = QLabel()
+        self.tips_label.setFont(self.big_font)
+        self.tips_label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.tips_label, 1)
 
         # 状态栏
         self.status_label = QLabel()
@@ -117,7 +128,7 @@ class MathQuizUI(QWidget):
         btn_layout = QHBoxLayout()
         self.submit_btn = QPushButton("提交答案 (Enter)")
         self.submit_btn.setFont(self.base_font)
-        self.submit_btn.clicked.connect(self.submit_answer)
+        self.submit_btn.clicked.connect(self.SubmitAnswer)
         self.generate_error_btn = QPushButton("导出错题本")
         self.generate_error_btn.setFont(self.base_font)
         self.generate_error_btn.clicked.connect(lambda: self.ExportWorkbook(1))  # 导出错题
@@ -143,6 +154,11 @@ class MathQuizUI(QWidget):
         if self.exam.os == "posix":
             self.apply_styles()
         self.answer_input.setFont(self.big_font)
+        # 创建 QPalette 对象并设置颜色
+        palette = QPalette()
+        palette.setColor(QPalette.WindowText, QColor(255, 0, 0))  # 设置字体颜色为红色
+
+        self.tips_label.setPalette(palette)  # 应用调色板
         self.UpdateQuestion()
 
 
@@ -212,7 +228,7 @@ class MathQuizUI(QWidget):
         if self.exam.authorization == False:
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
-        question = self.exam.next_question()
+        question = self.exam.NextQuestion()
         self.question_label.setText(f"当前题目：\n{question}")
 
         total = self.exam.question_number - 1
@@ -223,13 +239,14 @@ class MathQuizUI(QWidget):
         )
         self.answer_input.setFocus()
 
-    def submit_answer(self):
-        result = self.exam.submit_answer(self.answer_input.text().strip())
+    def SubmitAnswer(self):
+        result = self.exam.SubmitAnswer(self.answer_input.text().strip())
         self.answer_input.clear()
         if result[0]:
             self.UpdateQuestion()
         else:
-            QMessageBox.warning(self, "答案错误", result[1])
+            # QMessageBox.warning(self, "答案错误", result[1])
+            self.tips_label.setText(self.exam.tips)
 
 
     def ExportWorkbook(self, type=None):
