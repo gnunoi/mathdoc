@@ -37,3 +37,6 @@
 
 ## [Release V0.4.2](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.2)
 修正Windows平台发送邮件附件的文件名包含路径的问题。
+
+## [Release V0.4.3](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.3)
+增加年级、手机号、注册日期信息。
