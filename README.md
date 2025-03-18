@@ -40,3 +40,6 @@
 
 ## [Release V0.4.3](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.3)
 增加年级、手机号、注册日期信息。
+
+## [Release V0.4.4](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.4)
+增加错题的提示，包括：1、正负号；2、个位数；3、位数；4、进位或借位。
