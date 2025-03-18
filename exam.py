@@ -132,10 +132,30 @@ class Exam:
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
             Username TEXT UNIQUE,
             Email TEXT UNIQUE,
+            Mobile TEXT UNIQUE,
+            Grade INTEGER,
+            RegisterDate TEXT,
             IsVerified BOOLEAN DEFAULT 0
         )
         ''')
+        self.AddColumn('Users', 'Mobile', 'TEXT')
+        self.AddColumn('Users', 'RegisterDate', 'TEXT')
+        self.AddColumn('Users', 'Grade', 'INTEGER')
         self.conn.commit()
+
+    def AddColumn(self, table_name, column_name, column_type):
+        if table_name is None or column_name is None or column_type is None:
+            print(f'table_name = {table_name}, column_name = {column_name}, column_type = {column_type}')
+            return
+
+        try:
+            self.cursor.execute(f'ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type};')
+            print(f"字段 '{column_name}' 添加成功！")
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" in str(e):
+                print(f"字段 '{column_name}' 已经存在，无需添加。")
+            else:
+                print(f"添加字段时出错: {e}")
 
     def CreateExamTable(self):
         # 创建表格 Exam01，如果不存在则创建
@@ -204,9 +224,15 @@ class Exam:
         else:
             return None, None, None
 
-    def SaveUserToDB(self, username, email):
+    def SaveUserToDB(self, username, email, mobile, grade):
+        if username is None or email is None or mobile is None or grade is None:
+            print(f'username = {username}')
+            print(f'email = {email}')
+            print(f'mobile = {mobile}')
+            print(f'grade = {grade}')
         try:
-            self.cursor.execute("INSERT INTO Users (Username, Email, IsVerified) VALUES (?, ?, 1)", (username, email))
+            self.cursor.execute("INSERT INTO Users (Username, Email, Mobile, Grade, RegisterDate, IsVerified) VALUES (?, ?, ?, ?, ?, 1)",
+                                (username, email, mobile, grade, datetime.now().strftime('%Y-%m-%d')))
             self.conn.commit()
         except sqlite3.IntegrityError:
             QMessageBox.warning(None, "警告", "用户名或邮箱已存在！")
