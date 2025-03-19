@@ -9,6 +9,7 @@ import sqlite3
 from question import Question
 from mail import Mail
 from PyQt5.QtWidgets import (QMessageBox)
+from itertools import combinations
 
 class Exam:
     def __init__(self):
@@ -336,7 +337,7 @@ class Exam:
         })
         self.Append([
             '题号', '题目', '用户答案', '正确答案', '是否正确',
-            '开始时间', '结束时间', '用时(秒)', '错误提示'
+            '开始时间', '结束时间', '用时(秒)', '检查提示'
         ])
         self.worksheet.freeze_panes(1, 1)
 
@@ -412,33 +413,59 @@ class Exam:
             else:
                 return (False, f"请再试一次，请使用以下检查方法：{self.tips}")
 
+    def GenerateOppositeLists(self, lst):
+        result = []
+        n = len(lst)
+        for k in range(1, n + 1):  # k表示要改变的元素个数，从1到n
+            for indices in combinations(range(n), k):  # 生成所有可能的k个元素的索引组合
+                new_list = lst.copy()
+                for idx in indices:
+                    new_list[idx] = -new_list[idx]
+                result.append(new_list)
+        return result
+
+    def IsSignError(self):
+
+        numbers_list = self.GenerateOppositeLists(self.q.numbers)
+        # print(numbers_list)
+        user_answer = abs(self.user_answer)
+        correct_answer = abs(self.correct_answer)
+        # 检查符号
+        if user_answer / self.user_answer != correct_answer / self.correct_answer:
+            return True
+        for numbers in numbers_list:
+            q = Question(numbers = numbers, operators = self.q.operators)
+            # print(numbers, self.q.operators)
+            # print(q.expression, q.correct_answer)
+            if q.correct_answer == self.user_answer:
+                print(f'{q.expression} = {q.correct_answer}')
+                print('1. 检查正负号')
+                return True
+
     def GenerateTips(self):
         if self.user_answer == self.correct_answer:
             return
 
         print(self.q.expression, self.user_answer, self.correct_answer)
         tips = []
-        exp = self.q.expression
-
         user_answer = abs(self.user_answer)
         correct_answer = abs(self.correct_answer)
         # 检查符号
-        if user_answer / self.user_answer != correct_answer / self.correct_answer:
-            tips.append('1. 检查正负号')
-            print('1. 检查正负号')
-
+        if self.IsSignError():
+            tips.append('1. 正负号')
+            print('1. 正负号')
         # 检查个位数
         if user_answer % 10 != correct_answer % 10:
-            tips.append('2. 检查个位数')
-            print('2. 检查个位数')
-        # 检查位数
+            tips.append('2. 个位数')
+            print('2. 个位数')
+        # 检查总位数
         if len(str(user_answer)) != len(str(correct_answer)):
-            tips.append('3. 检查总位数')
-            print('3. 检查总位数')
+            tips.append('3. 总位数')
+            print('3. 总位数')
         # 检查进借位
         if user_answer // 10 != correct_answer // 10:
-            tips.append('4. 检查进借位')
-            print('4. 检查进借位')
+            tips.append('4. 进借位')
+            print('4. 进借位')
 
         self.tips = '；'.join(tips)
 
