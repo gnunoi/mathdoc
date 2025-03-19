@@ -247,7 +247,7 @@ class MathQuizUI(QWidget):
             self.UpdateQuestion()
         else:
             # QMessageBox.warning(self, "答案错误", result[1])
-            self.tips_label.setText(f'检查提示：{self.exam.tips}')
+            self.tips_label.setText(f'用户答案：{self.exam.user_answer}；检查：{self.exam.tips}')
 
 
     def ExportWorkbook(self, type=None):
