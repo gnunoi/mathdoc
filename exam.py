@@ -14,7 +14,7 @@ class Exam:
     def __init__(self):
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.03.18(V0.4.4)"
+        self.version_number = "2025.03.19(V0.5)"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.authorization = None
@@ -413,19 +413,33 @@ class Exam:
                 return (False, f"请再试一次，请使用以下检查方法：{self.tips}")
 
     def GenerateTips(self):
+        if self.user_answer == self.correct_answer:
+            return
+
         print(self.q.expression, self.user_answer, self.correct_answer)
         tips = []
-        # 检查符号
         exp = self.q.expression
 
+        user_answer = abs(self.user_answer)
+        correct_answer = abs(self.correct_answer)
+        # 检查符号
+        if user_answer / self.user_answer != correct_answer / self.correct_answer:
+            tips.append('1. 检查正负号')
+            print('1. 检查正负号')
+
         # 检查个位数
-        if self.user_answer % 10 != self.correct_answer % 10:
+        if user_answer % 10 != correct_answer % 10:
             tips.append('2. 检查个位数')
             print('2. 检查个位数')
         # 检查位数
-        if len(str(self.user_answer)) != len(str(self.correct_answer)):
-            tips.append('3. 检查位数')
-            print('3. 检查位数')
+        if len(str(user_answer)) != len(str(correct_answer)):
+            tips.append('3. 检查总位数')
+            print('3. 检查总位数')
+        # 检查进借位
+        if user_answer // 10 != correct_answer // 10:
+            tips.append('4. 检查进借位')
+            print('4. 检查进借位')
+
         self.tips = '；'.join(tips)
 
 
