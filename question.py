@@ -2,7 +2,7 @@ import random
 
 
 class Question():
-    def __init__(self, term_count=2, range=None, user_operators=None):
+    def __init__(self, term_count=2, range=None, user_operators=None, numbers=None, operators = None):
         self.term_count = term_count # 多项式的项数
         if range is None:
             self.range = [10, 50, 5, 10]
@@ -12,14 +12,17 @@ class Question():
             self.user_operators = ['+', '-', '*', '/']
         else:
             self.user_operators = user_operators
-        self.numbers = [] # 操作数
-        self.operators = [] # 运算符
+        self.numbers = numbers # 操作数
+        self.operators = operators # 运算符
         self.expression = None # 表达式
         self.question = None # 题干
         self.correct_answer = None # 正确答案
         self.user_answer = None # 用户答案
         self.tips = None # 提示
-        self.Generate()
+        if self.numbers is None or self.operators is None:
+            self.Generate()
+        else:
+            self.GenerateExpression()
 
     def Set(self, term_count=None, range=None, user_operators=None):
         if term_count is not None:
