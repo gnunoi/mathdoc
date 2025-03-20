@@ -316,28 +316,36 @@ class SignupDialog(QDialog):
         self.username_label.setFont(self.base_font)
         self.username_input = QLineEdit()
         self.username_input.setFont(self.base_font)
-        self.username_input.setText(self.username)
+        if self.username is not None and self.username != '':
+            self.username_input.setText(self.username)
+            self.username_input.setEnabled(False)
         layout.addRow(self.username_label, self.username_input)
 
         self.grade_label = QLabel("年级：")
         self.grade_label.setFont(self.base_font)
         self.grade_input = QLineEdit()
         self.grade_input.setFont(self.base_font)
-        self.grade_input.setText(self.grade)
+        if self.grade is not None and str(self.grade) != '':
+            self.grade_input.setText(str(self.grade))
+            self.grade_input.setEnabled(False)
         layout.addRow(self.grade_label, self.grade_input)
 
         self.email_label = QLabel("邮箱:")
         self.email_label.setFont(self.base_font)
         self.email_input = QLineEdit()
         self.email_input.setFont(self.base_font)
-        self.email_input.setText(self.email)
+        if self.email is not None and self.email != '':
+            self.email_input.setEnabled(False)
+            self.email_input.setText(self.email)
         layout.addRow(self.email_label, self.email_input)
 
         self.mobile_label = QLabel("手机:")
         self.mobile_label.setFont(self.base_font)
         self.mobile_input = QLineEdit()
         self.mobile_input.setFont(self.base_font)
-        self.mobile_input.setText(self.mobile)
+        if self.mobile is not None and self.mobile != '':
+            self.mobile_input.setEnabled(False)
+            self.mobile_input.setText(self.mobile)
         layout.addRow(self.mobile_label, self.mobile_input)
 
         self.send_code_btn = QPushButton("发送验证码")
@@ -350,8 +358,6 @@ class SignupDialog(QDialog):
         self.code_input = QLineEdit()
         self.code_input.setFont(self.base_font)
         print(self.exam.update)
-        if self.exam.update:
-            self.code_input.setText(self.VerificationCode)
         layout.addRow(self.code_label, self.code_input)
 
         self.register_btn = QPushButton("注册")
