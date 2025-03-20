@@ -15,20 +15,20 @@ class MathQuizUI(QWidget):
     def __init__(self):
         super().__init__()
         self.exam = Exam()
-        user = self.exam.GetUser()
-        # print(user)
-        while user[0] is None:
+        self.exam.GetUser()
+        while self.exam.username is None or self.exam.email is None \
+                or self.exam.mobile == '' or self.exam.grade == '':
             self.Signup = SignupDialog(self.exam)
             self.Signup.exec()
             # print(self.Signup.username, self.Signup.email)
             # self.Signup.close() # 退出对话框
-            user = self.exam.GetUser()
-            self.exam.username = user[1]
+            self.exam.GetUser()
             self.exam = Exam()
-        self.userid = user[0]
-        self.username = user[1]
-        self.email = user[2]
-
+        self.userid = self.exam.userid
+        self.username = self.exam.username
+        self.email = self.exam.email
+        self.mobile = self.exam.mobile
+        self.grade = self.exam.grade
         # print(self.userid, self.username, self.email)
         if self.exam.os == "nt":
             self.base_font = QFont("SimSun", 24)  # 修改为24号字
@@ -285,9 +285,11 @@ class SignupDialog(QDialog):
         super().__init__()
         self.exam = exam
         self.VerificationCode = None
-        self.email = None
-        self.username = None
+        self.username = self.exam.username
+        self.email = self.exam.email
         self.usercode = None
+        self.mobile = self.exam.mobile
+        self.grade = self.exam.grade
         self.initSignupDialog()
 
     def GetWindowSize(self):
@@ -301,6 +303,11 @@ class SignupDialog(QDialog):
             self.base_font = QFont("Pingfang SC", 24)  # 修改为24号字
         width, height = self.GetWindowSize()
         print(width, height)
+
+        if self.exam.username is not None and self.exam.username != '' \
+            and self.exam.email is not None and self.exam.email != '':
+            self.exam.update = True
+
         self.setWindowTitle("用户注册")
         self.setFixedSize(int(width*2/3), int(height*2/3))
         layout = QFormLayout()
@@ -309,24 +316,28 @@ class SignupDialog(QDialog):
         self.username_label.setFont(self.base_font)
         self.username_input = QLineEdit()
         self.username_input.setFont(self.base_font)
+        self.username_input.setText(self.username)
         layout.addRow(self.username_label, self.username_input)
 
         self.grade_label = QLabel("年级：")
         self.grade_label.setFont(self.base_font)
         self.grade_input = QLineEdit()
         self.grade_input.setFont(self.base_font)
+        self.grade_input.setText(self.grade)
         layout.addRow(self.grade_label, self.grade_input)
 
         self.email_label = QLabel("邮箱:")
         self.email_label.setFont(self.base_font)
         self.email_input = QLineEdit()
         self.email_input.setFont(self.base_font)
+        self.email_input.setText(self.email)
         layout.addRow(self.email_label, self.email_input)
 
         self.mobile_label = QLabel("手机:")
         self.mobile_label.setFont(self.base_font)
         self.mobile_input = QLineEdit()
         self.mobile_input.setFont(self.base_font)
+        self.mobile_input.setText(self.mobile)
         layout.addRow(self.mobile_label, self.mobile_input)
 
         self.send_code_btn = QPushButton("发送验证码")
@@ -338,6 +349,9 @@ class SignupDialog(QDialog):
         self.code_label.setFont(self.base_font)
         self.code_input = QLineEdit()
         self.code_input.setFont(self.base_font)
+        print(self.exam.update)
+        if self.exam.update:
+            self.code_input.setText(self.VerificationCode)
         layout.addRow(self.code_label, self.code_input)
 
         self.register_btn = QPushButton("注册")
