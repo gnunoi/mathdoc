@@ -54,7 +54,7 @@ class Mail():
             server = smtplib.SMTP_SSL(self.Server, self.Port)  # 使用SSL加密
             server.login(self.Sender, self.Decode(self.Authority))  # 登录SMTP服务器
             server.sendmail(self.Sender, receiver, msg.as_string())  # 发送邮件
-            # print("邮件发送成功！")
+            # print(f"{self.Sender} to {receiver}: 邮件发送成功！")
             return True
         except Exception as e:
             print(f"邮件发送失败: {e}")
