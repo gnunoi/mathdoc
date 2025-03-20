@@ -46,3 +46,6 @@
 
 ## [Release V0.4.5](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.5)
 完善了：正负号、总位数、进借位。
+
+## [Release V0.4.6](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.6)
+补充了注册信息。
