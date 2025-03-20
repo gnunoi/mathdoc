@@ -46,7 +46,14 @@ class Exam:
         self.mail = Mail()
         self.InitDatabase()
         self.LoadSettingsFromDB()
-        self.username = self.GetUser()[1]
+        self.userid = None
+        self.username = None
+        self.email = None
+        self.mobile = None
+        self.grade = None
+        self.register_date = None
+        self.update = False
+        self.GetUser()
         self.OpenWorkbook()
         self.GetNetTimeInThread(self.HandleAuthorization)
 
@@ -222,10 +229,17 @@ class Exam:
 
     def GetUser(self):
         # 检查是否有已注册的用户
-        self.cursor.execute("SELECT * FROM Users WHERE IsVerified = 1")
+        self.cursor.execute("SELECT ID, Username, Email, Mobile, Grade, RegisterDate, IsVerified FROM Users WHERE IsVerified = 1")
         result = self.cursor.fetchone()
         if result is not None:
             # print(result)
+            self.userid = result[0]
+            self.username = result[1]
+            self.email = result[2]
+            self.mobile = result[3]
+            self.grade = result[4]
+            self.register_date = result[5]
+            print(result)
             return result
         else:
             return None, None, None
@@ -237,6 +251,11 @@ class Exam:
             print(f'mobile = {mobile}')
             print(f'grade = {grade}')
         try:
+            if self.update:
+                print(username)
+                sql = "DELETE FROM Users Where Username = ?"
+                self.cursor.execute(sql, (username,))
+                self.conn.commit()
             self.cursor.execute("INSERT INTO Users (Username, Email, Mobile, Grade, RegisterDate, IsVerified) VALUES (?, ?, ?, ?, ?, 1)",
                                 (username, email, mobile, grade, datetime.now().strftime('%Y-%m-%d')))
             self.conn.commit()
