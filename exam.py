@@ -481,10 +481,11 @@ class Exam:
         if len(str(user_answer)) != len(str(correct_answer)):
             tips.append('3. 总位数')
             print('3. 总位数')
-        # 检查进借位
-        if user_answer // 10 != correct_answer // 10:
-            tips.append('4. 进借位')
-            print('4. 进借位')
+        else:
+            # 检查进借位
+            if user_answer // 10 != correct_answer // 10:
+                tips.append('4. 进借位')
+                print('4. 进借位')
 
         self.tips = '；'.join(tips)
 
