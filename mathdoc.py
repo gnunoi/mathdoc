@@ -263,7 +263,7 @@ class MathQuizUI(QWidget):
         self.exam.export_workbook(type)
         QMessageBox.information(self, "导出成功", f"{wb}已成功导出。")
 
-    def closeEvent(self, event):
+    def Quit(self):
         self.exam.SaveSettingsToDB()
         self.exam.SaveWorkbook()
         self.exam.CloseDatabase()
@@ -279,9 +279,12 @@ class MathQuizUI(QWidget):
             self.exam.mail.Send(receiver=self.email, attach=self.exam.workbook_file)
             QMessageBox.information(self, '作业发送', f'今日作业发送至邮箱：{self.email}')
 
+    def closeEvent(self, event):
+        self.Quit()
         event.accept()
 
     def ExitApp(self):
+        self.Quit()
         QApplication.quit()
 
 class SignupDialog(QDialog):
