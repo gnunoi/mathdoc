@@ -389,14 +389,14 @@ class Exam:
         except:
             return (False, "请输入有效数字")
 
+        self.tips = None
         if user_answer == self.correct_answer:
             is_correct = True
         else:
             is_correct = False
+            self.GenerateTips()
+            # print(self.tips)
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
-
-        self.GenerateTips()
-        # print(self.tips)
         self.Append([
             self.question_number,
             self.current_question.strip(),
