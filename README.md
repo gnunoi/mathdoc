@@ -48,4 +48,4 @@
 完善了：正负号、总位数、进借位。
 
 ## [Release V0.4.6](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.6)
-补充了注册信息。
+补充了注册信息。修正了检查提示。修正了点击退出按钮之外的程序退出不保存数据的问题。
