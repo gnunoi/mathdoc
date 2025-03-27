@@ -10,6 +10,7 @@ from exam import Exam
 from mail import Mail
 import random
 from datetime import datetime
+import time
 
 class MathQuizUI(QWidget):
     def __init__(self):
@@ -203,6 +204,16 @@ class MathQuizUI(QWidget):
                 self.exam.num_range[i] = int(self.exam.num_edit[i].text())
             except:
                 pass
+        if self.exam.num_range[0] > self.exam.num_range[1]:
+            self.exam.num_range[0] = int(self.exam.num_edit[1].text())
+            self.exam.num_range[1] = int(self.exam.num_edit[0].text())
+            self.exam.num_edit[0].setText(str(self.exam.num_range[0]))
+            self.exam.num_edit[1].setText(str(self.exam.num_range[1]))
+        if self.exam.num_range[2] > self.exam.num_range[3]:
+            self.exam.num_range[2] = int(self.exam.num_edit[3].text())
+            self.exam.num_range[3] = int(self.exam.num_edit[2].text())
+            self.exam.num_edit[2].setText(str(self.exam.num_range[2]))
+            self.exam.num_edit[3].setText(str(self.exam.num_range[3]))
 
         # 更新运算符
         for i in range(5):
