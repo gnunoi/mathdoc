@@ -1,5 +1,5 @@
 import random
-
+import time
 
 class Question():
     def __init__(self, term_count=2, range=None, user_operators=None, numbers=None, operators = None):
@@ -49,6 +49,9 @@ class Question():
         self.operators = []
         # print(self.user_operators)
         for i in range(self.term_count):
+            seed = random.randint(0, 1000000)
+            random.seed(seed)
+            print(f"seed = {seed}")
             self.numbers.append(random.randint(self.range[0], self.range[1]))
             if i < self.term_count - 1:
                 self.operators.append(random.choice(self.user_operators))
@@ -72,6 +75,9 @@ class Question():
     def Divisor(self):
         num = random.randint(self.range[2], self.range[3])
         while num == 0:
+            seed = random.randint(0, 1000000)
+            random.seed(seed)
+            print(f"seed = {seed}")
             num = random.randint(self.range[2], self.range[3])
         return num
 
