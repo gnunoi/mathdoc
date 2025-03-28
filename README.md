@@ -52,3 +52,6 @@
 
 ## [Release V0.4.7](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.7)
 随机数增加了种子，变得更随机。修正了取值范围的BUG。
+
+## [Release V0.4.8](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.8)
+让检查提示更加清晰明了，按照正负号、个位数、总位数和进借位的先后顺序提示。

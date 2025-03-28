@@ -474,11 +474,11 @@ class Exam:
             tips.append('1. 正负号')
             print('1. 正负号')
         # 检查个位数
-        if user_answer % 10 != correct_answer % 10:
+        elif user_answer % 10 != correct_answer % 10:
             tips.append('2. 个位数')
             print('2. 个位数')
         # 检查总位数
-        if len(str(user_answer)) != len(str(correct_answer)):
+        elif len(str(user_answer)) != len(str(correct_answer)):
             tips.append('3. 总位数')
             print('3. 总位数')
         else:
