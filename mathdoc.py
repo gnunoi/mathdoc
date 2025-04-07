@@ -91,7 +91,7 @@ class MathQuizUI(QWidget):
         self.exam.num_edit = [QLineEdit(str(n)) for n in self.exam.num_range]
         for i in range(4):
             self.exam.num_edit[i].setFont(self.base_font)
-            self.exam.num_edit[i].setFixedWidth(120)
+            self.exam.num_edit[i].setFixedWidth(360)
             self.exam.num_edit[i].setAlignment(Qt.AlignCenter)
             range_layout.addRow(QLabel(labels[i], font=self.base_font), self.exam.num_edit[i])
             self.exam.num_edit[i].editingFinished.connect(self.UpdateSettings)
@@ -104,6 +104,7 @@ class MathQuizUI(QWidget):
         self.question_label = QLabel()
         self.question_label.setFont(self.big_font)
         self.question_label.setAlignment(Qt.AlignCenter)
+        self.question_label.setObjectName("question_label")
         main_layout.addWidget(self.question_label, 2)
 
         # 答案输入
@@ -152,6 +153,7 @@ class MathQuizUI(QWidget):
         main_layout.addLayout(btn_layout)
 
         self.setLayout(main_layout)
+        self.answer_input.setObjectName("answer_input")
         if self.exam.os == "posix":
             self.apply_styles()
         self.answer_input.setFont(self.big_font)
@@ -176,9 +178,10 @@ class MathQuizUI(QWidget):
             subcontrol-origin: margin;
             left: 15px;
             color: #0078D7;
+            font-size: 24px;
         }
         QPushButton {
-            min-width: 320px;
+            min-width: 300px;
             padding: 12px;
             font-size: 24px;
             background: #F0F0F0;
@@ -193,6 +196,9 @@ class MathQuizUI(QWidget):
             border-radius: 8px;
             padding: 10px;
             font-size: 24px;
+        }
+        QLineEdit#answer_input {
+            font-size: 36px;
         }
         """
         self.setStyleSheet(style)
@@ -234,6 +240,8 @@ class MathQuizUI(QWidget):
 
         # 保存设置到数据库
         self.exam.SaveSettingsToDB()
+        # 更新题目
+        self.UpdateQuestion()
 
     def UpdateQuestion(self):
         if self.exam.authorization == False:
