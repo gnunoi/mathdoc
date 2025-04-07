@@ -55,3 +55,6 @@
 
 ## [Release V0.4.8](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.8)
 让检查提示更加清晰明了，按照正负号、个位数、总位数和进借位的先后顺序提示。
+
+## [Release V0.4.9](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.9)
+答题输入框的字体变大，与题目的字号一致，题目自动更新。
