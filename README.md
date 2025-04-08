@@ -58,3 +58,6 @@
 
 ## [Release V0.4.9](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.9)
 答题输入框与题目的字号一致，题目自动更新。
+
+## [Release V0.5.0](https://github.com/gnunoi/mathdoc/releases/tag/V0.4.9)
+增加两位数相乘的速算题目。
