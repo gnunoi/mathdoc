@@ -15,7 +15,7 @@ class Exam:
     def __init__(self):
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.03.31(V0.4.9)"
+        self.version_number = "2025.04.09(V0.5.0)"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.authorization = None
@@ -46,13 +46,6 @@ class Exam:
         self.mail = Mail()
         self.InitDatabase()
         self.LoadSettingsFromDB()
-        self.userid = None
-        self.username = None
-        self.email = None
-        self.mobile = None
-        self.grade = None
-        self.register_date = None
-        self.update = False
         self.GetUser()
         self.OpenWorkbook()
         self.GetNetTimeInThread(self.HandleAuthorization)
@@ -110,12 +103,7 @@ class Exam:
 
     def InitDatabase(self):
         # 初始化 SQLite 数据库
-        # print(f"{self.home}")
         desktop_path = os.path.join(self.home, "Desktop")
-        # print(desktop_path)
-        ini_file = os.path.join(desktop_path, "mathdoc.ini")
-        if os.path.exists(ini_file):
-            os.remove(ini_file)
         db_folder = os.path.join(desktop_path, ".mathdoc")
         if not os.path.exists(db_folder):
             os.mkdir(db_folder)
@@ -127,7 +115,6 @@ class Exam:
         except OSError as e:
             print(e)
         self.db_path = os.path.join(db_folder, "mathdoc.db")
-        # print(f"{self.db_path}")
         self.conn = sqlite3.connect(self.db_path)
         self.cursor = self.conn.cursor()
         self.CreateExamTable()
@@ -135,9 +122,7 @@ class Exam:
         self.CreateMailTable()
         self.CreateUsersTable()
 
-
     def CreateUsersTable(self):
-        # print('Create Users Table...')
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Users (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -169,7 +154,6 @@ class Exam:
                 print(f"添加字段时出错: {e}")
 
     def CreateExamTable(self):
-        # 创建表格 Exam01，如果不存在则创建
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Exam01 (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -188,7 +172,6 @@ class Exam:
         self.conn.commit()
 
     def CreateSettingsTable(self):
-        # 创建表格 Settings，如果不存在则创建
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Settings (
             Key TEXT PRIMARY KEY,
@@ -198,7 +181,6 @@ class Exam:
         self.conn.commit()
 
     def CreateMailTable(self):
-        # 创建表格 Mail，如果不存在则创建
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Mail (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -209,50 +191,36 @@ class Exam:
         self.conn.commit()
 
     def CheckMail(self):
-        # 检查今天是否已经发送过邮件
         today = datetime.now().strftime("%Y-%m-%d")
         self.cursor.execute("SELECT * FROM Mail WHERE Date = ? AND Submit = ?", (today, True))
         result = self.cursor.fetchone()
         return result is not None
 
     def SubmitHomework(self):
-        # 如果今天未发送邮件，则发送邮件并记录
         if not self.CheckMail():
-            # 创建并启动线程
             email_thread = Thread(target=self.mail.SendDB)
             email_thread.start()
-            # 等待线程完成（可选）
-            # self.mail.SendDB()  # 假设Mail类中有send_mail方法
             today = datetime.now().strftime("%Y-%m-%d")
             self.cursor.execute("INSERT INTO Mail (Date, Submit) VALUES (?, ?)", (today, True))
             self.conn.commit()
 
     def GetUser(self):
-        # 检查是否有已注册的用户
         self.cursor.execute("SELECT ID, Username, Email, Mobile, Grade, RegisterDate, IsVerified FROM Users WHERE IsVerified = 1")
         result = self.cursor.fetchone()
         if result is not None:
-            # print(result)
             self.userid = result[0]
             self.username = result[1]
             self.email = result[2]
             self.mobile = result[3]
             self.grade = result[4]
             self.register_date = result[5]
-            print(result)
             return result
         else:
             return None, None, None
 
     def SaveUserToDB(self, username, email, mobile, grade):
-        if username is None or email is None or mobile is None or grade is None:
-            print(f'username = {username}')
-            print(f'email = {email}')
-            print(f'mobile = {mobile}')
-            print(f'grade = {grade}')
         try:
             if self.update:
-                print(username)
                 sql = "DELETE FROM Users Where Username = ?"
                 self.cursor.execute(sql, (username,))
                 self.conn.commit()
@@ -263,11 +231,6 @@ class Exam:
             QMessageBox.warning(None, "警告", "用户名或邮箱已存在！")
 
     def LoadSettingsFromDB(self):
-        desktop_path = os.path.join(self.home, 'Desktop')
-        ini_file = os.path.join(desktop_path, 'mathdoc.ini')
-        if os.path.exists(ini_file):
-            os.remove(ini_file)
-        # 从数据库加载设置
         default_settings = {
             '加减数最小值': '10',
             '加减数最大值': '30',
@@ -275,7 +238,9 @@ class Exam:
             '乘除数最大值': '10',
             '运算符': '0',
             '项数': '2',
-            '括号概率': '30'
+            '括号概率': '30',
+            '题型': '0',
+            '速算类型': '0'
         }
 
         for key, default_value in default_settings.items():
@@ -297,8 +262,21 @@ class Exam:
                 self.q.term_count = int(value)
             elif key == '括号概率':
                 self.bracket_prob = int(value)
+            elif key == '题型':
+                # print(f'value: {value}')
+                if value is None:
+                    self.q.type = 0
+                else:
+                    self.q.type = int(value)
+                print('self.q.type = {}'.format(self.q.type))
+            elif key == '速算类型':
+                print(f'value: {value}')
+                if value is None:
+                    self.q.quick_calc_type = 0
+                else:
+                    self.q.quick_calc_type = int(value)
+                print('self.q.quick_calc_type = {}'.format(self.q.quick_calc_type))
 
-            # 确保设置已保存到数据库
             if not result:
                 self.cursor.execute("INSERT INTO Settings (Key, Value) VALUES (?, ?)", (key, default_value))
                 self.conn.commit()
@@ -306,7 +284,6 @@ class Exam:
         self.q.Set(range=self.num_range, user_operators=self.ops[self.operator])
 
     def SaveSettingsToDB(self):
-        # 将设置保存到数据库
         settings = {
             '加减数最小值': str(self.q.range[0]),
             '加减数最大值': str(self.q.range[1]),
@@ -314,12 +291,13 @@ class Exam:
             '乘除数最大值': str(self.q.range[3]),
             '运算符': str(self.operator),
             '项数': str(self.q.term_count),
-            '括号概率': str(self.bracket_prob)
+            '括号概率': str(self.bracket_prob),
+            '题型': str(self.q.type),
+            '速算类型': str(self.q.quick_calc_type)
         }
 
         for key, value in settings.items():
             self.cursor.execute("INSERT OR REPLACE INTO Settings (Key, Value) VALUES (?, ?)", (key, value))
-
         self.conn.commit()
 
     def OpenWorkbook(self):
@@ -332,7 +310,6 @@ class Exam:
         self.workbook = xlsxwriter.Workbook(self.workbook_file)
         current_date = datetime.now().strftime("%Y-%m-%d")
         self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
-        # print(self.worksheet)
 
         format = self.workbook.add_format({
             "bg_color": "#FFFFFF",
@@ -361,7 +338,6 @@ class Exam:
         self.worksheet.freeze_panes(1, 1)
 
     def Append(self, data):
-        # print(self.worksheet)
         self.worksheet.write_row(self.current_row, 0, data, self.cell_format)
         self.current_row += 1
 
@@ -395,7 +371,7 @@ class Exam:
         else:
             is_correct = False
             self.GenerateTips()
-            # print(self.tips)
+
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
         self.Append([
             self.question_number,
@@ -435,8 +411,8 @@ class Exam:
     def GenerateOppositeLists(self, lst):
         result = []
         n = len(lst)
-        for k in range(1, n + 1):  # k表示要改变的元素个数，从1到n
-            for indices in combinations(range(n), k):  # 生成所有可能的k个元素的索引组合
+        for k in range(1, n + 1):
+            for indices in combinations(range(n), k):
                 new_list = lst.copy()
                 for idx in indices:
                     new_list[idx] = -new_list[idx]
@@ -444,21 +420,15 @@ class Exam:
         return result
 
     def IsSignError(self):
-
         numbers_list = self.GenerateOppositeLists(self.q.numbers)
-        # print(numbers_list)
         user_answer = abs(self.user_answer)
         correct_answer = abs(self.correct_answer)
-        # 检查符号
         if user_answer / self.user_answer != correct_answer / self.correct_answer:
             return True
         for numbers in numbers_list:
-            q = Question(numbers = numbers, operators = self.q.operators)
-            # print(numbers, self.q.operators)
-            # print(q.expression, q.correct_answer)
+            q = Question(numbers=numbers, operators=self.q.operators)
             if q.correct_answer == self.user_answer:
                 print(f'{q.expression} = {q.correct_answer}')
-                print('1. 检查正负号')
                 return True
 
     def GenerateTips(self):
@@ -469,31 +439,24 @@ class Exam:
         tips = []
         user_answer = abs(self.user_answer)
         correct_answer = abs(self.correct_answer)
-        # 检查符号
         if self.IsSignError():
             tips.append('1. 正负号')
             print('1. 正负号')
-        # 检查个位数
         elif user_answer % 10 != correct_answer % 10:
             tips.append('2. 个位数')
             print('2. 个位数')
-        # 检查总位数
         elif len(str(user_answer)) != len(str(correct_answer)):
             tips.append('3. 总位数')
             print('3. 总位数')
         else:
-            # 检查进借位
             if user_answer // 10 != correct_answer // 10:
                 tips.append('4. 进借位')
                 print('4. 进借位')
 
         self.tips = '；'.join(tips)
 
-
     def SaveToDatabase(self, question_number, question, user_answer, correct_answer, is_correct, start_time, end_time,
                        time_used, tips):
-        # print(tips)
-        # 将记录保存到数据库
         self.cursor.execute('''
             INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, StartTime, EndTime, TimeUsed, Tips)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
@@ -503,15 +466,12 @@ class Exam:
         self.conn.commit()
 
     def CloseDatabase(self):
-        # 整理数据表
         self.ReorganizeExamData()
-        # 关闭数据库连接
         if self.conn:
             self.conn.close()
 
     def ReorganizeExamData(self):
         try:
-            # 获取当前Exam01表中的所有数据，并按StartTime排序
             self.cursor.execute("SELECT * FROM Exam01 ORDER BY ID")
             data = self.cursor.fetchall()
 
@@ -519,23 +479,17 @@ class Exam:
                 print("Exam01表中没有数据需要整理")
                 return
 
-            # 初始化新的QuestionNumber
             new_question_number = 1
-            previous_question = data[0][2]  # 第一行的Question
+            previous_question = data[0][2]
 
-            # 遍历数据，整理QuestionNumber
             for row in data:
                 current_id = row[0]
                 current_question = row[2]
 
-                # print(current_question, previous_question)
-                # 如果当前Question与上一行不同，则递增new_question_number
                 if current_question != previous_question:
                     new_question_number += 1
-                # 更新当前行的QuestionNumber
                 self.cursor.execute("UPDATE Exam01 SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
                 previous_question = current_question
-            # 提交更改
             self.conn.commit()
             print("Exam01表数据整理完成")
 
@@ -589,22 +543,19 @@ class Exam:
         elif type == 1:
             self.cursor.execute("SELECT * FROM Exam01 WHERE IsCorrect = '错误'")
         elif type == 2:
-            # 获取所有TimeUsed值并排序
-            self.cursor.execute("SELECT TimeUsed FROM Exam01 ORDER BY TimeUsed DESC")
+            self.cursor.execute("SELECT * FROM Exam01 ORDER BY TimeUsed DESC")
             time_used_list = self.cursor.fetchall()
             total_count = len(time_used_list)
-            threshold_index = min(int(total_count * 0.1), 50)  # 取前10%的索引
+            threshold_index = min(int(total_count * 0.1), 50)
             if threshold_index == 0:
                 threshold = float('inf')
             else:
-                threshold = time_used_list[threshold_index - 1][0] if time_used_list else float('inf')
-            # 筛选TimeUsed大于等于threshold的记录
-            self.cursor.execute(f"SELECT * FROM Exam01 WHERE TimeUsed >= {threshold} ORDER BY TimeUsed DESC ")
+                threshold = time_used_list[threshold_index - 1][8] if time_used_list else float('inf')
+            self.cursor.execute(f"SELECT * FROM Exam01 WHERE TimeUsed >= {threshold} ORDER BY TimeUsed DESC")
 
         data = self.cursor.fetchall()
         rows = len(data)
-        cols = len(data[0])
-        # print("rows = {}, cols = {}".format(rows, cols))
+        cols = len(data[0]) if data else 0
 
         for row_idx, row in enumerate(data, start=1):
             question_number = row[1]
@@ -623,7 +574,6 @@ class Exam:
                 cell_format)
 
         worksheet.freeze_panes(1, 1)
-        # cols：增加了一列ID，导出到Excel表没有这列，从0开始计数。
-        # rows: 因为增加了一行标题行。
-        worksheet.autofilter(0, 0, rows, cols-2)
+        if rows > 0:
+            worksheet.autofilter(0, 0, rows, cols - 2)
         workbook.close()
