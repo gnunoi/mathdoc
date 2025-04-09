@@ -43,6 +43,7 @@ class Exam:
         self.correct_answer = None
         self.user_answer = None
         self.tips = None
+        self.answer_tips = None
         self.mail = Mail()
         self.InitDatabase()
         self.LoadSettingsFromDB()
@@ -149,7 +150,8 @@ class Exam:
             print(f"字段 '{column_name}' 添加成功！")
         except sqlite3.OperationalError as e:
             if "duplicate column name" in str(e):
-                print(f"字段 '{column_name}' 已经存在，无需添加。")
+                # print(f"字段 '{column_name}' 已经存在，无需添加。")
+                pass
             else:
                 print(f"添加字段时出错: {e}")
 
@@ -268,14 +270,14 @@ class Exam:
                     self.q.type = 0
                 else:
                     self.q.type = int(value)
-                print('self.q.type = {}'.format(self.q.type))
+                # print('self.q.type = {}'.format(self.q.type))
             elif key == '速算类型':
-                print(f'value: {value}')
+                # print(f'value: {value}')
                 if value is None:
                     self.q.quick_calc_type = 0
                 else:
                     self.q.quick_calc_type = int(value)
-                print('self.q.quick_calc_type = {}'.format(self.q.quick_calc_type))
+                # print('self.q.quick_calc_type = {}'.format(self.q.quick_calc_type))
 
             if not result:
                 self.cursor.execute("INSERT INTO Settings (Key, Value) VALUES (?, ?)", (key, default_value))
@@ -347,6 +349,8 @@ class Exam:
             self.workbook.close()
 
     def GenerateQuestion(self):
+        self.answer_tips = []
+        self.tips = []
         self.q.Generate()
         return (self.q.question, self.q.correct_answer)
 
@@ -431,11 +435,7 @@ class Exam:
                 print(f'{q.expression} = {q.correct_answer}')
                 return True
 
-    def GenerateTips(self):
-        if self.user_answer == self.correct_answer:
-            return
-
-        print(self.q.expression, self.user_answer, self.correct_answer)
+    def GenerateCheckTips(self):
         tips = []
         user_answer = abs(self.user_answer)
         correct_answer = abs(self.correct_answer)
@@ -452,8 +452,71 @@ class Exam:
             if user_answer // 10 != correct_answer // 10:
                 tips.append('4. 进借位')
                 print('4. 进借位')
+        return tips
 
-        self.tips = '；'.join(tips)
+    def GenerateAnswerTips(self):
+        tips = []
+        if self.q.type == 1:
+            if self.q.quick_calc_type == 0: # 平方数
+                m = self.q.numbers[0]
+                n = self.q.numbers[1]
+                r = m % 10
+                if r >= 5:
+                    c = 10 - r
+                else:
+                    c = r
+                a = m + c
+                b = m - c
+                tips.append(f'{m} × {n} = ({m} + {c}) × ({m} - {c}) + {c} × {c} = {a} × {b} + {c} × {c} = {a*b} + {c*c} = {a*b+c*c}')
+            if self.q.quick_calc_type == 1: # 平方差法
+                m = self.q.numbers[0]
+                n = self.q.numbers[1]
+                a = int((m + n)/2)
+                b = abs(a - self.q.numbers[0])
+                tips.append(f'{m} × {n} = ({a} + {b})({a} - {b}) = {a} × {a} - {b} × {b} = {a*a} - {b*b} = {a*a-b*b}')
+            if self.q.quick_calc_type == 2: # 和十速算法
+                m = self.q.numbers[0]
+                n = self.q.numbers[1]
+                a = int(m/10)
+                b = m % 10
+                c = 10 -b
+                tips.append(f'{a} × ({a} + 1) = {a} × {a+1} = {a*(a+1)}；{b} × {c} = {b*c}；{m} × {n} = {m*n}')
+            if self.q.quick_calc_type == 3: # 大数凑十法
+                m = self.q.numbers[0]
+                n = self.q.numbers[1]
+                r = m % 10
+                c = 10 - r
+                tips.append(f'{m} × {n} = ({m+c} - {c}) × {n} = {m+c} × {n} - {c} × {n} = {(m+c)*n} - {c*n} = {m*n}')
+            if self.q.quick_calc_type == 4: # 逢五凑十法
+                m = self.q.numbers[0]
+                n = self.q.numbers[1]
+                if m % 25 == 0 and n % 4 == 0:
+                    a = int(m / 25)
+                    b = 25
+                    c = 4
+                    d = int(n /4)
+                else:
+                    a = int(m /5)
+                    b = 5
+                    c = 2
+                    d = int(n / 2)
+                tips.append(f'{m} × {n} = {a} × {b} × {c} × {d} = {a} × {d} × {b*c} = {a * d} × {b*c} = {m * n}')
+            if self.q.quick_calc_type == 5: # 双向凑十法
+                m = self.q.numbers[0]
+                n = self.q.numbers[1]
+                b = 10 - m % 10
+                a = m + b
+                d = 10 - n % 10
+                c = n + d
+                tips.append(f'{m} × {n} = ({a} - {b}) × ({c} - {d}) = {a} × {c} - {a} × {d} - {b} × {c} + {b} × {d} = {a*c} - {a*d} - {b*c} + {b*d} = {m*n}')
+        return tips
+
+    def GenerateTips(self):
+        if self.user_answer == self.correct_answer:
+            return
+        print(self.q.expression, self.user_answer, self.correct_answer)
+        self.tips = '；'.join(self.GenerateCheckTips())
+        self.answer_tips = '；'.join(self.GenerateAnswerTips())
 
     def SaveToDatabase(self, question_number, question, user_answer, correct_answer, is_correct, start_time, end_time,
                        time_used, tips):
@@ -491,7 +554,7 @@ class Exam:
                 self.cursor.execute("UPDATE Exam01 SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
                 previous_question = current_question
             self.conn.commit()
-            print("Exam01表数据整理完成")
+            # print("Exam01表数据整理完成")
 
         except Exception as e:
             print(f"整理Exam01表数据时出错: {e}")

@@ -56,7 +56,7 @@ class MathQuizUI(QWidget):
         type_layout = QVBoxLayout()
         self.type_options = [
             QRadioButton('四则运算'),
-            QRadioButton('速算')
+            QRadioButton('乘法速算')
         ]
         self.type_options[self.exam.q.type].setChecked(True)
         for rb in self.type_options:
@@ -67,7 +67,7 @@ class MathQuizUI(QWidget):
         control_panel.addWidget(self.type_group, 1)
 
         # 速算
-        self.quick_calc_group = QGroupBox("速算")
+        self.quick_calc_group = QGroupBox("乘法速算")
         self.quick_calc_group.setFont(self.base_font)
         quick_calc_layout = QVBoxLayout()
         self.quick_calc_options = [
@@ -161,6 +161,10 @@ class MathQuizUI(QWidget):
         self.tips_label.setFont(self.big_font)
         self.tips_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.tips_label, 1)
+        self.answer_tips_label = QLabel()
+        self.answer_tips_label.setFont(self.big_font)
+        self.answer_tips_label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.answer_tips_label, 1)
 
         # 状态栏
         self.status_label = QLabel()
@@ -201,8 +205,9 @@ class MathQuizUI(QWidget):
         self.answer_input.setFont(self.big_font)
         # 创建 QPalette 对象并设置颜色
         palette = QPalette()
-        palette.setColor(QPalette.WindowText, QColor(255, 0, 0))
+        palette.setColor(QPalette.WindowText, QColor(0, 120, 215)) #0078D7
         self.tips_label.setPalette(palette)
+        self.answer_tips_label.setPalette(palette)
         self.UpdateQuestion()
 
     def apply_styles(self):
@@ -303,6 +308,7 @@ class MathQuizUI(QWidget):
             self.ExitApp()
         question = self.exam.NextQuestion()
         self.tips_label.setText('')
+        self.answer_tips_label.setText('')
         self.question_label.setText(f"当前题目：\n{question}")
 
         total = self.exam.question_number - 1
@@ -314,12 +320,16 @@ class MathQuizUI(QWidget):
         self.answer_input.setFocus()
 
     def SubmitAnswer(self):
-        result = self.exam.SubmitAnswer(self.answer_input.text().strip())
+        answer_input = self.answer_input.text().strip()
+        answer_input = answer_input.split('=')[-1]
+        result = self.exam.SubmitAnswer(answer_input)
         self.answer_input.clear()
         if result[0]:
             self.UpdateQuestion()
         else:
-            self.tips_label.setText(f'用户答案：{self.exam.user_answer}；检查：{self.exam.tips}')
+            self.tips_label.setText(f'用户答案：{self.exam.user_answer}；检查提示：{self.exam.tips}')
+            if self.exam.answer_tips is not None and len(self.exam.answer_tips) > 0:
+                self.answer_tips_label.setText(f'答题提示：{self.exam.answer_tips}')
 
     def ExportWorkbook(self, type=None):
         wb = None
@@ -468,7 +478,7 @@ class SignupDialog(QDialog):
             QMessageBox.warning(self, '邮箱', '请输入有效的邮箱')
         else:
             m = Mail()
-            self.VerificationCode = str(random.randint(100000, 999999))
+            self.VerificationCode = str(self.RandInt(100000, 999999))
             m.Receiver = self.email
             m.Subject = '验证码'
             m.Body = '验证码：\n' + self.VerificationCode

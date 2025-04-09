@@ -1,4 +1,5 @@
 import random
+import time
 class Question():
     def __init__(self, term_count=2, range=None, user_operators=None, numbers=None, operators=None):
         self.term_count = term_count
@@ -26,6 +27,10 @@ class Question():
             self.GenerateExpression()
             pass
 
+    def RandInt(self, a, b):
+        random.seed(time.time())
+        return random.randint(a, b)
+
     def Set(self, term_count=None, range=None, user_operators=None, type=None, quick_calc_type=None):
         if term_count is not None:
             self.term_count = term_count
@@ -48,56 +53,61 @@ class Question():
         self.operators = []
         if self.type == 0:  # 四则运算
             for i in range(self.term_count):
-                self.numbers.append(random.randint(self.range[0], self.range[1]))
+                self.numbers.append(self.RandInt(self.range[0], self.range[1]))
                 if i < self.term_count - 1:
                     self.operators.append(random.choice(self.user_operators))
             self.Validate()
             self.GenerateExpression()
         elif self.type == 1:  # 速算
             if self.quick_calc_type == 0: # 平方数
-                number = random.randint(self.range[2], self.range[3])
+                number = self.RandInt(self.range[2], self.range[3])
                 self.numbers.append(number)
                 self.operators.append('*')
                 self.numbers.append(number)
                 self.GenerateExpression()
             if self.quick_calc_type == 1: # 平方差法
-                n1 = random.randint(int(self.range[2]/5), int(self.range[3]/5))*5
-                n2 = random.randint(1, 5)
+                n1 = self.RandInt(int(self.range[2]/5), int(self.range[3]/5))*5
+                n2 = self.RandInt(1, 5)
                 self.numbers.append(n1 + n2)
                 self.operators.append('*')
                 self.numbers.append(n1 - n2)
                 self.GenerateExpression()
             if self.quick_calc_type == 2: # 和十速算法
-                n1 = random.randint(int(self.range[2]/10), int(self.range[3]/10))*10
-                n2 = random.randint(1, 9)
-                self.numbers.append(n1 + n2)
+                n1 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
+                n2 = self.RandInt(1, 9)
+                a = n1 + n2
+                b = n1 + 10 - n2
+                if a > self.range[3]:
+                    a = a - 10
+                    b = b - 10
+                self.numbers.append(a)
                 self.operators.append('*')
-                self.numbers.append(n1 +10 - n2)
+                self.numbers.append(b)
                 self.GenerateExpression()
             if self.quick_calc_type == 3: # 大数凑十法
-                n1 = random.randint(int(self.range[2]/10), int(self.range[3]/10))*10
-                n2 = random.randint(1, 3)
+                n1 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
+                n2 = self.RandInt(1, 3)
                 num1 = n1 - n2 if n1 - n2 >= self.range[2] else n1 + 10 - n2
-                n3 = random.randint(int(self.range[2]/10), int(self.range[3]/10))*10
-                n4 = random.randint(1, 3)
+                n3 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
+                n4 = self.RandInt(1, 3)
                 num2 = n3 + n4 if n3 + n4 <= self.range[3] else n3 - 10 + n4
                 self.numbers.append(num1)
                 self.operators.append('*')
                 self.numbers.append(num2)
                 self.GenerateExpression()
             if self.quick_calc_type == 4: # 逢五凑十法
-                n1 = random.randint(int(self.range[2]/5), int(self.range[3]/5))*5
+                n1 = self.RandInt(int(self.range[2]/5), int(self.range[3]/5))*5
                 num1 = n1 if n1 % 10 != 0 else n1 + 5 if n1 + 5 <= self.range[3] else n1 - 5
-                n2 = random.randint(int(self.range[2]/2), int(self.range[3]/2))*2
+                n2 = self.RandInt(int(self.range[2]/2), int(self.range[3]/2))*2
                 self.numbers.append(num1)
                 self.operators.append('*')
                 self.numbers.append(n2)
                 self.GenerateExpression()
             if self.quick_calc_type == 5: # 双向凑十法
-                n1 = random.randint(int(self.range[2]/10), int(self.range[3]/10))*10
-                num1 = n1 + random.randint(8,9)
-                n2 = random.randint(int(self.range[2]/10), int(self.range[3]/10))*10
-                num2 = n2 + 10 - random.randint(1,2)
+                n1 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
+                num1 = n1 + self.RandInt(8,9)
+                n2 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
+                num2 = n2 + 10 - self.RandInt(1,2)
                 self.numbers.append(num1)
                 self.operators.append('*')
                 self.numbers.append(num2)
@@ -114,9 +124,9 @@ class Question():
         self.question = expr.replace('*', '×').replace('/', '÷') + " ="
 
     def Divisor(self):
-        num = random.randint(self.range[2], self.range[3])
+        num = self.RandInt(self.range[2], self.range[3])
         while num == 0:
-            num = random.randint(self.range[2], self.range[3])
+            num = self.RandInt(self.range[2], self.range[3])
         return num
 
     def Validate(self):

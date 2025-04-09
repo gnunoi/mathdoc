@@ -108,7 +108,7 @@ class Mail():
 if __name__ == "__main__":
     m = Mail()
     m.Subject='验证码'
-    m.Body='验证码：' + str(random.randint(100000,999999))
+    m.Body='验证码：' + str(self.RandInt(100000,999999))
     m.Receiver = 'sunsdbh@126.com'
     m.Send()
     # m.SendDB()
