@@ -150,7 +150,7 @@ class MathQuizUI(QWidget):
         main_layout.addWidget(self.question_label, 2)
 
         # 答案输入
-        self.answer_label = QLabel("输入答案，可以写中间过程：")
+        self.answer_label = QLabel("输入答案，可以写中间过程。如题目为：36×36=，答案可以为：32*40+4*4=1280+16=1296")
         self.answer_label.setFont(self.big_font)
         self.answer_label.setAlignment(Qt.AlignCenter)
 
@@ -160,17 +160,11 @@ class MathQuizUI(QWidget):
         self.answer_input.returnPressed.connect(self.SubmitAnswer)
 
         # 将 answer_label 和 answer_input 放在一个水平布局中
-        answer_layout = QHBoxLayout()
-        answer_layout.addWidget(self.answer_label)
-        answer_layout.addWidget(self.answer_input)
-
-        main_layout.addLayout(answer_layout, 1)
-
-        # self.answer_input = QLineEdit()
-        # self.answer_input.setFont(self.big_font)
-        # self.answer_input.setAlignment(Qt.AlignCenter)
-        # self.answer_input.returnPressed.connect(self.SubmitAnswer)
-        # main_layout.addWidget(self.answer_input, 1)
+        # answer_layout = QHBoxLayout()
+        main_layout.addWidget(self.answer_label, 1)
+        main_layout.addWidget(self.answer_input, 1)
+        #
+        # main_layout.addLayout(answer_layout, 1)
 
         # 提示栏
         self.tips_label = QLabel()
