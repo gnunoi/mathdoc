@@ -15,7 +15,7 @@ class Exam:
     def __init__(self):
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.04.09(V0.5.1)"
+        self.version_number = "2025.04.09(V0.5.2)"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.authorization = None
@@ -44,6 +44,11 @@ class Exam:
         self.user_answer = None
         self.tips = None
         self.answer_tips = None
+        self.username = None
+        self.email = None
+        self.mobile = None
+        self.grade = None
+        self.update = None
         self.mail = Mail()
         self.InitDatabase()
         self.LoadSettingsFromDB()
@@ -98,6 +103,7 @@ class Exam:
             self.authorization = net_time <= self.magic_date
         else:
             self.authorization = True
+        self.authorization = True
 
     def GetHome(self):
         return os.path.expanduser("~")

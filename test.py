@@ -1,511 +1,441 @@
-import sys
-import os
-from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
-                             QLineEdit, QRadioButton, QPushButton, QGroupBox,
-                             QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
-                             QDialog)
-from PyQt5.QtGui import (QFont, QPalette, QColor)
-from PyQt5.QtCore import Qt
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+from kivy.uix.popup import Popup
+from kivy.uix.togglebutton import ToggleButton
+from kivy.uix.spinner import Spinner
+from kivy.uix.floatlayout import FloatLayout
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.clock import Clock
+from kivy.properties import StringProperty, NumericProperty, ListProperty, BooleanProperty
+
 from exam import Exam
 from mail import Mail
 import random
 from datetime import datetime
 import time
+import os
 
-class MathQuizUI(QWidget):
-    def __init__(self):
-        super().__init__()
+# 设置窗口大小
+Window.size = (1200, 800)
+
+# Kivy UI 定义
+kv = '''
+<MathQuizUI>:
+    orientation: 'vertical'
+    spacing: 10
+    padding: 10
+
+    # 控制面板
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: None
+        height: 300
+
+        # 题型选择
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: None
+            width: 200
+            Label:
+                text: '题型'
+                font_size: 24
+                size_hint_y: None
+                height: 50
+            ToggleButton:
+                text: '四则运算'
+                group: 'type'
+                on_press: root.UpdateSettings('type', 0)
+            ToggleButton:
+                text: '乘法速算'
+                group: 'type'
+                on_press: root.UpdateSettings('type', 1)
+
+        # 速算类型选择
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: None
+            width: 200
+            Label:
+                text: '乘法速算'
+                font_size: 24
+                size_hint_y: None
+                height: 50
+            ToggleButton:
+                text: '平方数'
+                group: 'quick_calc'
+                on_press: root.UpdateSettings('quick_calc', 0)
+            ToggleButton:
+                text: '平方差法'
+                group: 'quick_calc'
+                on_press: root.UpdateSettings('quick_calc', 1)
+            ToggleButton:
+                text: '和十速算法'
+                group: 'quick_calc'
+                on_press: root.UpdateSettings('quick_calc', 2)
+            ToggleButton:
+                text: '大数凑十法'
+                group: 'quick_calc'
+                on_press: root.UpdateSettings('quick_calc', 3)
+            ToggleButton:
+                text: '逢五凑十法'
+                group: 'quick_calc'
+                on_press: root.UpdateSettings('quick_calc', 4)
+            ToggleButton:
+                text: '双向凑十法'
+                group: 'quick_calc'
+                on_press: root.UpdateSettings('quick_calc', 5)
+
+        # 算术项式选择
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: None
+            width: 200
+            Label:
+                text: '算术项式'
+                font_size: 24
+                size_hint_y: None
+                height: 50
+            ToggleButton:
+                text: '2项式'
+                group: 'term'
+                on_press: root.UpdateSettings('term', 2)
+            ToggleButton:
+                text: '3项式'
+                group: 'term'
+                on_press: root.UpdateSettings('term', 3)
+            ToggleButton:
+                text: '4项式'
+                group: 'term'
+                on_press: root.UpdateSettings('term', 4)
+            ToggleButton:
+                text: '5项式'
+                group: 'term'
+                on_press: root.UpdateSettings('term', 5)
+
+        # 运算类型选择
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: None
+            width: 200
+            Label:
+                text: '运算类型'
+                font_size: 24
+                size_hint_y: None
+                height: 50
+            ToggleButton:
+                text: '加法'
+                group: 'operator'
+                on_press: root.UpdateSettings('operator', 0)
+            ToggleButton:
+                text: '减法'
+                group: 'operator'
+                on_press: root.UpdateSettings('operator', 1)
+            ToggleButton:
+                text: '乘法'
+                group: 'operator'
+                on_press: root.UpdateSettings('operator', 2)
+            ToggleButton:
+                text: '除法'
+                group: 'operator'
+                on_press: root.UpdateSettings('operator', 3)
+            ToggleButton:
+                text: '混合运算'
+                group: 'operator'
+                on_press: root.UpdateSettings('operator', 4)
+
+        # 数值范围输入
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: None
+            width: 400
+            Label:
+                text: '数值范围'
+                font_size: 24
+                size_hint_y: None
+                height: 50
+            BoxLayout:
+                Label:
+                    text: '加减数最小值:'
+                    font_size: 20
+                TextInput:
+                    id: range_min_add
+                    text: '0'
+                    input_filter: 'int'
+                    on_text: root.UpdateSettings('range', 0, int(self.text))
+            BoxLayout:
+                Label:
+                    text: '加减数最大值:'
+                    font_size: 20
+                TextInput:
+                    id: range_max_add
+                    text: '100'
+                    input_filter: 'int'
+                    on_text: root.UpdateSettings('range', 1, int(self.text))
+            BoxLayout:
+                Label:
+                    text: '乘除数最小值:'
+                    font_size: 20
+                TextInput:
+                    id: range_min_mul
+                    text: '1'
+                    input_filter: 'int'
+                    on_text: root.UpdateSettings('range', 2, int(self.text))
+            BoxLayout:
+                Label:
+                    text: '乘除数最大值:'
+                    font_size: 20
+                TextInput:
+                    id: range_max_mul
+                    text: '10'
+                    input_filter: 'int'
+                    on_text: root.UpdateSettings('range', 3, int(self.text))
+
+    # 题目显示区域
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        Label:
+            id: question_label
+            text: '当前题目：'
+            font_size: 32
+            halign: 'center'
+            valign: 'middle'
+            size_hint_y: None
+            height: 100
+
+        # 答案输入区域
+        BoxLayout:
+            orientation: 'vertical'
+            TextInput:
+                id: answer_input
+                hint_text: '输入答案'
+                font_size: 32
+                multiline: False
+                on_text_validate: root.SubmitAnswer()
+            Label:
+                id: answer_tips_label
+                text: ''
+                font_size: 24
+                halign: 'center'
+
+        # 提示区域
+        Label:
+            id: tips_label
+            text: ''
+            font_size: 24
+            halign: 'center'
+            size_hint_y: None
+            height: 50
+
+        # 状态栏
+        Label:
+            id: status_label
+            text: '已答题：0 道 | 正确：0 道 | 错误：0 道 | 正确率：0.0%'
+            font_size: 20
+            halign: 'center'
+            size_hint_y: None
+            height: 50
+
+    # 操作按钮
+    BoxLayout:
+        spacing: 10
+        size_hint_y: None
+        height: 60
+        Button:
+            text: '提交答案 (Enter)'
+            font_size: 20
+            on_press: root.SubmitAnswer()
+        Button:
+            text: '导出错题本'
+            font_size: 20
+            on_press: root.ExportWorkbook(1)
+        Button:
+            text: '导出难题本'
+            font_size: 20
+            on_press: root.ExportWorkbook(2)
+        Button:
+            text: '导出习题本'
+            font_size: 20
+            on_press: root.ExportWorkbook(0)
+        Button:
+            text: '退出程序'
+            font_size: 20
+            on_press: root.ExitApp()
+
+<SignupDialog>:
+    title: '用户注册'
+    size_hint: None, None
+    size: 600, 800
+    auto_dismiss: False
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        padding: 20
+
+        TextInput:
+            id: username_input
+            hint_text: '用户名'
+            font_size: 24
+            multiline: False
+        TextInput:
+            id: grade_input
+            hint_text: '年级'
+            font_size: 24
+            multiline: False
+        TextInput:
+            id: email_input
+            hint_text: '邮箱'
+            font_size: 24
+            multiline: False
+        TextInput:
+            id: mobile_input
+            hint_text: '手机'
+            font_size: 24
+            multiline: False
+        Button:
+            text: '发送验证码'
+            font_size: 20
+            on_press: root.SendVCode()
+        TextInput:
+            id: code_input
+            hint_text: '验证码'
+            font_size: 24
+            multiline: False
+        Button:
+            text: '注册'
+            font_size: 20
+            on_press: root.Register()
+'''
+
+Builder.load_string(kv)
+
+class SignupDialog(Popup):
+    def __init__(self, exam, **kwargs):
+        super(SignupDialog, self).__init__(**kwargs)
+        self.exam = exam
+        self.VerificationCode = None
+
+    def SendVCode(self):
+        email = self.ids.email_input.text
+        if not email or '@' not in email:
+            print("请输入有效的邮箱")
+            return
+        self.VerificationCode = str(random.randint(100000, 999999))
+        m = Mail()
+        m.Receiver = email
+        m.Subject = '验证码'
+        m.Body = f'验证码：{self.VerificationCode}'
+        m.Send()
+        print(f"验证码已发送到 {email}")
+
+    def Register(self):
+        username = self.ids.username_input.text
+        code = self.ids.code_input.text
+        email = self.ids.email_input.text
+        mobile = self.ids.mobile_input.text
+        grade = self.ids.grade_input.text
+
+        if not username:
+            print("用户名不能为空")
+            return
+
+        if code != self.VerificationCode:
+            print("验证码不正确")
+            return
+
+        self.exam.SaveUserToDB(username, email, mobile, grade)
+        self.dismiss()
+
+class MathQuizUI(BoxLayout):
+    question = StringProperty('')
+    answer_tips = StringProperty('')
+    tips = StringProperty('')
+    status = StringProperty('已答题：0 道 | 正确：0 道 | 错误：0 道 | 正确率：0.0%')
+
+    def __init__(self, **kwargs):
+        super(MathQuizUI, self).__init__(**kwargs)
         self.exam = Exam()
         self.exam.GetUser()
-        while self.exam.username is None or self.exam.email is None \
-                or self.exam.mobile == '' or self.exam.grade == '':
-            self.Signup = SignupDialog(self.exam)
-            self.Signup.exec()
-            self.exam.GetUser()
-            self.exam = Exam()
-        self.userid = self.exam.userid
         self.username = self.exam.username
         self.email = self.exam.email
         self.mobile = self.exam.mobile
         self.grade = self.exam.grade
-        if self.exam.os == "nt":
-            self.base_font = QFont("SimSun", 24)
-        else:
-            self.base_font = QFont("Pingfang SC", 24)
-        self.big_font = QFont("Arial", 32)
-        self.initUI()
-        self.GetScreenSize()
-        self.SetWindowSize()
-
-    def GetScreenSize(self):
-        screen = QDesktopWidget().screenGeometry()
-        self.width = screen.width()
-        self.height = screen.height()
-
-    def SetWindowSize(self):
-        self.setGeometry(0, 0, self.width, self.height)
-
-    def initUI(self):
-        self.setWindowTitle(self.exam.title)
-        main_layout = QVBoxLayout()
-        control_panel = QHBoxLayout()
-
-        # 题型
-        self.type_group = QGroupBox("题型")
-        self.type_group.setFont(self.base_font)
-        type_layout = QVBoxLayout()
-        self.type_options = [
-            QRadioButton('四则运算'),
-            QRadioButton('速算')
-        ]
-        self.type_options[self.exam.q.type].setChecked(True)
-        for rb in self.type_options:
-            rb.setFont(self.base_font)
-            rb.toggled.connect(self.UpdateSettings)
-            type_layout.addWidget(rb)
-        self.type_group.setLayout(type_layout)
-        control_panel.addWidget(self.type_group, 1)
-
-        # 速算
-        self.quick_calc_group = QGroupBox("速算")
-        self.quick_calc_group.setFont(self.base_font)
-        quick_calc_layout = QVBoxLayout()
-        self.quick_calc_options = [
-            QRadioButton('平方数'),
-            QRadioButton('平方差法'),
-            QRadioButton('和十速算法'),
-            QRadioButton('大数凑十法'),
-            QRadioButton('逢五凑十法'),
-            QRadioButton('双向凑十法'),
-            # QRadioButton('因数分解发'),
-            # QRadioButton('二项式展开法')
-        ]
-        if not any(rb.isChecked() for rb in self.quick_calc_options):
-            self.quick_calc_options[self.exam.q.quick_calc_type].setChecked(True)
-        for rb in self.quick_calc_options:
-            rb.setFont(self.base_font)
-            rb.toggled.connect(self.UpdateSettings)
-            quick_calc_layout.addWidget(rb)
-        self.quick_calc_group.setLayout(quick_calc_layout)
-        control_panel.addWidget(self.quick_calc_group, 1)
-        if self.exam.q.type != 1:
-            self.quick_calc_group.setVisible(False)
-
-        # 算术项式
-        self.term_group = QGroupBox("算术项式")
-        self.term_group.setFont(self.base_font)
-        term_layout = QVBoxLayout()
-        self.radio_terms = [QRadioButton(f'{i + 2}项式') for i in range(4)]
-        self.radio_terms[self.exam.q.term_count - 2].setChecked(True)
-        for rb in self.radio_terms:
-            rb.setFont(self.base_font)
-            rb.toggled.connect(self.UpdateSettings)
-            term_layout.addWidget(rb)
-        self.term_group.setLayout(term_layout)
-        control_panel.addWidget(self.term_group, 1)
-        if self.exam.q.type != 0:
-            self.term_group.setVisible(False)
-
-        # 运算类型
-        self.operator_group = QGroupBox("运算类型")
-        self.operator_group.setFont(self.base_font)
-        operator_layout = QVBoxLayout()
-        self.radio_operator = [
-            QRadioButton('加法'), QRadioButton('减法'),
-            QRadioButton('乘法'), QRadioButton('除法'),
-            QRadioButton('混合运算')
-        ]
-        self.radio_operator[self.exam.operator].setChecked(True)
-        for rb in self.radio_operator:
-            rb.setFont(self.base_font)
-            rb.toggled.connect(self.UpdateSettings)
-            operator_layout.addWidget(rb)
-        self.operator_group.setLayout(operator_layout)
-        control_panel.addWidget(self.operator_group, 1)
-        if self.exam.q.type != 0:
-            self.operator_group.setVisible(False)
-
-        # 数值范围
-        self.range_group = QGroupBox("数值范围")
-        self.range_group.setFont(self.base_font)
-        range_layout = QFormLayout()
-        labels = ["加减数最小值:", "加减数最大值:", "乘除数最小值:", "乘除数最大值:"]
-        self.exam.num_edit = [QLineEdit(str(n)) for n in self.exam.num_range]
-        for i in range(4):
-            self.exam.num_edit[i].setFont(self.base_font)
-            self.exam.num_edit[i].setFixedWidth(360)
-            self.exam.num_edit[i].setAlignment(Qt.AlignCenter)
-            range_layout.addRow(QLabel(labels[i], font=self.base_font), self.exam.num_edit[i])
-            self.exam.num_edit[i].editingFinished.connect(self.UpdateSettings)
-        self.range_group.setLayout(range_layout)
-        control_panel.addWidget(self.range_group, 2)
-
-        main_layout.addLayout(control_panel)
-
-        # 题目显示
-        self.question_label = QLabel()
-        self.question_label.setFont(self.big_font)
-        self.question_label.setAlignment(Qt.AlignCenter)
-        self.question_label.setObjectName("question_label")
-        main_layout.addWidget(self.question_label, 2)
-
-        # 答案输入
-        self.answer_input = QLineEdit()
-        self.answer_input.setFont(self.big_font)
-        self.answer_input.setAlignment(Qt.AlignCenter)
-        self.answer_input.returnPressed.connect(self.SubmitAnswer)
-        main_layout.addWidget(self.answer_input, 1)
-
-        # 提示栏
-        self.tips_label = QLabel()
-        self.tips_label.setFont(self.big_font)
-        self.tips_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.tips_label, 1)
-
-        # 状态栏
-        self.status_label = QLabel()
-        self.status_label.setFont(self.big_font)
-        self.status_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.status_label, 1)
-
-        # 操作按钮
-        btn_layout = QHBoxLayout()
-        self.submit_btn = QPushButton("提交答案 (Enter)")
-        self.submit_btn.setFont(self.base_font)
-        self.submit_btn.clicked.connect(self.SubmitAnswer)
-        self.generate_error_btn = QPushButton("导出错题本")
-        self.generate_error_btn.setFont(self.base_font)
-        self.generate_error_btn.clicked.connect(lambda: self.ExportWorkbook(1))
-        self.generate_hard_btn = QPushButton("导出难题本")
-        self.generate_hard_btn.setFont(self.base_font)
-        self.generate_hard_btn.clicked.connect(lambda: self.ExportWorkbook(2))
-        self.generate_all_btn = QPushButton("导出习题本")
-        self.generate_all_btn.setFont(self.base_font)
-        self.generate_all_btn.clicked.connect(lambda: self.ExportWorkbook(0))
-        self.exit_btn = QPushButton("退出程序")
-        self.exit_btn.setFont(self.base_font)
-        self.exit_btn.clicked.connect(self.ExitApp)
-        btn_layout.addStretch(1)
-        btn_layout.addWidget(self.submit_btn)
-        btn_layout.addWidget(self.generate_error_btn)
-        btn_layout.addWidget(self.generate_hard_btn)
-        btn_layout.addWidget(self.generate_all_btn)
-        btn_layout.addWidget(self.exit_btn)
-        btn_layout.addStretch(1)
-        main_layout.addLayout(btn_layout)
-
-        self.setLayout(main_layout)
-        self.answer_input.setObjectName("answer_input")
-        if self.exam.os == "posix":
-            self.apply_styles()
-        self.answer_input.setFont(self.big_font)
-        # 创建 QPalette 对象并设置颜色
-        palette = QPalette()
-        palette.setColor(QPalette.WindowText, QColor(255, 0, 0))
-        self.tips_label.setPalette(palette)
         self.UpdateQuestion()
 
-    def apply_styles(self):
-        style = """
-        QGroupBox {
-            border: 2px solid #0078D7;
-            border-radius: 10px;
-            margin-top: 15px;
-            padding: 15px;
-            font-size: 24px;
-        }
-        QGroupBox::title {
-            subcontrol-origin: margin;
-            left: 15px;
-            color: #0078D7;
-            font-size: 24px;
-        }
-        QPushButton {
-            min-width: 300px;
-            padding: 12px;
-            font-size: 24px;
-            background: #F0F0F0;
-            border: 2px solid #CCCCCC;
-            border-radius: 8px;
-        }
-        QPushButton:hover {
-            background: #E0E0E0;
-        }
-        QLineEdit {
-            border: 3px solid #0078D7;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 24px;
-        }
-        QLineEdit#answer_input {
-            font-size: 36px;
-        }
-        """
-        self.setStyleSheet(style)
-
-    def UpdateSettings(self):
-        for i in range(4):
-            try:
-                self.exam.num_range[i] = int(self.exam.num_edit[i].text())
-            except:
-                pass
-        if self.exam.num_range[0] > self.exam.num_range[1]:
-            self.exam.num_range[0] = int(self.exam.num_edit[1].text())
-            self.exam.num_range[1] = int(self.exam.num_edit[0].text())
-            self.exam.num_edit[0].setText(str(self.exam.num_range[0]))
-            self.exam.num_edit[1].setText(str(self.exam.num_range[1]))
-        if self.exam.num_range[2] > self.exam.num_range[3]:
-            self.exam.num_range[2] = int(self.exam.num_edit[3].text())
-            self.exam.num_range[3] = int(self.exam.num_edit[2].text())
-            self.exam.num_edit[2].setText(str(self.exam.num_range[2]))
-            self.exam.num_edit[3].setText(str(self.exam.num_range[3]))
-
-        for i in range(5):
-            if self.radio_operator[i].isChecked():
-                self.exam.operator = i
-
-        for i in range(4):
-            if self.radio_terms[i].isChecked():
-                self.exam.q.term_count = i + 2
-
-        for i, rb in enumerate(self.type_options):
-            if rb.isChecked():
-                self.exam.q.type = i
-                if i == 0:
-                    self.quick_calc_group.setVisible(False)
-                    self.term_group.setVisible(True)
-                    self.operator_group.setVisible(True)
-                else:
-                    self.quick_calc_group.setVisible(True)
-                    self.term_group.setVisible(False)
-                    self.operator_group.setVisible(False)
-
-        quick_calc_type = None
-        for i, rb in enumerate(self.quick_calc_options):
-            if rb.isChecked():
-                quick_calc_type = i
-                break
-        if quick_calc_type is not None:
-            self.exam.q.quick_calc_type = quick_calc_type
+    def UpdateSettings(self, setting_type, value=None, index=None):
+        if setting_type == 'type':
+            self.exam.q.type = value
+        elif setting_type == 'quick_calc':
+            self.exam.q.quick_calc_type = value
+        elif setting_type == 'term':
+            self.exam.q.term_count = value
+        elif setting_type == 'operator':
+            self.exam.operator = value
+        elif setting_type == 'range' and index is not None:
+            self.exam.num_range[index] = value
 
         self.exam.q.Set(
             range=self.exam.num_range,
             term_count=self.exam.q.term_count,
             user_operators=self.exam.ops[self.exam.operator]
         )
-
         self.exam.SaveSettingsToDB()
         self.UpdateQuestion()
 
     def UpdateQuestion(self):
-        if self.exam.authorization == False:
-            QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
-            self.ExitApp()
+        # if not self.exam.authorization:
+        #     print("软件超过使用期，请联系软件作者")
+        #     self.ExitApp()
         question = self.exam.NextQuestion()
-        self.tips_label.setText('')
-        self.question_label.setText(f"当前题目：\n{question}")
+        self.ids.question_label.text = f"当前题目：\n{question}"
+        self.tips = ''
+        self.answer_tips = ''
 
         total = self.exam.question_number - 1
         correct_rate = self.exam.correct_number / total * 100 if total > 0 else 0
-        self.status_label.setText(
+        self.status = (
             f"已答题：{total} 道 | 正确：{self.exam.correct_number} 道 | "
             f"错误：{total - self.exam.correct_number} 道 | 正确率：{correct_rate:.1f}%"
         )
-        self.answer_input.setFocus()
+        self.ids.answer_input.focus = True
 
     def SubmitAnswer(self):
-        result = self.exam.SubmitAnswer(self.answer_input.text().strip())
-        self.answer_input.clear()
+        answer_input = self.ids.answer_input.text.strip()
+        answer_input = answer_input.split('=')[-1]
+        result = self.exam.SubmitAnswer(answer_input)
+        self.ids.answer_input.text = ''
+
         if result[0]:
             self.UpdateQuestion()
         else:
-            self.tips_label.setText(f'用户答案：{self.exam.user_answer}；检查：{self.exam.tips}')
+            self.tips = f'用户答案：{self.exam.user_answer}；检查提示：{self.exam.tips}'
+            if self.exam.answer_tips:
+                self.answer_tips = f'答题提示：{self.exam.answer_tips}'
 
     def ExportWorkbook(self, type=None):
-        wb = None
-        if type == 1:
-            wb = "错题本"
-        elif type == 2:
-            wb = "难题本"
-        elif type == 0:
-            wb = "习题本"
-        else:
-            pass
-        self.exam.export_workbook(type)
-        QMessageBox.information(self, "导出成功", f"{wb}已成功导出。")
+        wb_type = {0: "习题本", 1: "错题本", 2: "难题本"}.get(type, "")
+        if wb_type:
+            self.exam.export_workbook(type)
+            print(f"{wb_type}已成功导出。")
 
-    def Quit(self):
+    def ExitApp(self):
         self.exam.SaveSettingsToDB()
         self.exam.SaveWorkbook()
         self.exam.CloseDatabase()
-        if self.exam.current_row == 1:
-            try:
-                if os.path.exists(self.exam.workbook_file):
-                    os.remove(self.exam.workbook_file)
-            except Exception as e:
-                print(f"删除文件时出错: {e}")
-        else:
-            self.exam.mail.Send(attach=self.exam.workbook_file)
-            self.exam.mail.Send(receiver=self.email, attach=self.exam.workbook_file)
-            QMessageBox.information(self, '作业发送', f'今日作业发送至邮箱：{self.email}')
+        App.get_running_app().stop()
 
-    def closeEvent(self, event):
-        self.Quit()
-        event.accept()
-
-    def ExitApp(self):
-        self.Quit()
-        QApplication.quit()
-
-class SignupDialog(QDialog):
-    def __init__(self, exam):
-        super().__init__()
-        self.exam = exam
-        self.VerificationCode = None
-        self.username = self.exam.username
-        self.email = self.exam.email
-        self.usercode = None
-        self.mobile = self.exam.mobile
-        self.grade = self.exam.grade
-        self.initSignupDialog()
-
-    def GetWindowSize(self):
-        screen = QDesktopWidget().screenGeometry()
-        return screen.width(), screen.height()
-
-    def initSignupDialog(self):
-        if self.exam.os == "nt":
-            self.base_font = QFont("SimSun", 24)
-        else:
-            self.base_font = QFont("Pingfang SC", 24)
-        width, height = self.GetWindowSize()
-
-        if self.exam.username is not None and self.exam.username != '' \
-            and self.exam.email is not None and self.exam.email != '':
-            self.exam.update = True
-
-        self.setWindowTitle("用户注册")
-        self.setFixedSize(int(width*2/3), int(height*2/3))
-        layout = QFormLayout()
-        layout.setSpacing(48)
-        self.username_label = QLabel("用户名:")
-        self.username_label.setFont(self.base_font)
-        self.username_input = QLineEdit()
-        self.username_input.setFont(self.base_font)
-        if self.username is not None and self.username != '':
-            self.username_input.setText(self.username)
-            self.username_input.setEnabled(False)
-        layout.addRow(self.username_label, self.username_input)
-
-        self.grade_label = QLabel("年级：")
-        self.grade_label.setFont(self.base_font)
-        self.grade_input = QLineEdit()
-        self.grade_input.setFont(self.base_font)
-        if self.grade is not None and str(self.grade) != '':
-            self.grade_input.setText(str(self.grade))
-            self.grade_input.setEnabled(False)
-        layout.addRow(self.grade_label, self.grade_input)
-
-        self.email_label = QLabel("邮箱:")
-        self.email_label.setFont(self.base_font)
-        self.email_input = QLineEdit()
-        self.email_input.setFont(self.base_font)
-        if self.email is not None and self.email != '':
-            self.email_input.setEnabled(False)
-            self.email_input.setText(self.email)
-        layout.addRow(self.email_label, self.email_input)
-
-        self.mobile_label = QLabel("手机:")
-        self.mobile_label.setFont(self.base_font)
-        self.mobile_input = QLineEdit()
-        self.mobile_input.setFont(self.base_font)
-        if self.mobile is not None and self.mobile != '':
-            self.mobile_input.setEnabled(False)
-            self.mobile_input.setText(self.mobile)
-        layout.addRow(self.mobile_label, self.mobile_input)
-
-        self.send_code_btn = QPushButton("发送验证码")
-        self.send_code_btn.setFont(self.base_font)
-        self.send_code_btn.clicked.connect(self.SendVCode)
-        layout.addRow("", self.send_code_btn)
-
-        self.code_label = QLabel("验证码:")
-        self.code_label.setFont(self.base_font)
-        self.code_input = QLineEdit()
-        self.code_input.setFont(self.base_font)
-        layout.addRow(self.code_label, self.code_input)
-
-        self.register_btn = QPushButton("注册")
-        self.register_btn.setFont(self.base_font)
-        self.register_btn.clicked.connect(self.Register)
-        layout.addRow("", self.register_btn)
-
-        self.setLayout(layout)
-        if self.exam.os == "posix":
-            self.SetStyle()
-
-    def Register(self):
-        self.username = self.username_input.text()
-        self.usercode = self.code_input.text()
-        self.grade = self.grade_input.text()
-        self.mobile = self.mobile_input.text()
-
-        if self.username is None or self.username == '':
-            QMessageBox.warning(self, '用户名', '用户名不能为空')
-            return
-
-        if self.usercode is None or self.usercode != self.VerificationCode:
-            QMessageBox.warning(self, '邮箱', '请输入正确的验证码')
-            return
-
-        QMessageBox.information(self, '注册成功', f'{self.username}用户注册成功，邮箱：{self.email}')
-        self.exam.SaveUserToDB(self.username, self.email, self.mobile, self.grade)
-        self.close()
-
-    def SendVCode(self):
-        self.email = self.email_input.text()
-        if self.email is None or self.email == "" or self.email.find('@') == -1:
-            QMessageBox.warning(self, '邮箱', '请输入有效的邮箱')
-        else:
-            m = Mail()
-            self.VerificationCode = str(self.RandInt(100000, 999999))
-            m.Receiver = self.email
-            m.Subject = '验证码'
-            m.Body = '验证码：\n' + self.VerificationCode
-            m.Send()
-            QMessageBox.information(self, '验证码已发送', f'验证码已发送，请在邮箱{self.email}中查收邮件。')
-
-    def SetStyle(self):
-        style = """
-        QPushButton {
-            min-width: 320px;
-            padding: 12px;
-            font-size: 24px;
-            background: #F0F0F0;
-            border: 2px solid #CCCCCC;
-            border-radius: 8px;
-        }
-        QPushButton:hover {
-            background: #E0E0E0;
-        }
-        QLineEdit {
-            min-width: 320px;
-            border: 3px solid #0078D7;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 24px;
-        }
-        QLabel {
-            font-size: 24px;
-        }
-        """
-        self.setStyleSheet(style)
+class MathQuizApp(App):
+    def build(self):
+        return MathQuizUI()
 
 if __name__ == '__main__':
     local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    app = QApplication(sys.argv)
-    window = MathQuizUI()
-    window.showMaximized()
-    window.exam.mail.Subject = f'{window.username}[{window.email}]在{local_time}发来的作业'
-    window.exam.SubmitHomework()
-    sys.exit(app.exec())
+    app = MathQuizApp()
+    app.run()

@@ -485,7 +485,7 @@ class SignupDialog(QDialog):
             QMessageBox.warning(self, '邮箱', '请输入有效的邮箱')
         else:
             m = Mail()
-            self.VerificationCode = str(self.RandInt(100000, 999999))
+            self.VerificationCode = str(random.randint(100000, 999999))
             m.Receiver = self.email
             m.Subject = '验证码'
             m.Body = '验证码：\n' + self.VerificationCode

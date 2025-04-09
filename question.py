@@ -29,6 +29,8 @@ class Question():
 
     def RandInt(self, a, b):
         random.seed(time.time())
+        for i in range(1, random.randint(1,10)):
+            random.randint(a, b)
         return random.randint(a, b)
 
     def Set(self, term_count=None, range=None, user_operators=None, type=None, quick_calc_type=None):
