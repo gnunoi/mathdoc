@@ -155,7 +155,7 @@ class MathQuizUI(QWidget):
         self.answer_input.setAlignment(Qt.AlignCenter)
         self.answer_input.returnPressed.connect(self.SubmitAnswer)
 
-        self.answer_label = QLabel("输入答案，可以写中间过程。如题目为：36×36=，答案可以为：32*40+4*4=1280+16=1296")
+        self.answer_label = QLabel("输入答案，可以含中间过程。如：36*36=32*40+4*4=1280+16=1296")
         self.answer_label.setFont(self.big_font)
         self.answer_label.setAlignment(Qt.AlignCenter)
 
