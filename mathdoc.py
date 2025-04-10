@@ -345,8 +345,6 @@ class MathQuizUI(QWidget):
     def SubmitAnswer(self):
         answer_input = self.answer_input.text().strip()
         answer_input = answer_input.split('=')[-1]
-        if self.exam.q.type == 2:
-            answer_input = eval(answer_input)
         result = self.exam.SubmitAnswer(answer_input)
         self.answer_input.clear()
         if result[0]:

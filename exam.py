@@ -367,13 +367,20 @@ class Exam:
 
     def SubmitAnswer(self, user_input):
         self.end_time = datetime.now()
-        try:
-            user_answer = float(user_input)
-            if user_answer == int(user_answer):
-                user_answer = int(user_answer)
-                self.user_answer = user_answer
-        except:
-            return (False, "请输入有效数字")
+        if self.q.type == 0 or self.q.type == 1:
+            try:
+                user_answer = float(user_input)
+                if user_answer == int(user_answer):
+                    user_answer = int(user_answer)
+                    self.user_answer = user_answer
+            except:
+                return (False, "请输入有效数字")
+        elif self.q.type == 2:
+            self.user_answer = user_input
+            try:
+                user_answer = eval(user_input)
+            except:
+                return (False, "请输入有效的表达式")
 
         self.tips = None
         if user_answer == self.correct_answer:
@@ -443,21 +450,25 @@ class Exam:
 
     def GenerateCheckTips(self):
         tips = []
-        user_answer = abs(self.user_answer)
-        correct_answer = abs(self.correct_answer)
-        if self.IsSignError():
-            tips.append('1. 正负号')
-            print('1. 正负号')
-        elif user_answer % 10 != correct_answer % 10:
-            tips.append('2. 个位数')
-            print('2. 个位数')
-        elif len(str(user_answer)) != len(str(correct_answer)):
-            tips.append('3. 总位数')
-            print('3. 总位数')
-        else:
-            if user_answer // 10 != correct_answer // 10:
-                tips.append('4. 进借位')
-                print('4. 进借位')
+        if self.q.type == 0 or self.q.type == 1:
+            user_answer = abs(self.user_answer)
+            correct_answer = abs(self.correct_answer)
+            if self.IsSignError():
+                tips.append('1. 正负号')
+                print('1. 正负号')
+            elif user_answer % 10 != correct_answer % 10:
+                tips.append('2. 个位数')
+                print('2. 个位数')
+            elif len(str(user_answer)) != len(str(correct_answer)):
+                tips.append('3. 总位数')
+                print('3. 总位数')
+            else:
+                if user_answer // 10 != correct_answer // 10:
+                    tips.append('4. 进借位')
+                    print('4. 进借位')
+        elif self.q.type == 2:
+            tips = f'{self.user_answer} = {eval(self.user_answer)}'
+
         return tips
 
     def GenerateAnswerTips(self):
@@ -524,7 +535,11 @@ class Exam:
         if self.user_answer == self.correct_answer:
             return
         print(self.q.expression, self.user_answer, self.correct_answer)
-        self.tips = '；'.join(self.GenerateCheckTips())
+        if self.q.type ==0 or self.q.type == 1:
+            self.tips = '；'.join(self.GenerateCheckTips())
+        elif self.q.type == 2:
+            self.tips = self.GenerateCheckTips()
+
         if self.q.type == 1:
             self.answer_tips = '；'.join(self.GenerateAnswerTips())
         elif self.q.type == 2:
