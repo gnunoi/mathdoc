@@ -1,5 +1,7 @@
 import random
 import time
+import itertools
+
 class Question():
     def __init__(self, term_count=2, range=None, user_operators=None, numbers=None, operators=None):
         self.term_count = term_count
@@ -32,6 +34,41 @@ class Question():
         for i in range(1, random.randint(1,10)):
             random.randint(a, b)
         return random.randint(a, b)
+
+    def calculate24(self, nums):
+        """
+        尝试用四个数字计算24点
+        返回一个可能的解法，如果没有解则返回None
+        """
+        # 尝试所有可能的排列组合和运算符组合
+        r = []
+        for perm in itertools.permutations(nums):
+            for ops in itertools.product(['+', '-', '*', '/'], repeat=3):
+                # 尝试三种不同的括号组合
+                expressions = [
+                    f"({perm[0]} {ops[0]} {perm[1]}) {ops[1]} ({perm[2]} {ops[2]} {perm[3]})",
+                    f"(({perm[0]} {ops[0]} {perm[1]}) {ops[1]} {perm[2]}) {ops[2]} {perm[3]}",
+                    f"{perm[0]} {ops[0]} (({perm[1]} {ops[1]} {perm[2]}) {ops[2]} {perm[3]})",
+                    f"{perm[0]} {ops[0]} ({perm[1]} {ops[1]} ({perm[2]} {ops[2]} {perm[3]}))",
+                    f"({perm[0]} {ops[0]} {perm[1]}) {ops[1]} {perm[2]} {ops[2]} {perm[3]}"
+                ]
+                for expr in expressions:
+                    try:
+                        # 使用eval计算表达式
+                        if abs(eval(expr) - 24.0) < 1e-6:
+                            return expr
+                    except ZeroDivisionError:
+                        continue
+        return None
+
+    def generate_24point_numbers(self):
+        r = None
+        while r is None:
+            """生成四个1-13之间的随机整数"""
+            numbers = [random.randint(1, 13) for _ in range(4)]
+            r = self.calculate24(numbers)
+        # print(numbers)
+        return numbers
 
     def Set(self, term_count=None, range=None, user_operators=None, type=None, quick_calc_type=None):
         if term_count is not None:
@@ -114,16 +151,26 @@ class Question():
                 self.operators.append('*')
                 self.numbers.append(num2)
                 self.GenerateExpression()
+        elif self.type == 2:
+            self.numbers = self.generate_24point_numbers()
+            self.GenerateExpression()
 
     def GenerateExpression(self):
-        expr = str(self.numbers[0])
-        for i in range(1, len(self.numbers)):
-            op = self.operators[i-1]
-            num = self.numbers[i]
-            expr += f" {op} ({num})" if num < 0 else f" {op} {num}"
-        self.expression = expr
-        self.Evaluate()
-        self.question = expr.replace('*', '×').replace('/', '÷') + " ="
+        if self.type == 0 or self.type == 1:
+            expr = str(self.numbers[0])
+            for i in range(1, len(self.numbers)):
+                op = self.operators[i-1]
+                num = self.numbers[i]
+                expr += f" {op} ({num})" if num < 0 else f" {op} {num}"
+            self.expression = expr
+            self.Evaluate()
+            self.question = expr.replace('*', '×').replace('/', '÷') + " ="
+        elif self.type == 2:
+            self.correct_answer = 24
+            self.expression = ',  '.join(map(str, self.numbers))
+            print(self.expression)
+            self.question = f'计算24点：{self.expression}'
+            print(self.question)
 
     def Divisor(self):
         num = self.RandInt(self.range[2], self.range[3])

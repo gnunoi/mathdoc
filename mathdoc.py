@@ -28,6 +28,7 @@ class MathQuizUI(QWidget):
         self.email = self.exam.email
         self.mobile = self.exam.mobile
         self.grade = self.exam.grade
+        self.answer_label_text = "输入答案，可以含中间过程。如：36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
         if self.exam.os == "nt":
             self.base_font = QFont("SimSun", 24)
         else:
@@ -56,7 +57,8 @@ class MathQuizUI(QWidget):
         type_layout = QVBoxLayout()
         self.type_options = [
             QRadioButton('四则运算'),
-            QRadioButton('乘法速算')
+            QRadioButton('乘法速算'),
+            QRadioButton('24点游戏'),
         ]
         self.type_options[self.exam.q.type].setChecked(True)
         for rb in self.type_options:
@@ -139,7 +141,8 @@ class MathQuizUI(QWidget):
             self.exam.num_edit[i].editingFinished.connect(self.UpdateSettings)
         self.range_group.setLayout(range_layout)
         control_panel.addWidget(self.range_group, 2)
-
+        if self.exam.q.type == 2:
+            self.range_group.setVisible(False)
         main_layout.addLayout(control_panel)
 
         # 题目显示
@@ -155,10 +158,13 @@ class MathQuizUI(QWidget):
         self.answer_input.setAlignment(Qt.AlignCenter)
         self.answer_input.returnPressed.connect(self.SubmitAnswer)
 
-        self.answer_label = QLabel("输入答案，可以含中间过程。如：36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296")
+        self.answer_label = QLabel()
         self.answer_label.setFont(self.big_font)
         self.answer_label.setAlignment(Qt.AlignCenter)
-
+        if self.exam.q.type == 2:
+            self.answer_label.setText('输入表达式，使得表达式的值为24。如：(5+3)*(8-5)。')
+        else:
+            self.answer_label.setText(self.answer_label_text)
         main_layout.addWidget(self.answer_input, 1)
         main_layout.addWidget(self.answer_label, 1)
 
@@ -287,10 +293,20 @@ class MathQuizUI(QWidget):
                     self.quick_calc_group.setVisible(False)
                     self.term_group.setVisible(True)
                     self.operator_group.setVisible(True)
-                else:
+                    self.range_group.setVisible(True)
+                    self.answer_label.setText(self.answer_label_text)
+                elif i == 1:
                     self.quick_calc_group.setVisible(True)
                     self.term_group.setVisible(False)
                     self.operator_group.setVisible(False)
+                    self.range_group.setVisible(True)
+                    self.answer_label.setText(self.answer_label_text)
+                elif i == 2:
+                    self.quick_calc_group.setVisible(False)
+                    self.term_group.setVisible(False)
+                    self.operator_group.setVisible(False)
+                    self.range_group.setVisible(False)
+                    self.answer_label.setText('')
 
         quick_calc_type = None
         for i, rb in enumerate(self.quick_calc_options):
@@ -329,6 +345,8 @@ class MathQuizUI(QWidget):
     def SubmitAnswer(self):
         answer_input = self.answer_input.text().strip()
         answer_input = answer_input.split('=')[-1]
+        if self.exam.q.type == 2:
+            answer_input = eval(answer_input)
         result = self.exam.SubmitAnswer(answer_input)
         self.answer_input.clear()
         if result[0]:

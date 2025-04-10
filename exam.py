@@ -15,7 +15,7 @@ class Exam:
     def __init__(self):
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.04.09(V0.5.2)"
+        self.version_number = "2025.04.10(V0.5.3)"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.authorization = None
@@ -515,6 +515,9 @@ class Exam:
                 d = 10 - n % 10
                 c = n + d
                 tips.append(f'{m} × {n} = ({a} - {b}) × ({c} - {d}) = {a} × {c} - {a} × {d} - {b} × {c} + {b} × {d} = {a*c} - {a*d} - {b*c} + {b*d} = {m*n}')
+        elif self.q.type == 2: # 24点游戏
+            tips = self.q.calculate24(self.q.numbers)
+
         return tips
 
     def GenerateTips(self):
@@ -522,7 +525,10 @@ class Exam:
             return
         print(self.q.expression, self.user_answer, self.correct_answer)
         self.tips = '；'.join(self.GenerateCheckTips())
-        self.answer_tips = '；'.join(self.GenerateAnswerTips())
+        if self.q.type == 1:
+            self.answer_tips = '；'.join(self.GenerateAnswerTips())
+        elif self.q.type == 2:
+            self.answer_tips = self.GenerateAnswerTips()
 
     def SaveToDatabase(self, question_number, question, user_answer, correct_answer, is_correct, start_time, end_time,
                        time_used, tips):

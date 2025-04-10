@@ -67,3 +67,6 @@
 
 ## [Release V0.5.2](https://github.com/gnunoi/mathdoc/releases/tag/V0.5.2)
 修改注册过程的BUG。
+
+## [Release V0.5.3](https://github.com/gnunoi/mathdoc/releases/tag/V0.5.3)
+增加24点游戏。
