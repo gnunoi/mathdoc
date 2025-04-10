@@ -168,9 +168,9 @@ class Question():
         elif self.type == 2:
             self.correct_answer = 24
             self.expression = ',  '.join(map(str, self.numbers))
-            print(self.expression)
+            # print(self.expression)
             self.question = f'计算24点：{self.expression}'
-            print(self.question)
+            # print(self.question)
 
     def Divisor(self):
         num = self.RandInt(self.range[2], self.range[3])

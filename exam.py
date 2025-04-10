@@ -390,11 +390,11 @@ class Exam:
 
         # 比较两个列表中的数字及其出现次数
         if Counter(digits_in_expression) == Counter(numbers):
-            print('输入了全部数字')
+            # print('输入了全部数字')
             return True
         else:
             print(Counter(digits_in_expression), Counter(numbers))
-            print('未输入全部数字')
+            # print('未输入全部数字')
             return False
 
     def SubmitAnswer(self, user_input):
@@ -480,7 +480,7 @@ class Exam:
         for numbers in numbers_list:
             q = Question(numbers=numbers, operators=self.q.operators)
             if q.correct_answer == self.user_answer:
-                print(f'{q.expression} = {q.correct_answer}')
+                # print(f'{q.expression} = {q.correct_answer}')
                 return True
 
     def GenerateCheckTips(self):
