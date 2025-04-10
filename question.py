@@ -55,7 +55,7 @@ class Question():
                 for expr in expressions:
                     try:
                         # 使用eval计算表达式
-                        if abs(eval(expr) - 24.0) < 1e-6:
+                        if int(eval(expr)) == eval(expr) == 24:
                             return expr
                     except ZeroDivisionError:
                         continue

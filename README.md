@@ -70,3 +70,6 @@
 
 ## [Release V0.5.3](https://github.com/gnunoi/mathdoc/releases/tag/V0.5.3)
 增加24点游戏。
+
+## [Release V0.5.4](https://github.com/gnunoi/mathdoc/releases/tag/V0.5.4)
+修改24点游戏的BUG，确保题目是严格准确的数组。
