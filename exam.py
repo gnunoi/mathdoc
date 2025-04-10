@@ -10,6 +10,8 @@ from question import Question
 from mail import Mail
 from PyQt5.QtWidgets import (QMessageBox)
 from itertools import combinations
+import re
+from collections import Counter
 
 class Exam:
     def __init__(self):
@@ -365,6 +367,36 @@ class Exam:
         self.start_time = datetime.now()
         return self.current_question
 
+    def check_expression(self):
+        """
+        判断用户输入的表达式是否包含给定数组中的数字，并且数字的出现次数与数组中的完全一致。
+
+        参数:
+            expression (str): 用户输入的表达式
+            numbers (list): 给定的数字数组
+
+        返回:
+            bool: 如果表达式中的数字与给定数组完全一致（包括出现次数），返回 True，否则返回 False
+        """
+        # 提取表达式中的所有数字
+        # 使用正则表达式匹配数字，包括整数和小数
+        digits_in_expression = re.findall(r'\d+\.?\d*', self.user_answer)
+
+        # 将提取的数字转换为浮点数
+        digits_in_expression = [float(digit) for digit in digits_in_expression]
+
+        # 将给定的数字数组转换为浮点数列表
+        numbers = [float(num) for num in self.q.numbers]
+
+        # 比较两个列表中的数字及其出现次数
+        if Counter(digits_in_expression) == Counter(numbers):
+            print('输入了全部数字')
+            return True
+        else:
+            print(Counter(digits_in_expression), Counter(numbers))
+            print('未输入全部数字')
+            return False
+
     def SubmitAnswer(self, user_input):
         self.end_time = datetime.now()
         if self.q.type == 0 or self.q.type == 1:
@@ -385,6 +417,9 @@ class Exam:
         self.tips = None
         if user_answer == self.correct_answer:
             is_correct = True
+            if self.q.type ==2 and not self.check_expression():
+                is_correct = False
+                self.tips = '未包含全部数字'
         else:
             is_correct = False
             self.GenerateTips()
@@ -467,7 +502,10 @@ class Exam:
                     tips.append('4. 进借位')
                     print('4. 进借位')
         elif self.q.type == 2:
-            tips = f'{self.user_answer} = {eval(self.user_answer)}'
+            if self.user_answer == str(eval(self.user_answer)):
+                tips = f'{self.user_answer} != 24'
+            else:
+                tips = f'{self.user_answer} = {eval(self.user_answer)} != 24'
 
         return tips
 
