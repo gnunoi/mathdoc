@@ -343,7 +343,26 @@ class MathQuizUI(QWidget):
         self.answer_input.setFocus()
 
     def SubmitAnswer(self):
+        # 定义替换映射
+        replace_map = {
+            "（": "(",
+            "）": ")",
+            "[": "(",
+            "]": ")",
+            "{": "(",
+            "}": ")",
+            "【": "(",
+            "】": ")",
+            "＋": "+",
+            "➖": "-",
+            "×": "*",
+            "÷": "/",
+        }
+
         answer_input = self.answer_input.text().strip()
+        # 执行替换
+        for old, new in replace_map.items():
+            answer_input = answer_input.replace(old, new)
         answer_input = answer_input.split('=')[-1]
         result = self.exam.SubmitAnswer(answer_input)
         self.answer_input.clear()
