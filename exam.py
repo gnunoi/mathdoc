@@ -415,11 +415,11 @@ class Exam:
                 return (False, "请输入有效的表达式")
 
         self.tips = None
-        if user_answer == self.correct_answer:
+        if self.q.type == 2 and not self.check_expression():
+            is_correct = False
+            self.tips = '未包含全部数字'
+        elif user_answer == self.correct_answer:
             is_correct = True
-            if self.q.type ==2 and not self.check_expression():
-                is_correct = False
-                self.tips = '未包含全部数字'
         else:
             is_correct = False
             self.GenerateTips()
