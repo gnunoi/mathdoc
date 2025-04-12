@@ -1,6 +1,8 @@
 import random
 import time
 import itertools
+import re
+from fractions import Fraction
 
 class Question():
     def __init__(self, term_count=2, range=None, user_operators=None, numbers=None, operators=None):
@@ -35,6 +37,23 @@ class Question():
             random.randint(a, b)
         return random.randint(a, b)
 
+    def convert_to_fraction(self, expression):
+        # 使用正则表达式匹配所有整数或浮点数
+        pattern = r'(?<!\w)(-?\d+\.?\d*|\.\d+)(?!\w)'
+
+        # 替换函数：将匹配到的数字转换为 Fraction
+        def replace_with_fraction(match):
+            num_str = match.group(0)
+            # 如果是小数点开头的数字，比如 .5，转换为 0.5
+            if num_str.startswith('.'):
+                num_str = '0' + num_str
+            # 返回 Fraction(...) 的形式
+            return f'Fraction({num_str})'
+
+        # 使用正则表达式替换所有数字
+        converted_expression = re.sub(pattern, replace_with_fraction, expression)
+        return converted_expression
+
     def calculate24(self, nums):
         """
         尝试用四个数字计算24点
@@ -55,7 +74,8 @@ class Question():
                 for expr in expressions:
                     try:
                         # 使用eval计算表达式
-                        if int(eval(expr)) == eval(expr) == 24:
+                        converted_expression = self.convert_to_fraction(expr)
+                        if eval(converted_expression) == 24:
                             return expr
                     except ZeroDivisionError:
                         continue
@@ -65,7 +85,7 @@ class Question():
         r = None
         while r is None:
             """生成四个1-13之间的随机整数"""
-            numbers = [random.randint(1, 13) for _ in range(4)]
+            numbers = [random.randint(1, 10) for _ in range(4)]
             r = self.calculate24(numbers)
         # print(numbers)
         return numbers

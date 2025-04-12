@@ -1,45 +1,34 @@
 import re
-from collections import Counter
+from fractions import Fraction
 
 
-def validate_expression(expression, numbers):
-    """
-    判断用户输入的表达式是否包含给定数组中的数字，并且数字的出现次数与数组中的完全一致。
+def convert_to_fraction(expression):
+    # 使用正则表达式匹配所有整数或浮点数
+    pattern = r'(?<!\w)(-?\d+\.?\d*|\.\d+)(?!\w)'
 
-    参数:
-        expression (str): 用户输入的表达式
-        numbers (list): 给定的数字数组
+    # 替换函数：将匹配到的数字转换为 Fraction
+    def replace_with_fraction(match):
+        num_str = match.group(0)
+        # 如果是小数点开头的数字，比如 .5，转换为 0.5
+        if num_str.startswith('.'):
+            num_str = '0' + num_str
+        # 返回 Fraction(...) 的形式
+        return f'Fraction({num_str})'
 
-    返回:
-        bool: 如果表达式中的数字与给定数组完全一致（包括出现次数），返回 True，否则返回 False
-    """
-    # 提取表达式中的所有数字
-    # 使用正则表达式匹配数字，包括整数和小数
-    digits_in_expression = re.findall(r'\d+\.?\d*', expression)
-
-    # 将提取的数字转换为浮点数
-    digits_in_expression = [float(digit) for digit in digits_in_expression]
-
-    # 将给定的数字数组转换为浮点数列表
-    numbers = [float(num) for num in numbers]
-
-    # 比较两个列表中的数字及其出现次数
-    return Counter(digits_in_expression) == Counter(numbers)
+    # 使用正则表达式替换所有数字
+    converted_expression = re.sub(pattern, replace_with_fraction, expression)
+    return converted_expression
 
 
-# 测试用例
-if __name__ == "__main__":
-    # 测试用例 1：完全匹配
-    print(validate_expression("15+3*24", [3, 15, 24]))  # 输出: True
+# 示例表达式
+expression = "3 + 4.5 * (2 - .5) / 2.0"
+converted_expression = convert_to_fraction(expression)
+print("原始表达式:", expression)
+print("转换后的表达式:", converted_expression)
 
-    # 测试用例 2：部分匹配
-    print(validate_expression("3 + 5 * 2", [3, 5]))  # 输出: False
-
-    # 测试用例 3：顺序不同但完全匹配
-    print(validate_expression("5 * 2 + 3", [3, 5, 2]))  # 输出: True
-
-    # 测试用例 4：包含重复数字
-    print(validate_expression("3 + 3 * 2", [3, 3, 2]))  # 输出: True
-
-    # 测试用例 5：不匹配
-    print(validate_expression("3 + 4 * 2", [3, 5, 2]))  # 输出: False
+# 验证转换后的表达式是否正确
+try:
+    result = eval(converted_expression)
+    print("计算结果:", result)
+except Exception as e:
+    print("计算失败:", e)

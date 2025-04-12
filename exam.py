@@ -572,7 +572,7 @@ class Exam:
     def GenerateTips(self):
         if self.user_answer == self.correct_answer:
             return
-        print(self.q.expression, self.user_answer, self.correct_answer)
+        # print(self.q.expression, self.user_answer, self.correct_answer)
         if self.q.type ==0 or self.q.type == 1:
             self.tips = '；'.join(self.GenerateCheckTips())
         elif self.q.type == 2:
