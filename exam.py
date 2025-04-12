@@ -17,7 +17,7 @@ class Exam:
     def __init__(self):
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.04.11(V0.5.5)"
+        self.version_number = "2025.04.12(V0.5.5)"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
         self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.authorization = None
