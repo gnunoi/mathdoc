@@ -137,6 +137,7 @@ class Question():
         return np.random.randint(a, b)
 
     def Generate(self):
+        self.start_time = datetime.now()
         pass
 
     def Question(self):
@@ -156,6 +157,9 @@ class Question():
         self.AnswerTips()
 
     def JudgeAnswer(self):
+        self.end_time = datetime.now()
+        self.used_time = round((self.end_time - self.start_time).total_seconds(), 1)
+        self.start_time = datetime.now()
         pass
 
     def ConvertToFraction(self, expression):
@@ -203,6 +207,7 @@ class Question():
         while True:
             print(self.comments)
             print("输入EXIT或QUIT退出程序")
+            print(self.start_time)
             print(self.question)
             self.user_input = input()
             if self.user_input.upper() == 'EXIT' or self.user_input.upper() == 'QUIT':
@@ -216,6 +221,7 @@ class Question():
                     print('回答正确: {} = {}'.format(self.user_input, self.correct_answer))
                 else:
                     print('回答正确: {} = {}'.format(self.expression, self.user_answer))
+                print(f'答题结束时间：{self.end_time}, 答题用时：{self.used_time}秒')
                 self.Generate()  # 生成下一题
             else:
                 print('回答错误: 再来一次')
@@ -242,6 +248,7 @@ class Question24Point(Question):
         self.Instance()
         self.Question()
         self.Answer()
+        super().Generate()
 
     def Instance(self):
         min_val = self.range[0]
@@ -298,6 +305,7 @@ class Question24Point(Question):
         return self.answer_tips
 
     def JudgeAnswer(self):
+        super().JudgeAnswer()
         if not self.ProcessUserInput():
             return False
         try:
@@ -326,6 +334,7 @@ class QuestionLR(Question):
         if self.Instance() == True:
             self.Question()
             self.Answer()
+            super().Generate()
             return True
         else:
             return False
@@ -406,6 +415,7 @@ class QuestionLR(Question):
         pass
 
     def JudgeAnswer(self):
+        super().JudgeAnswer()
         try:
             user_answer = eval(self.user_answer)
             return user_answer == self.correct_answer
@@ -614,7 +624,7 @@ class Question4AO(QuestionLR):
         pass
 
 if __name__ == "__main__":
-    # qm = QuestionManager(type=0, range=[1, 10])
-    # qm = QuestionManager(type=1, subtype=[1], range=[10, 50])
-    qm = QuestionManager(type=2, subtype=[3, 4], range=[-50, 50, 2, 10])
+    qm = QuestionManager(type=0, range=[1, 10])
+    qm = QuestionManager(type=1, subtype=[1], range=[10, 50])
+    # qm = QuestionManager(type=2, subtype=[3, 4], range=[-50, 50, 2, 10])
     qm.test()
