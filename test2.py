@@ -61,7 +61,39 @@ class QuestionManager:
             return None
 
     def test(self):
-        self.q.test()
+        q = self.q
+        print(q.name)
+        # 初始化题目
+        if q.Generate() == False:
+            return
+        # q.Dump()
+        while True:
+            print(q.comments)
+            print("输入EXIT或QUIT退出程序")
+            print(q.start_time)
+            print(q.question)
+            q.user_input = input()
+            if q.user_input.upper() == 'EXIT' or q.user_input.upper() == 'QUIT':
+                print('用户退出程序')
+                break
+            if not q.ProcessUserInput():
+                print('无效输入，继续做题')
+                continue
+            if q.JudgeAnswer():
+                if q.type == 0:
+                    print('回答正确: {} = {}'.format(q.user_input, q.correct_answer))
+                else:
+                    print('回答正确: {} = {}'.format(q.expression, q.user_answer))
+                print(f'答题结束时间：{q.end_time}, 答题用时：{q.used_time}秒')
+                q.Generate()  # 生成下一题
+            else:
+                print('回答错误: 再来一次')
+                q.Tips()
+                if q.check_tips is not None:
+                    print(f'检查提示：{q.check_tips}')
+                if q.answer_tips is not None:
+                    print(f'答题提示：{q.answer_tips}')
+            print()
 
 """
 类名称: Question
@@ -197,40 +229,6 @@ class Question():
     def ProcessCalculation(self):
         print(self.expression)
         return
-
-    def test(self):
-        print(self.name)
-        # 初始化题目
-        if self.Generate() == False:
-            return
-        # self.Dump()
-        while True:
-            print(self.comments)
-            print("输入EXIT或QUIT退出程序")
-            print(self.start_time)
-            print(self.question)
-            self.user_input = input()
-            if self.user_input.upper() == 'EXIT' or self.user_input.upper() == 'QUIT':
-                print('用户退出程序')
-                break
-            if not self.ProcessUserInput():
-                print('无效输入，继续做题')
-                continue
-            if self.JudgeAnswer():
-                if self.type == 0:
-                    print('回答正确: {} = {}'.format(self.user_input, self.correct_answer))
-                else:
-                    print('回答正确: {} = {}'.format(self.expression, self.user_answer))
-                print(f'答题结束时间：{self.end_time}, 答题用时：{self.used_time}秒')
-                self.Generate()  # 生成下一题
-            else:
-                print('回答错误: 再来一次')
-                self.Tips()
-                if self.check_tips is not None:
-                    print(f'检查提示：{self.check_tips}')
-                if self.answer_tips is not None:
-                    print(f'答题提示：{self.answer_tips}')
-            print()
 
 
 """
@@ -624,7 +622,11 @@ class Question4AO(QuestionLR):
         pass
 
 if __name__ == "__main__":
-    qm = QuestionManager(type=0, range=[1, 10])
-    qm = QuestionManager(type=1, subtype=[1], range=[10, 50])
-    # qm = QuestionManager(type=2, subtype=[3, 4], range=[-50, 50, 2, 10])
+    type = 0
+    if type == 0:
+        qm = QuestionManager(type=0, range=[1, 10])
+    elif type == 1:
+        qm = QuestionManager(type=1, subtype=[1], range=[10, 50])
+    elif type ==2:
+        qm = QuestionManager(type=2, subtype=[3, 4], range=[-50, 50, 2, 10])
     qm.test()
