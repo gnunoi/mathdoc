@@ -48,10 +48,12 @@ class Exam:
         self.subtype = subtype
         self.range = range
         self.db = Database()
-        self.user = User()
+        self.user = User(self.db)
         self.q = self.CreateQuestion()
-        self.user.Read(self.db)
-        self.user.Read(self.db)
+        self.user.Read()
+        self.Dump(self.user)
+        self.user.Write()
+        self.Dump(self.user)
 
     def Dump(self, obj = None):
         if obj == None:
@@ -136,23 +138,45 @@ Read(): 从数据库的Users数据表读取到User类的成员变量
 Write(): 将User类的成员变量写入到数据库的Users数据表
 """
 class User:
-    def __init__(self):
+    def __init__(self, db):
+        self.db = db
         self.userid = None
         self.username = None
         self.email = None
-        self.mentor_email = None
         self.mobile = None
         self.grade = None
         self.register_date = None
         self.is_verified = None
+        self.mentor_email = None
         self.expired_date = None
 
-    def Read(self, db):
-        cursor = db.cursor
-        cursor.execute('''SELECT ID, Username, Email, Mobile, Grade, 
+        self.CreateTable()
+
+    def CreateTable(self):
+        db = self.db
+        db.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Users (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            Uswername TEXT UNIQUE,
+            Email TEXT UNIQUE,
+            Mobile TEXT UNIQUE,
+            Grade INTEGER,
+            RegisterDate TEXT,
+            IsVerified BOOLEAN DEFAULT 0,
+            MentorEmail TEXT,
+            ExpiredDate TEXT
+        )
+        ''')
+        db.AddColumn('Users', 'MentorEmail', 'TEXT')
+        db.AddColumn('Users', 'ExpiredDate', 'TEXT')
+        db.connect.commit()
+
+    def Read(self):
+        db = self.db
+        db.cursor.execute('''SELECT ID, Username, Email, Mobile, Grade, 
                                 RegisterDate, IsVerified, MentorEmail,  ExpiredDate
                                 FROM Users WHERE IsVerified = 1''')
-        result = cursor.fetchone()
+        result = db.cursor.fetchone()
         if result is not None:
             self.userid = result[0]
             self.username = result[1]
@@ -160,23 +184,23 @@ class User:
             self.mobile = result[3]
             self.grade = result[4]
             self.register_date = result[5]
-            self.register_date = result[6]
-            self.is_verified = result[7]
+            self.is_verified = result[6]
+            self.mentor_email = result[7]
             self.expired_date = result[8]
         return result
 
-    def Write(self, db):
-        cursor = db.cursor
+    def Write(self):
+        db = self.db
         try:
             sql = "DELETE FROM Users Where Username = ?"
-            cursor.execute(sql, (self.username,))
-            db.conn.commit()
-            cursor.execute("""INSERT INTO Users (Username, Email, Mobile, Grade, RegisterDate, IsVerified, MentorEmail, ExpiredDate) 
+            db.cursor.execute(sql, (self.username,))
+            db.connect.commit()
+            db.cursor.execute("""INSERT INTO Users (Username, Email, Mobile, Grade, RegisterDate, IsVerified, MentorEmail, ExpiredDate) 
                                 VALUES (?, ?, ?, ?, ?, 1, ?, ?)""",
                                 (self.username, self.email, self.mobile, self.grade,
                                  datetime.now().strftime('%Y-%m-%d'), 'gnunoi@163.com',
                                  (datetime.now() + timedelta(days=180)).strftime('%Y-%m-%d')))
-            db.conn.commit()
+            db.connect.commit()
         except sqlite3.IntegrityError:
             print("用户名或邮箱已存在！")
 
@@ -215,7 +239,6 @@ class Database:
         # print(f'Database file: {self.path}')
         self.connect = sqlite3.connect(self.path)
         self.cursor = self.connect.cursor()
-        self.CreateUsersTable()
         self.CreateSettingsTable()
         self.CreateExamTable()
         self.CreateMailTable()
@@ -256,24 +279,6 @@ class Database:
                 pass
             else:
                 print(f"添加字段时出错: {e}")
-
-    def CreateUsersTable(self):
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Users (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT UNIQUE,
-            Email TEXT UNIQUE,
-            Mobile TEXT UNIQUE,
-            Grade INTEGER,
-            RegisterDate TEXT,
-            IsVerified BOOLEAN DEFAULT 0,
-            MentorEmail TEXT,
-            ExpiredDate TEXT
-        )
-        ''')
-        self.AddColumn('Users', 'MentorEmail', 'TEXT')
-        self.AddColumn('Users', 'ExpiredDate', 'TEXT')
-        self.connect.commit()
 
     def CreateExamTable(self):
         self.cursor.execute('''
