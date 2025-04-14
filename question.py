@@ -48,6 +48,9 @@ ConvertToFraction(): 将表达式中的数字替换为分数，确保计算严�
 ProcessUserInput(): 处理用户输入，将中文符号替换为英文符号，删除空白符
 CheckUserInput(): 检查用户输入的表达式是否包含了全部数字
 ProcessCalculation(): 显示完整的计算步骤
+
+ClassName(): 获取类名称
+SuperName(): 获取父类名称
 """
 class Question():
     def __init__(self, type=0, subtype=[0], range=[1, 10]):
@@ -69,6 +72,13 @@ class Question():
         self.start_time = None
         self.end_time = None
         self.used_time = None
+
+    def ClassName(self):
+        return self.__class__.__name__
+
+    def SuperName(self):
+        parent_names = [base.__name__ for base in self.__class__.__bases__]
+        return parent_names
 
     def Dump(self):
         print()
@@ -104,7 +114,6 @@ class Question():
         self.end_time = datetime.now()
         self.used_time = round((self.end_time - self.start_time).total_seconds(), 1)
         self.start_time = datetime.now()
-        pass
 
     def ConvertToFraction(self, expression):
         pattern = r'(?<!\w)(-?\d+\.?\d*|\.\d+)(?!\w)'
@@ -121,11 +130,9 @@ class Question():
             "（": "(", "）": ")", "[": "(", "]": ")", "{": "(", "}": "(", "【": "(", "】": ")",
             "＋": "+", "➕": "+", "➖": "-", "×": "*", "✖": "*", "÷": "/",
         }
-
         user_input = self.user_input.strip()
         if user_input == '':
             return False
-
         for old, new in replace_map.items():
             user_input = user_input.replace(old, new)
         user_input = user_input.split('=')[-1]
@@ -148,7 +155,7 @@ class Question():
 题目类型：24点游戏
 """
 class Question24Point(Question):
-    def __init__(self, range=[1, 13]):
+    def __init__(self, range=[1, 10]):
         super().__init__(type=0, subtype=[0], range=range)
         self.name = "24点游戏"
         self.comments = "输入表达式，使得表达式的值为24。如: (5+3)*(8-5)。"
@@ -216,8 +223,6 @@ class Question24Point(Question):
 
     def JudgeAnswer(self):
         super().JudgeAnswer()
-        if not self.ProcessUserInput():
-            return False
         try:
             # 转化为分数再计算，处理诸如: [3, 3, 8, 8]: 8 / (3 - (8 / 3))
             user_answer = eval(self.ConvertToFraction(self.user_answer))
@@ -233,7 +238,7 @@ class Question24Point(Question):
 题目类型：从左向右求值，即题目是表达式，答案是数值
 """
 class QuestionLR(Question):
-    def __init__(self, type=1, subtype=[0], range=[1, 10]):
+    def __init__(self, type=1, subtype=[0, 0], range=[1, 50, 10, 50]):
         super().__init__(type=1, subtype=subtype, range=range)
         self.type = type
         self.subtype = subtype
@@ -338,7 +343,7 @@ class QuestionLR(Question):
 题目类型：两位数乘法速算
 """
 class QuestionQC(QuestionLR):
-    def __init__(self, subtype=[0], range=[1, 10]):
+    def __init__(self, subtype=[0, 0], range=[10, 50]):
         super().__init__(type=1, subtype=subtype, range=range)
         self.name = "两位数乘法速算"
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
@@ -471,7 +476,7 @@ class QuestionQC(QuestionLR):
 题目类型：四则运算
 """
 class Question4AO(QuestionLR):
-    def __init__(self, subtype=[0, 0], range=[-50, 50, 10, 50]):
+    def __init__(self, subtype=[0, 0], range=[1, 50, 10, 50]):
         super().__init__(type=2, subtype=subtype, range=range)
         self.name = "四则速算"
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
@@ -482,7 +487,7 @@ class Question4AO(QuestionLR):
         self.operators = []
         # ops = ['+', '-', '*', '/']
         ops = [['+'], ['-'], ['*'], ['/'], ['+', '-', '*', '/']]
-        term_count = self.subtype[0]
+        term_count = self.subtype[0] + 2
         try:
             user_operators = ops[self.subtype[1]]
         except:
@@ -506,7 +511,7 @@ class Question4AO(QuestionLR):
         return num
 
     def Validate(self):
-        count = self.subtype[0] - 2
+        count = self.subtype[0]
         for i in range(count, -1, -1):
             if self.operators[i] in ['*', '/']:
                 self.numbers[i + 1] = self.Divisor()

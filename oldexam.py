@@ -248,7 +248,6 @@ class Exam:
             '乘除数最大值': '10',
             '运算符': '0',
             '项数': '2',
-            '括号概率': '30',
             '题型': '0',
             '速算类型': '0'
         }
@@ -270,8 +269,6 @@ class Exam:
                 self.operator = int(value)
             elif key == '项数':
                 self.q.term_count = int(value)
-            elif key == '括号概率':
-                self.bracket_prob = int(value)
             elif key == '题型':
                 # print(f'value: {value}')
                 if value is None:
@@ -301,7 +298,6 @@ class Exam:
             '乘除数最大值': str(self.q.range[3]),
             '运算符': str(self.operator),
             '项数': str(self.q.term_count),
-            '括号概率': str(self.bracket_prob),
             '题型': str(self.q.type),
             '速算类型': str(self.q.quick_calc_type)
         }
