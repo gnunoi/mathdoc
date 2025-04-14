@@ -51,6 +51,7 @@ class Exam:
         self.user = User()
         self.q = self.CreateQuestion()
         self.user.Read(self.db)
+        self.user.Write(self.db)
 
     def Dump(self, obj = None):
         if obj == None:
@@ -145,6 +146,25 @@ class User:
         self.register_date = None
         self.is_verified = None
         self.expired_date = None
+
+    def CreateTable(self, db):
+        cursor = db.cursor
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Users (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            Name TEXT UNIQUE,
+            Email TEXT UNIQUE,
+            Mobile TEXT UNIQUE,
+            Grade INTEGER,
+            RegisterDate TEXT,
+            IsVerified BOOLEAN DEFAULT 0,
+            MentorEmail TEXT,
+            ExpiredDate TEXT
+        )
+        ''')
+        db.AddColumn('Users', 'MentorEmail', 'TEXT')
+        db.AddColumn('Users', 'ExpiredDate', 'TEXT')
+        db.connect.commit()
 
     def Read(self, db):
         cursor = db.cursor
@@ -255,24 +275,6 @@ class Database:
                 pass
             else:
                 print(f"添加字段时出错: {e}")
-
-    def CreateUsersTable(self):
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Users (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT UNIQUE,
-            Email TEXT UNIQUE,
-            Mobile TEXT UNIQUE,
-            Grade INTEGER,
-            RegisterDate TEXT,
-            IsVerified BOOLEAN DEFAULT 0,
-            MentorEmail TEXT,
-            ExpiredDate TEXT
-        )
-        ''')
-        self.AddColumn('Users', 'MentorEmail', 'TEXT')
-        self.AddColumn('Users', 'ExpiredDate', 'TEXT')
-        self.connect.commit()
 
     def CreateExamTable(self):
         self.cursor.execute('''
