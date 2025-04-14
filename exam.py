@@ -1,5 +1,5 @@
 from question import *
-
+import sqlite3
 """
 类名称: Exam
 变量: 
