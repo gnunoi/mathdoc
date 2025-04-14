@@ -179,7 +179,7 @@ class User:
         except sqlite3.IntegrityError:
             print("用户名或邮箱已存在！")
 
-class Settings:
+class Setting:
     def __int__(self):
         self.type = 0 # 题目类型
         self.subtype = [2, 0] # 题目子类型
@@ -188,12 +188,19 @@ class Settings:
         self.min_divisor = 1 # 除数最小值
         self.max_divisor = 10 # 除数最大值
 
+    def Read(self):
+        pass
+
+    def Write(self):
+        pass
+
 class Database:
     def __init__(self):
         # 初始化 SQLite 数据库
         self.home = os.path.expanduser("~")
         # print(f'home direcotry: {self.home}')
         self.path = None
+        self.connect = None
         self.cursor = None
         self.InitDB()
 
@@ -205,8 +212,8 @@ class Database:
         self.Hide(db_folder)
         self.path = os.path.join(db_folder, "mathdoc.db")
         # print(f'Database file: {self.path}')
-        self.conn = sqlite3.connect(self.path)
-        self.cursor = self.conn.cursor()
+        self.connect = sqlite3.connect(self.path)
+        self.cursor = self.connect.cursor()
         self.CreateUsersTable()
         self.CreateSettingsTable()
         self.CreateExamTable()
@@ -265,7 +272,7 @@ class Database:
         ''')
         self.AddColumn('Users', 'MentorEmail', 'TEXT')
         self.AddColumn('Users', 'ExpiredDate', 'TEXT')
-        self.conn.commit()
+        self.connect.commit()
 
     def CreateExamTable(self):
         self.cursor.execute('''
@@ -286,7 +293,7 @@ class Database:
         ''')
         self.AddColumn('Exam01', 'AnswerTips', 'TEXT')
         self.AddColumn('Exam01', 'Solution', 'TEXT')
-        self.conn.commit()
+        self.connect.commit()
 
     def CreateSettingsTable(self):
         self.cursor.execute('''
@@ -295,7 +302,7 @@ class Database:
             Value TEXT
         )
         ''')
-        self.conn.commit()
+        self.connect.commit()
 
     def CreateMailTable(self):
         self.cursor.execute('''
@@ -305,7 +312,7 @@ class Database:
             Submit BOOLEAN
         )
         ''')
-        self.conn.commit()
+        self.connect.commit()
 
 """
 测试代码
