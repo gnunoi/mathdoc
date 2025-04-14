@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QDialog)
 from PyQt5.QtGui import (QFont, QPalette, QColor)
 from PyQt5.QtCore import Qt
-from exam import Exam
+from oldexam import Exam
 from mail import Mail
 import random
 from datetime import datetime

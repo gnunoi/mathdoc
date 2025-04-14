@@ -1,69 +1,176 @@
 import random
-import time
+import numpy as np
 import itertools
 import re
 from fractions import Fraction
+from datetime import datetime
+from collections import Counter
+from itertools import combinations
 
+"""
+类名称: Question
+说明：各种题目的基础类
+
+变量: 
+answer_tips: 答题提示
+check_tips: 检查提示
+cls: 题目类别，包括类型、描述、各种生成函数
+comments: 答题说明
+correct_answer: 正确答案
+end_time: 答题结束时间
+expression: 题目的表达式
+is_correct: 答题是否正确
+name: 题目类型名称
+numbers: 操作数的数组
+operators: 运算符的数组
+question: 题目的题干
+range: 取值范围
+start_time: 答题开始时间
+subtype: 数组，分别是题目子类型及更详细的分类
+type: 题目类型编号
+user_input: 用户输入的原始答案
+user_answer: 整理并计算后的用户答案
+used_time: 提提所用时间
+
+函数: 
+Dump(): 输出所有成员
+RandInt(a, b): 随机生成整数a到b之间的整数
+Generate(): 生成完整的新题目，包括实例、题干、大难
+Instance(): 生成新的题目实例
+Question(): 根据现有的题目，生成完整的题干
+Answer(): 根据现有的题目，生成正确答案
+JudgeAnswer(): 判断用户答案是否正确
+Tips(): 生成检查提示与答题提示
+CheckTips(): 生成检查提示
+AnswerTips(): 生成检查提示
+
+ConvertToFraction(): 将表达式中的数字替换为分数，确保计算严格准确
+ProcessUserInput(): 处理用户输入，将中文符号替换为英文符号，删除空白符
+CheckUserInput(): 检查用户输入的表达式是否包含了全部数字
+ProcessCalculation(): 显示完整的计算步骤
+"""
 class Question():
-    def __init__(self, term_count=2, range=None, user_operators=None, numbers=None, operators=None):
-        self.term_count = term_count
-        if range is None:
-            self.range = [10, 50, 5, 10]
-        else:
-            self.range = range
-        if user_operators is None:
-            self.user_operators = ['+', '-', '*', '/']
-        else:
-            self.user_operators = user_operators
-        self.type = None
-        self.quick_calc_type = None
-        self.numbers = numbers
-        self.operators = operators
+    def __init__(self, type=0, subtype=[0], range=[1, 10]):
+        self.type = type
+        self.name = None
+        self.subtype = subtype
+        self.range = range
+        self.numbers = []
+        self.operators = []
         self.expression = None
         self.question = None
-        self.correct_answer = None
+        self.user_input = None
         self.user_answer = None
-        self.tips = None
-        if self.numbers is None or self.operators is None:
-            self.Generate()
-            pass
-        else:
-            self.GenerateExpression()
-            pass
+        self.correct_answer = None
+        self.comments = None
+        self.check_tips = None
+        self.answer_tips = None
+        self.is_correct = None
+        self.start_time = None
+        self.end_time = None
+        self.used_time = None
+
+    def Dump(self):
+        print()
+        print(f'Dumping Object: {self}')
+        for name, value in self.__dict__.items():
+            print(f"{name}: {value}")
+        print()
 
     def RandInt(self, a, b):
-        random.seed(time.time())
-        for i in range(1, random.randint(1,10)):
-            random.randint(a, b)
-        return random.randint(a, b)
+        return np.random.randint(a, b)
 
-    def convert_to_fraction(self, expression):
-        # 使用正则表达式匹配所有整数或浮点数
+    def Generate(self):
+        self.start_time = datetime.now()
+        pass
+
+    def Question(self):
+        pass
+
+    def Answer(self):
+        pass
+
+    def CheckTips(self):
+        pass
+
+    def AnswerTips(self):
+        pass
+
+    def Tips(self):
+        self.CheckTips()
+        self.AnswerTips()
+
+    def JudgeAnswer(self):
+        self.end_time = datetime.now()
+        self.used_time = round((self.end_time - self.start_time).total_seconds(), 1)
+        self.start_time = datetime.now()
+        pass
+
+    def ConvertToFraction(self, expression):
         pattern = r'(?<!\w)(-?\d+\.?\d*|\.\d+)(?!\w)'
-
-        # 替换函数：将匹配到的数字转换为 Fraction
         def replace_with_fraction(match):
             num_str = match.group(0)
-            # 如果是小数点开头的数字，比如 .5，转换为 0.5
             if num_str.startswith('.'):
                 num_str = '0' + num_str
-            # 返回 Fraction(...) 的形式
             return f'Fraction({num_str})'
-
-        # 使用正则表达式替换所有数字
         converted_expression = re.sub(pattern, replace_with_fraction, expression)
         return converted_expression
 
-    def calculate24(self, nums):
-        """
-        尝试用四个数字计算24点
-        返回一个可能的解法，如果没有解则返回None
-        """
-        # 尝试所有可能的排列组合和运算符组合
-        r = []
-        for perm in itertools.permutations(nums):
+    def ProcessUserInput(self):
+        replace_map = {
+            "（": "(", "）": ")", "[": "(", "]": ")", "{": "(", "}": "(", "【": "(", "】": ")",
+            "＋": "+", "➕": "+", "➖": "-", "×": "*", "✖": "*", "÷": "/",
+        }
+
+        user_input = self.user_input.strip()
+        if user_input == '':
+            return False
+
+        for old, new in replace_map.items():
+            user_input = user_input.replace(old, new)
+        user_input = user_input.split('=')[-1]
+        self.user_answer = user_input
+        return True
+
+    def CheckUserInput(self):
+        digits_in_expression = re.findall(r'\d+\.?\d*', self.user_answer)
+        digits_in_expression = [float(digit) for digit in digits_in_expression]
+        numbers = [float(num) for num in self.numbers]
+        return Counter(digits_in_expression) == Counter(numbers)
+
+    def ProcessCalculation(self):
+        print(self.expression)
+        return
+
+
+"""
+类名称：Question24Point
+题目类型：24点游戏
+"""
+class Question24Point(Question):
+    def __init__(self, range=[1, 13]):
+        super().__init__(type=0, subtype=[0], range=range)
+        self.name = "24点游戏"
+        self.comments = "输入表达式，使得表达式的值为24。如: (5+3)*(8-5)。"
+        self.Generate()
+
+    def Generate(self):
+        self.Instance()
+        self.Question()
+        self.Answer()
+        super().Generate()
+
+    def Instance(self):
+        min_val = self.range[0]
+        max_val = self.range[1]
+        while True:
+            self.numbers = [random.randint(min_val, max_val) for _ in range(4)]
+            if self.Validate24Point() is not None:
+                break
+
+    def Validate24Point(self):
+        for perm in itertools.permutations(self.numbers):
             for ops in itertools.product(['+', '-', '*', '/'], repeat=3):
-                # 尝试三种不同的括号组合
                 expressions = [
                     f"({perm[0]} {ops[0]} {perm[1]}) {ops[1]} ({perm[2]} {ops[2]} {perm[3]})",
                     f"(({perm[0]} {ops[0]} {perm[1]}) {ops[1]} {perm[2]}) {ops[2]} {perm[3]}",
@@ -73,124 +180,324 @@ class Question():
                 ]
                 for expr in expressions:
                     try:
-                        # 使用eval计算表达式
-                        converted_expression = self.convert_to_fraction(expr)
-                        if eval(converted_expression) == 24:
+                        converted_expr = self.ConvertToFraction(expr)
+                        if eval(converted_expr) == 24:
                             return expr
                     except ZeroDivisionError:
                         continue
         return None
 
-    def generate_24point_numbers(self):
-        r = None
-        while r is None:
-            """生成四个1-13之间的随机整数"""
-            numbers = [random.randint(1, 10) for _ in range(4)]
-            r = self.calculate24(numbers)
-        # print(numbers)
-        return numbers
+    def Question(self):
+        self.question = f'24点游戏: {self.numbers}'
+        return self.question
 
-    def Set(self, term_count=None, range=None, user_operators=None, type=None, quick_calc_type=None):
-        if term_count is not None:
-            self.term_count = term_count
-        if range is not None:
-            self.range = range
-        if user_operators is not None:
-            self.user_operators = user_operators
-        if type is not None:
-            self.type = type
-        if quick_calc_type is not None:
-            self.quick_calc_type = quick_calc_type
+    def Answer(self):
+        self.correct_answer = 24
+        return self.correct_answer
+
+    def CheckTips(self):
+        if not self.CheckUserInput():
+            self.check_tips = f'{self.user_input} ，未包括全部数字'
+        else:
+            try:
+                user_answer = eval(self.ConvertToFraction(self.user_answer))
+                if user_answer != self.correct_answer:
+                    self.check_tips = f'{self.user_input} = {user_answer} != {self.correct_answer}'
+                else:
+                    self.check_tips = '正确！'
+            except:
+                self.check_tips = '无法正确求值，请检查输入是否正确'
+        return self.check_tips
+
+    def AnswerTips(self):
+        # print('24点游戏：AnswerTips()')
+        self.answer_tips = f'{self.Validate24Point()}'
+        return self.answer_tips
+
+    def JudgeAnswer(self):
+        super().JudgeAnswer()
+        if not self.ProcessUserInput():
+            return False
+        try:
+            # 转化为分数再计算，处理诸如: [3, 3, 8, 8]: 8 / (3 - (8 / 3))
+            user_answer = eval(self.ConvertToFraction(self.user_answer))
+        except:
+            return False
+        if not self.CheckUserInput():
+            return False
+        return user_answer == self.correct_answer
+
+
+"""
+类名称：QuestionLR
+题目类型：从左向右求值，即题目是表达式，答案是数值
+"""
+class QuestionLR(Question):
+    def __init__(self, type=1, subtype=[0], range=[1, 10]):
+        super().__init__(type=1, subtype=subtype, range=range)
+        self.type = type
+        self.subtype = subtype
+        self.range = range
         self.Generate()
 
-    def Print(self):
-        print("question = {}".format(self.question))
-        print("correct_answer = {}".format(self.correct_answer))
-
     def Generate(self):
+        if self.Instance() == True:
+            self.Question()
+            self.Answer()
+            super().Generate()
+            return True
+        else:
+            return False
+
+    def Question(self):
+        try:
+            expr = ''
+            for i in range(len(self.numbers)):
+                num = self.numbers[i]
+                num = str(num) if num >= 0 else f'({num})'
+                expr += num
+                operator = f' {self.operators[i]} ' if i < len(self.operators) else ''
+                expr += operator
+            self.expression = expr
+            self.question = expr.replace('*', '×') + " = "
+            return self.expression
+        except:
+            print('无法生成题目')
+            return None
+
+    def Answer(self):
+        self.correct_answer = eval(self.ConvertToFraction(self.expression))
+        return self.correct_answer
+
+    def GenerateOppositeLists(self, lst):
+        result = []
+        n = len(lst)
+        for k in range(1, n + 1):
+            for indices in combinations(range(n), k):
+                new_list = lst.copy()
+                for idx in indices:
+                    new_list[idx] = -new_list[idx]
+                result.append(new_list)
+        return result
+
+    def IsSignError(self):
+        numbers_list = self.GenerateOppositeLists(self.numbers)
+        try:
+            user_answer = abs(self.user_answer)
+        except:
+            print(f'求值出错: {abs(self.user_answer)}')
+        try:
+            correct_answer = abs(self.correct_answer)
+        except:
+            print(f'求值出错: {abs(self.correct_answer)}')
+
+        if user_answer / self.user_answer != correct_answer / self.correct_answer:
+            return True
+        try:
+            for numbers in numbers_list:
+                expr = ''
+                for i in range(len(self.numbers)):
+                    expr += f'{self.numbers[i]} {self.operators[i]} ' if i < len(self.operators) else f'{self.numbers[i]}'
+                if eval(self.ConvertToFraction(expr)) == self.user_answer:
+                    return True
+        except:
+            print('判断正负号的计算过程出错')
+
+    def CheckTips(self):
+        # print(self.user_answer)
+        tips = ''
+        if type(self.user_answer) == str:
+            self.user_answer = eval(self.ConvertToFraction(self.user_answer))
+        user_answer = abs(self.user_answer)
+        correct_answer = abs(self.correct_answer)
+        if self.IsSignError():
+            tips += '1. 正负号'
+        elif user_answer % 10 != correct_answer % 10:
+            tips += '2. 个位数'
+        elif len(str(user_answer)) != len(str(correct_answer)):
+            tips += '3. 总位数'
+        elif user_answer // 10 != correct_answer // 10:
+            tips += '4. 进借位'
+        self.check_tips = f'{tips}'
+        return self.check_tips
+
+    def AnswerTips(self):
+        pass
+
+    def JudgeAnswer(self):
+        super().JudgeAnswer()
+        try:
+            user_answer = eval(self.ConvertToFraction(self.user_answer))
+            return user_answer == self.correct_answer
+        except:
+            return False
+
+
+"""
+类名称：QuestionQC
+题目类型：两位数乘法速算
+"""
+class QuestionQC(QuestionLR):
+    def __init__(self, subtype=[0], range=[1, 10]):
+        super().__init__(type=1, subtype=subtype, range=range)
+        self.name = "两位数乘法速算"
+        self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
+        self.Generate()
+
+    def Instance(self):
+        """
+        :return:
+            False，错误
+            True，正确
+        """
         self.numbers = []
         self.operators = []
-        if self.type == 0:  # 四则运算
-            for i in range(self.term_count):
-                self.numbers.append(self.RandInt(self.range[0], self.range[1]))
-                if i < self.term_count - 1:
-                    self.operators.append(random.choice(self.user_operators))
-            self.Validate()
-            self.GenerateExpression()
-        elif self.type == 1:  # 速算
-            if self.quick_calc_type == 0: # 平方数
-                number = self.RandInt(self.range[2], self.range[3])
-                self.numbers.append(number)
-                self.operators.append('*')
-                self.numbers.append(number)
-                self.GenerateExpression()
-            if self.quick_calc_type == 1: # 平方差法
-                n1 = self.RandInt(int(self.range[2]/5), int(self.range[3]/5))*5
-                n2 = self.RandInt(1, 5)
-                self.numbers.append(n1 + n2)
-                self.operators.append('*')
-                self.numbers.append(n1 - n2)
-                self.GenerateExpression()
-            if self.quick_calc_type == 2: # 和十速算法
-                n1 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
-                n2 = self.RandInt(1, 9)
-                a = n1 + n2
-                b = n1 + 10 - n2
-                if a > self.range[3]:
-                    a = a - 10
-                    b = b - 10
-                self.numbers.append(a)
-                self.operators.append('*')
-                self.numbers.append(b)
-                self.GenerateExpression()
-            if self.quick_calc_type == 3: # 大数凑十法
-                n1 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
-                n2 = self.RandInt(1, 3)
-                num1 = n1 - n2 if n1 - n2 >= self.range[2] else n1 + 10 - n2
-                n3 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
-                n4 = self.RandInt(1, 3)
-                num2 = n3 + n4 if n3 + n4 <= self.range[3] else n3 - 10 + n4
-                self.numbers.append(num1)
-                self.operators.append('*')
-                self.numbers.append(num2)
-                self.GenerateExpression()
-            if self.quick_calc_type == 4: # 逢五凑十法
-                n1 = self.RandInt(int(self.range[2]/5), int(self.range[3]/5))*5
-                num1 = n1 if n1 % 10 != 0 else n1 + 5 if n1 + 5 <= self.range[3] else n1 - 5
-                n2 = self.RandInt(int(self.range[2]/2), int(self.range[3]/2))*2
-                self.numbers.append(num1)
-                self.operators.append('*')
-                self.numbers.append(n2)
-                self.GenerateExpression()
-            if self.quick_calc_type == 5: # 双向凑十法
-                n1 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
-                num1 = n1 + self.RandInt(8,9)
-                n2 = self.RandInt(int(self.range[2]/10), int(self.range[3]/10))*10
-                num2 = n2 + 10 - self.RandInt(1,2)
-                self.numbers.append(num1)
-                self.operators.append('*')
-                self.numbers.append(num2)
-                self.GenerateExpression()
-        elif self.type == 2:
-            self.numbers = self.generate_24point_numbers()
-            self.GenerateExpression()
+        subtype = self.subtype[0]
+        min_val = self.range[0]
+        max_val = self.range[1]
 
-    def GenerateExpression(self):
-        if self.type == 0 or self.type == 1:
-            expr = str(self.numbers[0])
-            for i in range(1, len(self.numbers)):
-                op = self.operators[i-1]
-                num = self.numbers[i]
-                expr += f" {op} ({num})" if num < 0 else f" {op} {num}"
-            self.expression = expr
-            self.Evaluate()
-            self.question = expr.replace('*', '×').replace('/', '÷') + " ="
-        elif self.type == 2:
-            self.correct_answer = 24
-            self.expression = ',  '.join(map(str, self.numbers))
-            # print(self.expression)
-            self.question = f'计算24点：{self.expression}'
-            # print(self.question)
+        if subtype < 0 or subtype > 5:
+            print(f"不支持的子类型: {subtype}")
+            return False
+
+        if subtype == 0:  # 平方数
+            number = self.RandInt(min_val, max_val)
+            self.numbers.append(number)
+            self.operators.append('*')
+            self.numbers.append(number)
+        elif subtype == 1:  # 平方差法
+            n1 = self.RandInt(int(min_val / 5), int(max_val / 5)) * 5
+            n2 = self.RandInt(1, 5)
+            self.numbers.append(n1 + n2)
+            self.operators.append('*')
+            self.numbers.append(n1 - n2)
+        elif subtype == 2:  # 和十速算法
+            n1 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
+            n2 = self.RandInt(1, 9)
+            a = n1 + n2
+            b = n1 + 10 - n2
+            if a > max_val:
+                a = a - 10
+                b = b - 10
+            self.numbers.append(a)
+            self.operators.append('*')
+            self.numbers.append(b)
+        elif subtype == 3:  # 大数凑十法
+            n1 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
+            n2 = self.RandInt(1, 3)
+            num1 = n1 - n2 if n1 - n2 >= min_val else n1 + 10 - n2
+            n3 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
+            n4 = self.RandInt(1, 3)
+            num2 = n3 + n4 if n3 + n4 <= max_val else n3 - 10 + n4
+            self.numbers.append(num1)
+            self.operators.append('*')
+            self.numbers.append(num2)
+        elif subtype == 4:  # 逢五凑十法
+            n1 = self.RandInt(int(min_val / 5), int(max_val / 5)) * 5
+            num1 = n1 if n1 % 10 != 0 else n1 + 5 if n1 + 5 <= max_val else n1 - 5
+            n2 = self.RandInt(int(min_val / 2), int(max_val / 2)) * 2
+            self.numbers.append(num1)
+            self.operators.append('*')
+            self.numbers.append(n2)
+        elif subtype == 5:  # 双向凑十法
+            n1 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
+            num1 = n1 + self.RandInt(8, 9)
+            n2 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
+            num2 = n2 + 10 - self.RandInt(1, 2)
+            self.numbers.append(num1)
+            self.operators.append('*')
+            self.numbers.append(num2)
+        return True
+
+    def AnswerTips(self):
+        # print('乘法速算：AnswerTips()')
+        tips = ''
+        if self.subtype[0] == 0: # 平方数
+            m = self.numbers[0]
+            n = self.numbers[1]
+            r = m % 10
+            if r >= 5:
+                c = 10 - r
+            else:
+                c = r
+            a = m + c
+            b = m - c
+            tips += f'{m} × {n} = ({m} + {c}) × ({m} - {c}) + {c} × {c} = {a} × {b} + {c} × {c} = {a*b} + {c*c} = {a*b+c*c}'
+        if self.subtype[0] == 1: # 平方差法
+            m = self.numbers[0]
+            n = self.numbers[1]
+            a = int((m + n)/2)
+            b = abs(a - self.numbers[0])
+            tips += f'{m} × {n} = ({a} + {b})({a} - {b}) = {a} × {a} - {b} × {b} = {a*a} - {b*b} = {a*a-b*b}'
+        if self.subtype[0] == 2: # 和十速算法
+            m = self.numbers[0]
+            n = self.numbers[1]
+            a = int(m/10)
+            b = m % 10
+            c = 10 -b
+            tips += f'{a} × ({a} + 1) = {a} × {a+1} = {a*(a+1)}；{b} × {c} = {b*c}；{m} × {n} = {m*n}'
+        if self.subtype[0] == 3: # 大数凑十法
+            m = self.numbers[0]
+            n = self.numbers[1]
+            r = m % 10
+            c = 10 - r
+            tips += f'{m} × {n} = ({m+c} - {c}) × {n} = {m+c} × {n} - {c} × {n} = {(m+c)*n} - {c*n} = {m*n}'
+        if self.subtype[0] == 4: # 逢五凑十法
+            m = self.numbers[0]
+            n = self.numbers[1]
+            if m % 25 == 0 and n % 4 == 0:
+                a = int(m / 25)
+                b = 25
+                c = 4
+                d = int(n /4)
+            else:
+                a = int(m /5)
+                b = 5
+                c = 2
+                d = int(n / 2)
+            tips += f'{m} × {n} = {a} × {b} × {c} × {d} = {a} × {d} × {b*c} = {a * d} × {b*c} = {m * n}'
+        if self.subtype[0] == 5: # 双向凑十法
+            m = self.numbers[0]
+            n = self.numbers[1]
+            b = 10 - m % 10
+            a = m + b
+            d = 10 - n % 10
+            c = n + d
+            tips += f'{m} × {n} = ({a} - {b}) × ({c} - {d}) = {a} × {c} - {a} × {d} - {b} × {c} + {b} × {d} = {a*c} - {a*d} - {b*c} + {b*d} = {m*n}'
+        self.answer_tips = tips
+        return self.answer_tips
+"""
+类名称：Question4AO
+题目类型：四则运算
+"""
+class Question4AO(QuestionLR):
+    def __init__(self, subtype=[0, 0], range=[-50, 50, 10, 50]):
+        super().__init__(type=2, subtype=subtype, range=range)
+        self.name = "四则速算"
+        self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
+        self.Generate()
+
+    def Instance(self):
+        self.numbers = []
+        self.operators = []
+        # ops = ['+', '-', '*', '/']
+        ops = [['+'], ['-'], ['*'], ['/'], ['+', '-', '*', '/']]
+        term_count = self.subtype[0]
+        try:
+            user_operators = ops[self.subtype[1]]
+        except:
+            print('运算符选择错误')
+
+        for i in range(term_count):
+            num = self.RandInt(self.range[0], self.range[1])
+            self.numbers.append(num)
+            if i < term_count - 1:
+                self.operators.append(random.choice(user_operators))
+        # print(self.numbers)
+        # print(self.operators)
+        self.Validate()
+        self.Question()
+        return True
 
     def Divisor(self):
         num = self.RandInt(self.range[2], self.range[3])
@@ -199,14 +506,14 @@ class Question():
         return num
 
     def Validate(self):
-        count = self.term_count
-        for i in range(count - 2, -1, -1):
+        count = self.subtype[0] - 2
+        for i in range(count, -1, -1):
             if self.operators[i] in ['*', '/']:
                 self.numbers[i + 1] = self.Divisor()
                 self.numbers[i] = self.Divisor()
 
         flag = 0
-        for i in range(count - 2, -1, -1):
+        for i in range(count, -1, -1):
             if self.operators[i] == '/':
                 if flag == 0:
                     flag = 1
@@ -220,26 +527,8 @@ class Question():
                     self.numbers[i + 1] = num
                     flag = 0
 
-    def Evaluate(self):
-        try:
-            result = eval(self.expression)
-            if isinstance(result, int):
-                self.correct_answer = result
-            elif isinstance(result, float):
-                if result.is_integer():
-                    self.correct_answer = int(result)
-                else:
-                    self.correct_answer = result
-            else:
-                return "结果不是数字类型"
-        except Exception as e:
-            return f"错误: {e}"
-
-if __name__ == "__main__":
-    q = Question(term_count=3, range=[5, 20, 5, 10], user_operators=['+'])
-    q.Print()
-    q.Set(term_count=4, range=[-100, 100, 5, 20], user_operators=['+', '-', '*', '/'])
-    q.Print()
-    for i in range(100):
-        q.Generate()
-        print("{}: {} {} ".format(i+1, q.question, q.correct_answer))
+    def AnswerTips(self):
+        print('四则运算：AnswerTips()')
+        self.answer_tips = self.ProcessCalculation()
+        return self.answer_tips
+        pass
