@@ -37,13 +37,18 @@ user_answer: 整理并计算后的用户答案
 Dump(): 输出所有成员
 RandInt(a, b): 随机生成整数a到b之间的整数
 Generate(): 生成完整的新题目，包括实例、题干、大难
-Instance(): 生成新的题目实例
+BeforeGenerate(): 生成前处理
+AfterGenerate(): 生成后处理
 Question(): 根据现有的题目，生成完整的题干
 Answer(): 根据现有的题目，生成正确答案
 JudgeAnswer(): 判断用户答案是否正确
+BeforeJudgeAnswer(): 判题前处理
 Tips(): 生成检查提示与答题提示
 CheckTips(): 生成检查提示
 AnswerTips(): 生成检查提示
+ClassName(): 返回类的名称
+SuperName(): 返回父类的名称
+
 
 ConvertToFraction(): 将表达式中的数字替换为分数，确保计算严格准确
 ProcessUserInput(): 处理用户输入，将中文符号替换为英文符号，删除空白符
@@ -93,8 +98,28 @@ class Question():
     def RandInt(self, a, b):
         return np.random.randint(a, b)
 
-    def Generate(self):
+    def BeforeGenerate(self):
+        self.answer_tips = None
+        self.check_tips = None
+        self.correct_answer = None
+        # self.comments = None
+        self.end_time = None
+        self.expression = None
         self.is_correct = False
+        # self.name = None
+        self.numbers = []
+        self.operators = []
+        self.question = None
+        self.start_time = None
+        self.solution = None
+        self.time_used = None
+        self.user_input = None
+        self.user_answer = None
+
+    def Generate(self):
+        pass
+
+    def AfterGenerate(self):
         self.start_time = datetime.now()
         pass
 
@@ -114,7 +139,14 @@ class Question():
         self.CheckTips()
         self.AnswerTips()
 
+    def BeforeJudgeAnswer(self):
+        self.check_tips = None
+        self.answer_tips = None
+        self.solution = None
+        self.is_correct = False
+
     def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
         self.start_time = datetime.now()
@@ -178,12 +210,13 @@ class Question24Point(Question):
         self.Generate()
 
     def Generate(self):
-        self.Instance()
+        self.BeforeGenerate()
         self.Question()
         self.Answer()
-        super().Generate()
+        self.AfterGenerate()
 
-    def Instance(self):
+    def BeforeGenerate(self):
+        super().BeforeGenerate()
         min_val = self.range[0]
         max_val = self.range[1]
         while True:
@@ -263,13 +296,10 @@ class QuestionLR(Question):
         self.Generate()
 
     def Generate(self):
-        if self.Instance() == True:
-            self.Question()
-            self.Answer()
-            super().Generate()
-            return True
-        else:
-            return False
+        self.BeforeGenerate()
+        self.Question()
+        self.Answer()
+        self.AfterGenerate()
 
     def Question(self):
         try:
@@ -367,7 +397,8 @@ class QuestionQC(QuestionLR):
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
         self.Generate()
 
-    def Instance(self):
+    def BeforeGenerate(self):
+        super().BeforeGenerate()
         self.numbers = []
         self.operators = []
         subtype = self.subtype[0]
@@ -495,9 +526,8 @@ class Question4AO(QuestionLR):
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
         self.Generate()
 
-    def Instance(self):
-        self.numbers = []
-        self.operators = []
+    def BeforeGenerate(self):
+        super().BeforeGenerate()
         ops = [['+'], ['-'], ['*'], ['/'], ['+', '-', '*', '/']]
         term_count = self.subtype[0] + 2
         try:
