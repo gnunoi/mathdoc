@@ -8,7 +8,7 @@ from datetime import *
 类名称: Exam
 变量: 
 type: 题目类型
-   0: 24点游戏
+   0: 计算24点
    1: 乘法速算
    2: 四则运算
 subtype: 子类型
@@ -74,7 +74,7 @@ class Exam:
         self.q = self.CreateQuestion()
 
     def CreateQuestion(self):
-        if self.type == 0: # 0: 24点游戏
+        if self.type == 0: # 0: 计算24点
             return Question24Point(range=self.range)
         elif self.type == 1: # 1: 乘法速算
             return QuestionQC(subtype=self.subtype, range=self.range)
@@ -96,14 +96,17 @@ class Exam:
                 print(f'检查提示：{q.check_tips}')
             if q.answer_tips is not None:
                 print(f'答题提示：{q.answer_tips}')
-            print(f'答题结束时间：{q.end_time}, 答题用时：{q.used_time}秒')
+            print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
+            self.review.SaveDatabase(q)
         else: # 回答正确
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
                 print('回答正确: {} = {}'.format(q.expression, q.user_answer))
             else: # 所有QuestionRL的题目：self.type == 0
                 print('回答正确: {} = {}'.format(q.user_input, q.correct_answer))
-            print(f'答题结束时间：{q.end_time}, 答题用时：{q.used_time}秒')
+            print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
+            self.review.SaveDatabase(q)
+            self.review.question_number += 1
             q.Generate()  # 生成下一题
 
     def Run(self):
@@ -327,6 +330,7 @@ class Setting:
 class Review:
     def __init__(self, db):
         self.db = db
+        self.question_number = 1
         self.CreateTable()
         # self.Read()
         # self.Write()
@@ -351,6 +355,19 @@ class Review:
         ''')
         db.AddColumn('Exam01', 'AnswerTips', 'TEXT')
         db.AddColumn('Exam01', 'Solution', 'TEXT')
+        db.connect.commit()
+
+    def SaveDatabase(self, q):
+        # q = Question()
+        db = self.db
+        db.cursor.execute('''
+            INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
+            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            (self.question_number, q.question, str(q.user_answer), str(q.correct_answer), "正确" if q.is_correct else "错误",
+            q.start_time.strftime("%Y-%m-%d %H:%M:%S"), q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
+            q.time_used, q.check_tips, q.answer_tips, q.solution)
+        )
         db.connect.commit()
 
 
