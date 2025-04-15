@@ -37,14 +37,15 @@ user: 用户对象
 setting: 设置对象
 record: 答题记录对象
 wb: 工作簿对象
+mail: 邮件对象
 q: Question对象
 
 函数: 
 CreateQuestion(): 生成与type相对应的题目类别的对象
-Update(): 更新成员变量的函数
+UpdateSetting(): 更新成员变量的函数
 SubmitAnswer(): 提交答案
-Test(): 测试函数
-
+Register(): 命令行注册函数
+Run(): 命令行模式运行函数
 """
 class Exam:
     def __init__(self, type=0, subtype=[0], range=[1, 10]):
