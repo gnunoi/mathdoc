@@ -66,6 +66,8 @@ class Exam:
             print(f"{type(getattr(obj, name))}: {name}: {value}")
         print()
 
+    def Exit(self):
+        self.record.Dump()
 
     def Update(self, type = None, subtype = None, range = None):
         if type is not None: self.type = type
@@ -124,7 +126,7 @@ class Exam:
             grade = input()
             self.user.Register(username = username, email = email, mobile = mobile, grade = grade)
         print()
-        type = 0
+        type = 1
         parms = [{'type': 0, 'subtype': [], 'range': [1, 10]},
                  {'type': 1, 'subtype': [2], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
@@ -147,8 +149,7 @@ class Exam:
                 break
             self.SubmitAnswer(q.user_input)
             print()
-        print(self.record.list)
-        self.record.Dump()
+        self.Exit() # 处理程序退出的收尾工作，如保存数据，发送邮件。
 
 
 """
