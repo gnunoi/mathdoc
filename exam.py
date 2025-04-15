@@ -540,15 +540,24 @@ class Workbook:
         self.workbook = None
         self.worksheet = None
         # print(self.username)
-        self.Open()
-        self.cell_format = self.workbook.add_format({
+        self.title = ('题号', '题目', '用户答案', '正确答案', '是否正确',
+            '开始时间', '结束时间', '用时(秒)', '检查提示', '答题提示')
+        self.cell_format = {
             "bg_color": "#FFFFFF",
             "border": 1,
             "border_color": "black",
             "align": "center",
             "valign": "vcenter",
             "font_size": "12",
-        })
+        }
+        self.full_format = {
+            "bg_color": "#FFFFFF",
+            "align": "center",
+            "valign": "vcenter",
+            "font_size": "12",
+        }
+        self.column_widths = [12, 40, 12, 12, 12, 12, 12, 15, 40, 40]
+        self.Open()
 
     def Open(self):
         if not os.path.exists(self.path):
@@ -565,34 +574,20 @@ class Workbook:
         current_date = datetime.now().strftime("%Y-%m-%d")
         self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
 
-        format = self.workbook.add_format({
-            "bg_color": "#FFFFFF",
-            "align": "center",
-            "valign": "vcenter",
-            "font_size": "12",
-        })
+        full_format = self.workbook.add_format(self.full_format)
         self.worksheet.set_column(0, 100, None, format)
-        # for col in range(9):
-        #     self.worksheet.set_column(col, col, self.column_widths[col], format)
+        for col in range(9):
+            self.worksheet.set_column(col, col, self.column_widths[col], full_format)
         self.worksheet.set_zoom(120)
         for row in range(0, 1000):
             self.worksheet.set_row(row, 25)
-        self.cell_format = self.workbook.add_format({
-            "bg_color": "#FFFFFF",
-            "border": 1,
-            "border_color": "black",
-            "align": "center",
-            "valign": "vcenter",
-            "font_size": "12",
-        })
-        self.Append(0, ('题号', '题目', '用户答案', '正确答案', '是否正确',
-            '开始时间', '结束时间', '用时(秒)', '检查提示', '答题提示')
-        )
+        self.Append(0, self.title)
         self.worksheet.freeze_panes(1, 1)
 
     def Append(self, row, row_data):
         print(row_data)
-        self.worksheet.write_row(row, 0, row_data, self.cell_format)
+        cell_format = self.workbook.add_format(self.cell_format)
+        self.worksheet.write_row(row, 0, row_data, cell_format)
 
     def Dump(self, data):
         row = 1
@@ -606,7 +601,7 @@ class Workbook:
         if self.workbook:
             self.Dump(data)
             self.worksheet.autofilter(0, 0, rows, 9)
-            self.workbook.close()
+            # self.workbook.close()
 
 """
 测试代码
