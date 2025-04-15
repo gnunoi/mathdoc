@@ -557,7 +557,6 @@ class Workbook:
             # print(f'"{self.path}"目录已存在')
             pass
 
-        username = self.username
         current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.filename = f"{self.username}_{current_datetime}.xlsx"
         self.fullpath = os.path.join(self.path, self.filename)
@@ -586,26 +585,27 @@ class Workbook:
             "valign": "vcenter",
             "font_size": "12",
         })
-        self.Append(0, [
-            '题号', '题目', '用户答案', '正确答案', '是否正确',
-            '开始时间', '结束时间', '用时(秒)', '检查提示'
-        ])
+        self.Append(0, ('题号', '题目', '用户答案', '正确答案', '是否正确',
+            '开始时间', '结束时间', '用时(秒)', '检查提示', '答题提示')
+        )
         self.worksheet.freeze_panes(1, 1)
 
     def Append(self, row, row_data):
+        print(row_data)
         self.worksheet.write_row(row, 0, row_data, self.cell_format)
 
     def Dump(self, data):
         row = 1
         for row_data in data:
-            self.Append(row, row_data, self.cell_format)
+            self.Append(row, row_data)
             row += 1
 
     def Save(self, data):
         rows = len(data)
         print(rows)
         if self.workbook:
-            # self.worksheet.autofilter(0, 0, self.current_row - 1, 8)
+            self.Dump(data)
+            self.worksheet.autofilter(0, 0, rows, 9)
             self.workbook.close()
 
 """
