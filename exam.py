@@ -419,7 +419,6 @@ class Record:
                 db.cursor.execute("UPDATE Exam01 SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
                 previous_question = current_question
             db.connect.commit()
-            print("Exam01表数据整理完成")
         except Exception as e:
             print(f"整理Exam01表数据时出错: {e}")
 
@@ -539,8 +538,8 @@ class Workbook:
         self.fullpath = None
         self.workbook = None
         self.worksheet = None
-        self.max_rows = 10000
-        self.max_cols = 256
+        self.max_rows = 65536 # xlsx工作表共有2^20 = 1048576行
+        self.max_cols = 1024 # xlsx工作表共有2^14 = 16384列
         self.row_height = 25
         self.column_widths = [10, 40, 15, 15, 15, 25, 25, 15, 40, 40]
         self.zoom = 120 # 放大系数：120%
@@ -600,9 +599,7 @@ class Workbook:
 
     def Save(self, data):
         rows = len(data)
-        print(rows)
         if self.workbook:
-            print(self.workbook)
             self.Dump(data)
             self.worksheet.autofilter(0, 0, rows, len(self.title)-1)
             self.workbook.close()
