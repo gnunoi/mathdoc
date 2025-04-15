@@ -7,6 +7,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+from threading import Thread
 """
 类名称: Exam
 变量: 
@@ -77,7 +78,13 @@ class Exam:
         self.record.Dump()
         if len(self.record.data):
             self.wb.Save(self.record.data)
-            self.mail.Send(receiver = self.user.email, attach = self.wb.fullpath)
+            self.SendHomework()
+
+    def SendHomework(self):
+        local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.mail.subject = f'{self.user.username}[{self.user.email}]在{local_time}发来的作业'
+        self.mail.Send(receiver=self.user.email, attach=self.wb.fullpath)
+        self.mail.Send(attach=self.wb.fullpath)
 
     def UpdateSetting(self, type = None, subtype = None, range = None):
         if type is not None: self.type = type
@@ -627,6 +634,9 @@ class Mail():
         self.database = os.path.join(self.desktop, ".mathdoc", "mathdoc.db")  # 附件文件路径
 
     def Send(self, receiver=None, attach=None):
+        self.ThreadSend(receiver=receiver, attach=attach)
+
+    def ThreadSend(self, receiver=None, attach=None):
         # 创建MIMEMultipart对象
         msg = MIMEMultipart()
         msg['From'] = self.sender
