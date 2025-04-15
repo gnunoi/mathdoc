@@ -3,6 +3,7 @@ import sqlite3
 import os
 from datetime import *
 import xlsxwriter
+import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
@@ -74,7 +75,9 @@ class Exam:
 
     def Exit(self):
         self.record.Dump()
-        self.wb.Save(self.record.data)
+        if len(self.record.data):
+            self.wb.Save(self.record.data)
+            self.mail.Send(receiver = self.user.email, attach = self.wb.fullpath)
 
     def UpdateSetting(self, type = None, subtype = None, range = None):
         if type is not None: self.type = type
@@ -611,32 +614,30 @@ class Workbook:
 
 class Mail():
     def __init__(self):
-        self.Receiver="mathdb@163.com"
-        self.Sender="mathdoc@163.com"
-        self.Authority = "466066c2a4aac05abcc0c4aacc845e68"
-        self.Subject = "数字博士作业"            # 邮件主题
-        self.Body = "数字博士作业，包含一个附件。"  # 邮件正文
+        self.receiver = "mathdb@163.com"
+        self.sender = "mathdoc@163.com"
+        self.authority = "466066c2a4aac05abcc0c4aacc845e68"
+        self.subject = "数字博士作业"            # 邮件主题
+        self.body = "数字博士作业，包含一个附件。"  # 邮件正文
         # 设置163邮箱的SMTP服务器和端口
-        self.Server = 'smtp.163.com'
-        self.Port = 465  # 163邮箱使用SSL加密
-        self.Home = os.path.expanduser("~")
-        self.Database = os.path.join(self.Home, "Desktop", ".mathdoc", "mathdoc.db")  # 附件文件路径
-        self.postfix = {'移动': '139.com',
-                        '联通': 'wo.com.cn',
-                        '电信': '189.cn'}
+        self.server = 'smtp.163.com'
+        self.port = 465  # 163邮箱使用SSL加密
+        self.home = os.path.expanduser("~")
+        self.desktop = os.path.join(self.home, "Desktop")
+        self.database = os.path.join(self.desktop, ".mathdoc", "mathdoc.db")  # 附件文件路径
 
     def Send(self, receiver=None, attach=None):
         # 创建MIMEMultipart对象
         msg = MIMEMultipart()
-        msg['From'] = self.Sender
+        msg['From'] = self.sender
         if receiver is None:
-            receiver = self.Receiver
+            receiver = self.receiver
         msg['To'] = receiver
-        msg['Subject'] = self.Subject
+        msg['Subject'] = self.subject
         # print(msg['To'])
         # 添加邮件正文
-        if self.Body is not None:
-            msg.attach(MIMEText(self.Body, 'plain'))
+        if self.body is not None:
+            msg.attach(MIMEText(self.body, 'plain'))
 
         # 添加附件
         if os.name == 'posix':
@@ -655,33 +656,31 @@ class Mail():
 
         try:
             # 创建SMTP会话
-            server = smtplib.SMTP_SSL(self.Server, self.Port)  # 使用SSL加密
-            server.login(self.Sender, self.Decode(self.Authority))  # 登录SMTP服务器
-            server.sendmail(self.Sender, receiver, msg.as_string())  # 发送邮件
-            # print(f"{self.Sender} to {receiver}: 邮件发送成功！")
+            server = smtplib.SMTP_SSL(self.server, self.port)  # 使用SSL加密
+            server.login(self.sender, self.Decode(self.authority))  # 登录SMTP服务器
+            server.sendmail(self.sender, receiver, msg.as_string())  # 发送邮件
+            # print(f"{self.sender} to {receiver}: 邮件发送成功！")
             return True
         except Exception as e:
             print(f"邮件发送失败: {e}")
             return False
-        finally:
-            server.quit()
 
     def SendDB(self):
-        # print(self.Sender)
-        # print(self.Receiver)
-        # print(self.Decode(self.Authority))
-        # print(self.Server)
-        # print(self.Port)
-        # print(self.Database)
+        # print(self.sender)
+        # print(self.receiver)
+        # print(self.Decode(self.authority))
+        # print(self.server)
+        # print(self.port)
+        # print(self.database)
         try:
-            self.Send(attach=self.Database)
+            self.Send(attach=self.database)
         except Exception as e:
             print(e)
 
     def SendVCode(self):
-        self.Subject = '验证码'
-        self.Body = '验证码：' + str(random.randint(100000, 999999))
-        self.Receiver = 'sunsdbh@126.com'
+        self.subject = '验证码'
+        self.body = '验证码：' + str(random.randint(100000, 999999))
+        self.receiver = 'sunsdbh@126.com'
         self.Send()
 
     def Encode(self, s):
