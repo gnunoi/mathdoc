@@ -599,7 +599,7 @@ class Workbook:
 
     def Save(self, data):
         rows = len(data)
-        if self.workbook:
+        if self.workbook and rows:
             self.Dump(data)
             self.worksheet.autofilter(0, 0, rows, len(self.title)-1)
             self.workbook.close()
