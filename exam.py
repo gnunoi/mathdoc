@@ -599,9 +599,10 @@ class Workbook:
         rows = len(data)
         print(rows)
         if self.workbook:
-            self.Dump(data)
-            self.worksheet.autofilter(0, 0, rows, 9)
-            # self.workbook.close()
+            print(self.workbook)
+            # self.Dump(data)
+            # self.worksheet.autofilter(0, 0, rows, 9)
+            self.workbook.close()
 
 """
 测试代码
