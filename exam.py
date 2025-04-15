@@ -333,12 +333,23 @@ class Setting:
 """
 类名称：Record
 说明：答题记录
+
+变量：
+db: 数据库对象，从Exam初始化函数传入db参数
+data: 答题记录列表，元素是每次答题记录构成的元组
+
+函数：
+CreateTable(): 创建答题记录数据表
+Append(): 向记录列表追加记录
+Dump(): 将所有答题记录保存到答题记录数据表
+SaveRecord(): 将一条答题记录保存到数据表
+Reorganize(): 重新整理答题记录数据表，保证题号按照数字顺序写入
 """
 class Record:
     def __init__(self, db):
         self.db = db
         self.question_number = 1
-        self.list = []
+        self.data = []
         self.CreateTable()
         # self.Read()
         # self.Write()
@@ -371,7 +382,7 @@ class Record:
                   q.start_time.strftime("%Y-%m-%d %H:%M:%S"),
                   q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
                   q.time_used, q.check_tips, q.answer_tips, q.solution)
-        self.list.append(record)
+        self.data.append(record)
 
     def Dump(self):
         db = self.db
@@ -379,7 +390,7 @@ class Record:
             INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
             StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-            self.list)
+            self.data)
         db.connect.commit()
         self.Reorganize()
 
@@ -409,7 +420,7 @@ class Record:
         except Exception as e:
             print(f"整理Exam01表数据时出错: {e}")
 
-    def SaveDatabase(self, q):
+    def SaveRecord(self, q):
         # q = Question()
         db = self.db
         db.cursor.execute('''
@@ -456,7 +467,6 @@ class Database:
                 print(f"隐藏文件或目录时出错：{e}")
 
     def ExistTable(self, table_name):
-
         # 查询 sqlite_master 表，检查是否存在指定的表格
         self.cursor.execute(f"""
             SELECT name 
@@ -505,8 +515,30 @@ class Database:
         ''')
         self.connect.commit()
 
+"""
+类名称: Workbook
+说明: 处理工作簿相关事项
+
+变量：
+path: 工作部文件的完整路径
+
+函数：
+Open(): 打开工作簿
+Close(): 关闭工作簿
+Write(): 保存工作簿
+"""
 class Workbook:
-    pass
+    def __init__(self):
+        self.path = None
+
+    def Open(self):
+        pass
+
+    def Close(self):
+        pass
+
+    def Write(self, data):
+        pass
 
 """
 测试代码
