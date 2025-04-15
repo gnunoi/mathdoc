@@ -69,7 +69,7 @@ class Exam:
     def Exit(self):
         self.record.Dump()
 
-    def Update(self, type = None, subtype = None, range = None):
+    def UpdateSetting(self, type = None, subtype = None, range = None):
         if type is not None: self.type = type
         if subtype is not None: self.subtype = subtype
         if range is not None: self.range = range
@@ -134,7 +134,7 @@ class Exam:
                  {'type': 1, 'subtype': [2], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
                  ]
-        self.Update(parms[type]['type'], parms[type]['subtype'], parms[type]['range'])
+        self.UpdateSetting(parms[type]['type'], parms[type]['subtype'], parms[type]['range'])
         q = self.q
         print(q.name)
         while True:
