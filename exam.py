@@ -653,7 +653,6 @@ class Mail():
             except Exception as e:
                 print(f"附件读取错误: {e}")
                 return False
-
         try:
             # 创建SMTP会话
             server = smtplib.SMTP_SSL(self.server, self.port)  # 使用SSL加密
@@ -664,6 +663,8 @@ class Mail():
         except Exception as e:
             print(f"邮件发送失败: {e}")
             return False
+        finally:
+            server.quit()
 
     def SendDB(self):
         # print(self.sender)
