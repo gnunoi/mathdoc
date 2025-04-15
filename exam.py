@@ -533,6 +533,7 @@ class Workbook:
         self.home = os.path.expanduser("~")
         self.desktop = os.path.join(self.home, "Desktop")
         self.path = os.path.join(self.desktop, "答题记录")
+        self.Open()
 
     def Open(self):
         if not os.path.exists(self.path):
