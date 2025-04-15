@@ -540,8 +540,8 @@ class Workbook:
         self.workbook = None
         self.worksheet = None
         # print(self.username)
-        self.title = ['题号', '题目', '用户答案', '正确答案', '是否正确',
-            '开始时间', '结束时间', '用时(秒)', '检查提示', '答题提示']
+        self.title = ('题号', '题目', '用户答案', '正确答案', '是否正确',
+            '开始时间', '结束时间', '用时(秒)', '检查提示', '答题提示')
         self.cell_format = {
             "bg_color": "#FFFFFF",
             "border": 1,
@@ -556,7 +556,8 @@ class Workbook:
             "valign": "vcenter",
             "font_size": "12",
         }
-        self.column_widths = [12, 40, 12, 12, 12, 12, 12, 15, 40, 40]
+        self.column_widths = [10, 40, 15, 15, 15, 25, 25, 15, 40, 40]
+        self.zoom = 120 # 放大系数：120%
         self.Open()
 
     def Open(self):
@@ -576,9 +577,9 @@ class Workbook:
 
         full_format = self.workbook.add_format(self.full_format)
         self.worksheet.set_column(0, 100, None, full_format)
-        for col in range(9):
+        for col in range(len(self.title)):
             self.worksheet.set_column(col, col, self.column_widths[col], full_format)
-        self.worksheet.set_zoom(120)
+        self.worksheet.set_zoom(self.zoom) # 工作表放大
         for row in range(0, 1000):
             self.worksheet.set_row(row, 25)
         self.Append(0, self.title)
@@ -592,7 +593,7 @@ class Workbook:
     def Dump(self, data):
         row = 1
         for row_data in data:
-            self.Append(row, row_data)
+            self.Append(row, row_data[:-1])
             row += 1
 
     def Save(self, data):
@@ -600,8 +601,8 @@ class Workbook:
         print(rows)
         if self.workbook:
             print(self.workbook)
-            # self.Dump(data)
-            # self.worksheet.autofilter(0, 0, rows, 9)
+            self.Dump(data)
+            self.worksheet.autofilter(0, 0, rows, len(self.title)-1)
             self.workbook.close()
 
 """
