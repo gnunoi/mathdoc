@@ -575,7 +575,7 @@ class Workbook:
         self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
 
         full_format = self.workbook.add_format(self.full_format)
-        self.worksheet.set_column(0, 100, None, format)
+        self.worksheet.set_column(0, 100, None, full_format)
         for col in range(9):
             self.worksheet.set_column(col, col, self.column_widths[col], full_format)
         self.worksheet.set_zoom(120)
@@ -583,7 +583,6 @@ class Workbook:
             self.worksheet.set_row(row, 25)
         # self.Append(0, self.title)
         # self.worksheet.freeze_panes(1, 1)
-        self.workbook.close()
 
     def Append(self, row, row_data):
         print(row_data)
@@ -597,7 +596,6 @@ class Workbook:
             row += 1
 
     def Save(self, data):
-        pass
         rows = len(data)
         print(rows)
         if self.workbook:
