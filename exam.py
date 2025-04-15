@@ -33,6 +33,9 @@ subtype: 子类型
       3: 除法
       4: 混合运算
 range: 取值范围
+user: 用户对象
+setting: 设置对象
+review: 复习对象
 q: Question对象
 
 函数: 
@@ -49,9 +52,8 @@ class Exam:
         self.range = range
         self.db = Database()
         self.user = User(self.db)
-        self.user.Read()
         self.setting = Setting(self.db)
-
+        self.review = Review(self.db)
         self.q = self.CreateQuestion()
 
 
@@ -61,7 +63,7 @@ class Exam:
         print()
         print(f'Dumping Object: {obj.__class__.__name__}')
         for name, value in obj.__dict__.items():
-            print(f"{name}: {value}")
+            print(f"{type(getattr(obj, name))}: {name}: {value}")
         print()
 
 
@@ -105,6 +107,17 @@ class Exam:
             q.Generate()  # 生成下一题
 
     def Run(self):
+        while not self.user.IsCompleted():
+            print('请先注册')
+            print('输入用户名：')
+            username = input()
+            print('输入邮箱名：')
+            email = input()
+            print('输入手机号：')
+            mobile = input()
+            print('输入年级（1至12）：')
+            grade = input()
+            self.user.Register(username = username, email = email, mobile = mobile, grade = grade)
         print()
         type = 0
         parms = [{'type': 0, 'subtype': [], 'range': [1, 10]},
@@ -151,18 +164,19 @@ class User:
         self.expired_date = None
 
         self.CreateTable()
+        self.Read()
 
     def CreateTable(self):
         db = self.db
         db.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Users (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Uswername TEXT UNIQUE,
+            Username TEXT UNIQUE,
             Email TEXT UNIQUE,
             Mobile TEXT UNIQUE,
             Grade INTEGER,
             RegisterDate TEXT,
-            IsVerified BOOLEAN DEFAULT 0,
+            IsVerified BOOLEAN DEFAULT FALSE,
             MentorEmail TEXT,
             ExpiredDate TEXT
         )
@@ -195,26 +209,56 @@ class User:
             sql = "DELETE FROM Users Where Username = ?"
             db.cursor.execute(sql, (self.username,))
             db.connect.commit()
-            db.cursor.execute("""INSERT INTO Users (Username, Email, Mobile, Grade, RegisterDate, IsVerified, MentorEmail, ExpiredDate) 
-                                VALUES (?, ?, ?, ?, ?, 1, ?, ?)""",
+            db.cursor.execute("""INSERT INTO Users (Username, Email, Mobile, Grade, RegisterDate, 
+                                IsVerified, MentorEmail, ExpiredDate) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                                 (self.username, self.email, self.mobile, self.grade,
-                                 datetime.now().strftime('%Y-%m-%d'), 'gnunoi@163.com',
-                                 (datetime.now() + timedelta(days=180)).strftime('%Y-%m-%d')))
+                                 self.register_date, self.is_verified, self.mentor_email, self.expired_date))
             db.connect.commit()
         except sqlite3.IntegrityError:
             print("用户名或邮箱已存在！")
 
+    def Register(self, username = None, email = None, mobile = None,
+                 grade = None, mentor_email = None):
+        if username is not None: self.username = username
+        if email is not None: self.email = email
+        if mobile is not None: self.mobile = mobile
+        if grade is not None: self.grade = grade
+        if mentor_email is not None: self.mentor_email = mentor_email
+        self.is_verified = True
+        self.register_date = datetime.now().strftime('%Y-%m-%d')
+        self.expired_date = (datetime.now() + timedelta(days=180)).strftime('%Y-%m-%d')
+        if self.IsCompleted():
+            self.Write()
+
+    def IsCompleted(self):
+        if self.username is None: return False
+        if self.email is None: return False
+        if self.mobile is None: return False
+        if self.grade is None: return False
+        if self.register_date is None: return False
+        return True
+
 class Setting:
     def __init__(self, db):
         self.db = db
-        self.type = 0 # 题目类型
-        self.subtype = [2, 0] # 题目子类型
-        self.min_addend = 1 # 加数最小值
-        self.max_addend = 50 # 加数最大值
-        self.min_divisor = 1 # 除数最小值
-        self.max_divisor = 10 # 除数最大值
-
+        self.default = {
+            'type': 0,
+            'subtype': [2, 0],
+            'min_addend': 1,
+            'max_addend': 50,
+            'min_divisor': 1,
+            'max_divisor': 10,
+        }
+        self.type = self.default['type'] # 题目类型
+        self.subtype = self.default['subtype'] # 题目子类型
+        self.min_addend = self.default['min_addend'] # 加数最小值
+        self.max_addend = self.default['max_addend'] # 加数最大值
+        self.min_divisor = self.default['min_divisor'] # 除数最小值
+        self.max_divisor = self.default['max_divisor'] # 除数最大值
         self.CreateTable()
+        self.Read()
+        # self.Write()
 
     def CreateTable(self):
         db = self.db
@@ -227,69 +271,75 @@ class Setting:
         db.connect.commit()
 
     def Read(self):
-        default_settings = {
-            '加减数最小值': '10',
-            '加减数最大值': '30',
-            '乘除数最小值': '2',
-            '乘除数最大值': '10',
-            '运算符': '0',
-            '项数': '2',
-            '题型': '0',
-            '速算类型': '0'
-        }
-
-        for key, default_value in default_settings.items():
-            self.cursor.execute("SELECT Value FROM Settings WHERE Key = ?", (key,))
-            result = self.cursor.fetchone()
-            value = result[0] if result else default_value
-            if key == '加减数最小值':
-                self.num_range[0] = int(value)
-            elif key == '加减数最大值':
-                self.num_range[1] = int(value)
-            elif key == '乘除数最小值':
-                self.num_range[2] = int(value)
-            elif key == '乘除数最大值':
-                self.num_range[3] = int(value)
-            elif key == '运算符':
-                self.operator = int(value)
-            elif key == '项数':
-                self.q.term_count = int(value)
-            elif key == '题型':
-                # print(f'value: {value}')
-                if value is None:
-                    self.q.type = 0
-                else:
-                    self.q.type = int(value)
-                # print('self.q.type = {}'.format(self.q.type))
-            elif key == '速算类型':
-                # print(f'value: {value}')
-                if value is None:
-                    self.q.quick_calc_type = 0
-                else:
-                    self.q.quick_calc_type = int(value)
-                # print('self.q.quick_calc_type = {}'.format(self.q.quick_calc_type))
+        import ast
+        db = self.db
+        for key, value in self.default.items():
+            db.cursor.execute("SELECT Value FROM Setting WHERE Key = ?", (key,))
+            result = db.cursor.fetchone()
+            if result == None:
+                break
+            value = result[0]
+            if key == 'type':
+                self.type = int(value)
+            elif key == 'subtype':
+                self.subtype = ast.literal_eval(value)
+            elif key == 'min_addend':
+                self.min_addend = int(value)
+            elif key == 'max_addend':
+                self.max_addend = int(value)
+            elif key == 'min_divisor':
+                self.min_divisor = int(value)
+            elif key == 'max_divisor':
+                self.max_divisor = int(value)
 
             if not result:
-                self.cursor.execute("INSERT INTO Settings (Key, Value) VALUES (?, ?)", (key, default_value))
-                self.conn.commit()
-
-        self.q.Set(range=self.num_range, user_operators=self.ops[self.operator])
+                db.cursor.execute("INSERT INTO Setting (Key, Value) VALUES (?, ?)", (key, default_value))
+                db.connect.commit()
 
     def Write(self):
+        db = self.db
         settings = {
-            '加减数最小值': str(self.q.range[0]),
-            '加减数最大值': str(self.q.range[1]),
-            '乘除数最小值': str(self.q.range[2]),
-            '乘除数最大值': str(self.q.range[3]),
-            '运算符': str(self.operator),
-            '项数': str(self.q.term_count),
-            '题型': str(self.q.type),
-            '速算类型': str(self.q.quick_calc_type)
+            'type': str(self.type),
+            'subtype': str(self.subtype),
+            'min_addend': str(self.min_addend),
+            'max_addend': str(self.max_addend),
+            'min_divisor': str(self.min_divisor),
+            'max_divisor': str(self.max_divisor),
         }
 
         for key, value in settings.items():
-            self.cursor.execute("INSERT OR REPLACE INTO Settings (Key, Value) VALUES (?, ?)", (key, value))
-        self.conn.commit()
+            db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))
+        db.connect.commit()
+
+class Review:
+    def __init__(self, db):
+        self.db = db
+        self.CreateTable()
+        # self.Read()
+        # self.Write()
+
+    def CreateTable(self):
+        db = self.db
+        db.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Exam01 (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            QuestionNumber INTEGER,
+            Question TEXT,
+            UserAnswer TEXT,
+            CorrectAnswer TEXT,
+            IsCorrect TEXT,
+            StartTime TEXT,
+            EndTime TEXT,
+            TimeUsed REAL,
+            Tips TEXT,
+            AnswerTips TEXT,
+            Solution TEXT
+        )
+        ''')
+        db.AddColumn('Exam01', 'AnswerTips', 'TEXT')
+        db.AddColumn('Exam01', 'Solution', 'TEXT')
+        db.connect.commit()
+
 
 class Database:
     def __init__(self):
@@ -311,7 +361,6 @@ class Database:
         # print(f'Database file: {self.path}')
         self.connect = sqlite3.connect(self.path)
         self.cursor = self.connect.cursor()
-        self.CreateExamTable()
         self.CreateMailTable()
         # self.ShowTables()
 
@@ -350,27 +399,6 @@ class Database:
                 pass
             else:
                 print(f"添加字段时出错: {e}")
-
-    def CreateExamTable(self):
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Exam01 (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            QuestionNumber INTEGER,
-            Question TEXT,
-            UserAnswer TEXT,
-            CorrectAnswer TEXT,
-            IsCorrect TEXT,
-            StartTime TEXT,
-            EndTime TEXT,
-            TimeUsed REAL,
-            Tips TEXT,
-            AnswerTips, TEXT,
-            Solution, TEXT
-        )
-        ''')
-        self.AddColumn('Exam01', 'AnswerTips', 'TEXT')
-        self.AddColumn('Exam01', 'Solution', 'TEXT')
-        self.connect.commit()
 
     def CreateMailTable(self):
         self.cursor.execute('''
