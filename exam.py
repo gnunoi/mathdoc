@@ -373,6 +373,11 @@ class Record:
                   q.time_used, q.check_tips, q.answer_tips, q.solution)
         self.list.append(record)
 
+    def Dump(self):
+        db = self.db
+
+        db.connect.commit()
+
     def SaveDatabase(self, q):
         # q = Question()
         db = self.db
