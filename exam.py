@@ -3,6 +3,7 @@ import sqlite3
 import os
 from datetime import *
 import xlsxwriter
+from mail import *
 """
 类名称: Exam
 变量: 
@@ -55,6 +56,7 @@ class Exam:
         self.setting = Setting(self.db)
         self.record = Record(self.db)
         self.wb = Workbook(self.user.username)
+        self.mail = Mail()
         self.q = self.CreateQuestion()
 
 
