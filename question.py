@@ -14,7 +14,6 @@ from itertools import combinations
 变量: 
 answer_tips: 答题提示
 check_tips: 检查提示
-cls: 题目类别，包括类型、描述、各种生成函数
 comments: 答题说明
 correct_answer: 正确答案
 end_time: 答题结束时间
