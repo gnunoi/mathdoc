@@ -61,7 +61,7 @@ class Question():
         self.comments = None
         self.end_time = None
         self.expression = None
-        self.is_correct = None
+        self.is_correct = False
         self.name = None
         self.numbers = []
         self.operators = []
@@ -94,6 +94,7 @@ class Question():
         return np.random.randint(a, b)
 
     def Generate(self):
+        self.is_correct = False
         self.start_time = datetime.now()
         pass
 
