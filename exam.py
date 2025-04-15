@@ -35,7 +35,7 @@ subtype: 子类型
 range: 取值范围
 user: 用户对象
 setting: 设置对象
-review: 复习对象
+Record: 复习对象
 q: Question对象
 
 函数: 
@@ -53,7 +53,7 @@ class Exam:
         self.db = Database()
         self.user = User(self.db)
         self.setting = Setting(self.db)
-        self.review = Review(self.db)
+        self.record = Record(self.db)
         self.q = self.CreateQuestion()
 
 
@@ -97,7 +97,8 @@ class Exam:
             if q.answer_tips is not None:
                 print(f'答题提示：{q.answer_tips}')
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
-            self.review.SaveDatabase(q)
+            self.record.Append(q)
+            self.record.SaveDatabase(q)
         else: # 回答正确
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
@@ -105,8 +106,9 @@ class Exam:
             else: # 所有QuestionRL的题目：self.type == 0
                 print('回答正确: {} = {}'.format(q.user_input, q.correct_answer))
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
-            self.review.SaveDatabase(q)
-            self.review.question_number += 1
+            self.record.Append(q)
+            self.record.SaveDatabase(q)
+            self.record.question_number += 1
             q.Generate()  # 生成下一题
 
     def Run(self):
@@ -145,6 +147,7 @@ class Exam:
                 break
             self.SubmitAnswer(q.user_input)
             print()
+        print(self.record.list)
 
 
 """
@@ -327,10 +330,15 @@ class Setting:
         if self.max_divisor is None: return False
         return True
 
-class Review:
+"""
+类名称：Record
+说明：答题记录
+"""
+class Record:
     def __init__(self, db):
         self.db = db
         self.question_number = 1
+        self.list = []
         self.CreateTable()
         # self.Read()
         # self.Write()
@@ -356,6 +364,14 @@ class Review:
         db.AddColumn('Exam01', 'AnswerTips', 'TEXT')
         db.AddColumn('Exam01', 'Solution', 'TEXT')
         db.connect.commit()
+
+    def Append(self, q):
+        record = (self.question_number, q.question, str(q.user_answer), str(q.correct_answer),
+                  "正确" if q.is_correct else "错误",
+                  q.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                  q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
+                  q.time_used, q.check_tips, q.answer_tips, q.solution)
+        self.list.append(record)
 
     def SaveDatabase(self, q):
         # q = Question()
