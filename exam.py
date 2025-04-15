@@ -54,7 +54,7 @@ class Exam:
         self.user = User(self.db)
         self.setting = Setting(self.db)
         self.record = Record(self.db)
-        self.wb = Workbook()
+        self.wb = Workbook(self.user.username)
         self.q = self.CreateQuestion()
 
 
@@ -529,16 +529,57 @@ Close(): 关闭工作簿
 Write(): 保存工作簿
 """
 class Workbook:
-    def __init__(self):
+    def __init__(self, username):
+        self.username = username
         self.home = os.path.expanduser("~")
         self.desktop = os.path.join(self.home, "Desktop")
         self.path = os.path.join(self.desktop, "答题记录")
+        self.filename = None
+        self.fullpath = None
+        # print(self.username)
         self.Open()
 
     def Open(self):
         if not os.path.exists(self.path):
             os.mkdir(self.path)
-        pass
+        else:
+            # print(f'"{self.path}"目录已存在')
+            pass
+
+        username = self.username
+        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.filename = f"{self.username}_{current_datetime}.xlsx"
+        self.fullpath = os.path.join(self.path, self.filename)
+
+        self.workbook = xlsxwriter.Workbook(self.fullpath)
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
+
+        format = self.workbook.add_format({
+            "bg_color": "#FFFFFF",
+            "align": "center",
+            "valign": "vcenter",
+            "font_size": "12",
+        })
+        self.worksheet.set_column(0, 100, None, format)
+        # for col in range(9):
+        #     self.worksheet.set_column(col, col, self.column_widths[col], format)
+        self.worksheet.set_zoom(120)
+        for row in range(0, 1000):
+            self.worksheet.set_row(row, 25)
+        self.cell_format = self.workbook.add_format({
+            "bg_color": "#FFFFFF",
+            "border": 1,
+            "border_color": "black",
+            "align": "center",
+            "valign": "vcenter",
+            "font_size": "12",
+        })
+        # self.Append([
+        #     '题号', '题目', '用户答案', '正确答案', '是否正确',
+        #     '开始时间', '结束时间', '用时(秒)', '检查提示'
+        # ])
+        self.worksheet.freeze_panes(1, 1)
 
     def Close(self):
         pass
