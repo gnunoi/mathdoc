@@ -99,6 +99,14 @@ class Question():
         return np.random.randint(a, b)
 
     def BeforeGenerate(self):
+        """
+        以下变量不能重新初始化
+        comments
+        name
+        type
+        subtype
+        range
+        """
         self.answer_tips = None
         self.check_tips = None
         self.correct_answer = None
