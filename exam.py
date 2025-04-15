@@ -78,9 +78,48 @@ class Exam:
         self.record.Dump()
         if len(self.record.data):
             self.wb.Save(self.record.data)
-            self.SendHomework()
+            self.SendRecords()
 
-    def SendHomework(self):
+    def ExportRecords(self, type):
+        db = self.db
+        path = None
+        name = ['习题本', '错题本', '难题本']
+        if type < 0 or type > 2:
+            return
+        else:
+            current_date = datetime.now().strftime("%Y%m%d")
+            path = os.path.join(self.wb.path, str(name[type])+f'{current_date}.xlsx')
+            print(path)
+            table_name = 'Exam01'
+            db.cursor.execute(f"PRAGMA table_info({table_name})")
+            columns = db.cursor.fetchall()
+            column_names = [column[1] for column in columns]
+            selected_columns = column_names[1:]
+            query = f"SELECT {', '.join(selected_columns)} FROM {table_name}"
+            print(query)
+
+        if type == 0:
+            db.cursor.execute(f"{query}")
+        elif type == 1:
+            db.cursor.execute(f"{query} WHERE IsCorrect = '错误'")
+        elif type == 2:
+            db.cursor.execute(f"{query} ORDER BY TimeUsed DESC")
+            time_used_list = db.cursor.fetchall()
+            total_count = len(time_used_list)
+            threshold_index = min(int(total_count * 0.1), 50)
+            if threshold_index == 0:
+                threshold = float('inf')
+            else:
+                threshold = time_used_list[threshold_index - 1][7] if time_used_list else float('inf')
+            db.cursor.execute(f"{query} WHERE TimeUsed >= {threshold} ORDER BY TimeUsed DESC")
+        data = db.cursor.fetchall()
+        for i in range(len(data)):
+            print(f'{i}: {data[i]}')
+        wb = Workbook(fullpath = path)
+        wb.Save(data) # dataframe
+
+
+    def SendRecords(self):
         local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.mail.subject = f'{self.user.username}[{self.user.email}]在{local_time}发来的作业'
         self.mail.Send(receiver=self.user.email, attach=self.wb.fullpath)
@@ -160,9 +199,20 @@ class Exam:
             print(q.start_time)
             print(q.question)
             q.user_input = input()
-            if q.user_input.upper() == 'EXIT' or q.user_input.upper() == 'QUIT':
+            upper_input = q.user_input.upper()
+            if upper_input == 'EXIT' or upper_input == 'QUIT':
                 print('用户退出程序')
                 break
+            print(upper_input)
+            if upper_input == 'EXPORT0':
+                self.ExportRecords(0)
+                continue
+            elif upper_input == 'EXPORT1':
+                self.ExportRecords(1)
+                continue
+            elif upper_input == 'EXPORT2':
+                self.ExportRecords(2)
+                continue
             self.SubmitAnswer(q.user_input)
             print()
         self.Exit() # 处理程序退出的收尾工作，如保存数据，发送邮件。
@@ -544,13 +594,13 @@ Close(): 关闭工作簿
 Write(): 保存工作簿
 """
 class Workbook:
-    def __init__(self, username):
+    def __init__(self, username = None, fullpath = None):
         self.username = username
         self.home = os.path.expanduser("~")
         self.desktop = os.path.join(self.home, "Desktop")
         self.path = os.path.join(self.desktop, "答题记录")
         self.filename = None
-        self.fullpath = None
+        self.fullpath = fullpath
         self.workbook = None
         self.worksheet = None
         self.max_rows = 65536 # xlsx工作表共有2^20 = 1048576行
@@ -582,14 +632,13 @@ class Workbook:
         else:
             # print(f'"{self.path}"目录已存在')
             pass
-
-        current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.filename = f"{self.username}_{current_datetime}.xlsx"
-        self.fullpath = os.path.join(self.path, self.filename)
+        if self.fullpath is None:
+            current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
+            self.filename = f"{self.username}_{current_datetime}.xlsx"
+            self.fullpath = os.path.join(self.path, self.filename)
 
         self.workbook = xlsxwriter.Workbook(self.fullpath)
-        current_date = datetime.now().strftime("%Y-%m-%d")
-        self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
+        self.worksheet = self.workbook.add_worksheet("答题记录")
 
         full_format = self.workbook.add_format(self.full_format)
         self.worksheet.set_column(0, self.max_cols, None, full_format)
