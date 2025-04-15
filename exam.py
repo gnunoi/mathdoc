@@ -581,8 +581,8 @@ class Workbook:
         self.worksheet.set_zoom(120)
         for row in range(0, 1000):
             self.worksheet.set_row(row, 25)
-        # self.Append(0, self.title)
-        # self.worksheet.freeze_panes(1, 1)
+        self.Append(0, self.title)
+        self.worksheet.freeze_panes(1, 1)
 
     def Append(self, row, row_data):
         print(row_data)
