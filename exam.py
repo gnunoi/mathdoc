@@ -539,7 +539,11 @@ class Workbook:
         self.fullpath = None
         self.workbook = None
         self.worksheet = None
-        # print(self.username)
+        self.max_rows = 10000
+        self.max_cols = 256
+        self.row_height = 25
+        self.column_widths = [10, 40, 15, 15, 15, 25, 25, 15, 40, 40]
+        self.zoom = 120 # 放大系数：120%
         self.title = ('题号', '题目', '用户答案', '正确答案', '是否正确',
             '开始时间', '结束时间', '用时(秒)', '检查提示', '答题提示')
         self.cell_format = {
@@ -556,8 +560,6 @@ class Workbook:
             "valign": "vcenter",
             "font_size": "12",
         }
-        self.column_widths = [10, 40, 15, 15, 15, 25, 25, 15, 40, 40]
-        self.zoom = 120 # 放大系数：120%
         self.Open()
 
     def Open(self):
@@ -576,17 +578,17 @@ class Workbook:
         self.worksheet = self.workbook.add_worksheet("答题记录{}".format(current_date))
 
         full_format = self.workbook.add_format(self.full_format)
-        self.worksheet.set_column(0, 100, None, full_format)
+        self.worksheet.set_column(0, self.max_cols, None, full_format)
         for col in range(len(self.title)):
             self.worksheet.set_column(col, col, self.column_widths[col], full_format)
         self.worksheet.set_zoom(self.zoom) # 工作表放大
-        for row in range(0, 1000):
-            self.worksheet.set_row(row, 25)
+        for row in range(0, self.max_rows):
+            self.worksheet.set_row(row, self.row_height) # 设置行高
         self.Append(0, self.title)
         self.worksheet.freeze_panes(1, 1)
 
     def Append(self, row, row_data):
-        print(row_data)
+        # print(row_data)
         cell_format = self.workbook.add_format(self.cell_format)
         self.worksheet.write_row(row, 0, row_data, cell_format)
 
