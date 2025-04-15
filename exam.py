@@ -49,11 +49,11 @@ class Exam:
         self.range = range
         self.db = Database()
         self.user = User(self.db)
-        self.q = self.CreateQuestion()
         self.user.Read()
-        self.Dump(self.user)
-        self.user.Write()
-        self.Dump(self.user)
+        self.setting = Setting(self.db)
+
+        self.q = self.CreateQuestion()
+
 
     def Dump(self, obj = None):
         if obj == None:
@@ -106,7 +106,7 @@ class Exam:
 
     def Run(self):
         print()
-        type = 1
+        type = 0
         parms = [{'type': 0, 'subtype': [], 'range': [1, 10]},
                  {'type': 1, 'subtype': [2], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
@@ -205,7 +205,8 @@ class User:
             print("用户名或邮箱已存在！")
 
 class Setting:
-    def __int__(self):
+    def __init__(self, db):
+        self.db = db
         self.type = 0 # 题目类型
         self.subtype = [2, 0] # 题目子类型
         self.min_addend = 1 # 加数最小值
@@ -213,11 +214,82 @@ class Setting:
         self.min_divisor = 1 # 除数最小值
         self.max_divisor = 10 # 除数最大值
 
+        self.CreateTable()
+
+    def CreateTable(self):
+        db = self.db
+        db.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Setting (
+            Key TEXT PRIMARY KEY,
+            Value TEXT
+        )
+        ''')
+        db.connect.commit()
+
     def Read(self):
-        pass
+        default_settings = {
+            '加减数最小值': '10',
+            '加减数最大值': '30',
+            '乘除数最小值': '2',
+            '乘除数最大值': '10',
+            '运算符': '0',
+            '项数': '2',
+            '题型': '0',
+            '速算类型': '0'
+        }
+
+        for key, default_value in default_settings.items():
+            self.cursor.execute("SELECT Value FROM Settings WHERE Key = ?", (key,))
+            result = self.cursor.fetchone()
+            value = result[0] if result else default_value
+            if key == '加减数最小值':
+                self.num_range[0] = int(value)
+            elif key == '加减数最大值':
+                self.num_range[1] = int(value)
+            elif key == '乘除数最小值':
+                self.num_range[2] = int(value)
+            elif key == '乘除数最大值':
+                self.num_range[3] = int(value)
+            elif key == '运算符':
+                self.operator = int(value)
+            elif key == '项数':
+                self.q.term_count = int(value)
+            elif key == '题型':
+                # print(f'value: {value}')
+                if value is None:
+                    self.q.type = 0
+                else:
+                    self.q.type = int(value)
+                # print('self.q.type = {}'.format(self.q.type))
+            elif key == '速算类型':
+                # print(f'value: {value}')
+                if value is None:
+                    self.q.quick_calc_type = 0
+                else:
+                    self.q.quick_calc_type = int(value)
+                # print('self.q.quick_calc_type = {}'.format(self.q.quick_calc_type))
+
+            if not result:
+                self.cursor.execute("INSERT INTO Settings (Key, Value) VALUES (?, ?)", (key, default_value))
+                self.conn.commit()
+
+        self.q.Set(range=self.num_range, user_operators=self.ops[self.operator])
 
     def Write(self):
-        pass
+        settings = {
+            '加减数最小值': str(self.q.range[0]),
+            '加减数最大值': str(self.q.range[1]),
+            '乘除数最小值': str(self.q.range[2]),
+            '乘除数最大值': str(self.q.range[3]),
+            '运算符': str(self.operator),
+            '项数': str(self.q.term_count),
+            '题型': str(self.q.type),
+            '速算类型': str(self.q.quick_calc_type)
+        }
+
+        for key, value in settings.items():
+            self.cursor.execute("INSERT OR REPLACE INTO Settings (Key, Value) VALUES (?, ?)", (key, value))
+        self.conn.commit()
 
 class Database:
     def __init__(self):
@@ -239,7 +311,6 @@ class Database:
         # print(f'Database file: {self.path}')
         self.connect = sqlite3.connect(self.path)
         self.cursor = self.connect.cursor()
-        self.CreateSettingsTable()
         self.CreateExamTable()
         self.CreateMailTable()
         # self.ShowTables()
@@ -299,15 +370,6 @@ class Database:
         ''')
         self.AddColumn('Exam01', 'AnswerTips', 'TEXT')
         self.AddColumn('Exam01', 'Solution', 'TEXT')
-        self.connect.commit()
-
-    def CreateSettingsTable(self):
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Settings (
-            Key TEXT PRIMARY KEY,
-            Value TEXT
-        )
-        ''')
         self.connect.commit()
 
     def CreateMailTable(self):

@@ -116,14 +116,26 @@ class Question():
         self.start_time = datetime.now()
 
     def ConvertToFraction(self, expression):
-        pattern = r'(?<!\w)(-?\d+\.?\d*|\.\d+)(?!\w)'
+        """
+        将表达式中的每个数字转换为 Fraction 类型，并形成新的表达式。
+
+        参数:
+            expression (str): 输入的数学表达式，例如 "3 + 4 * 5.5"
+
+        返回:
+            str: 转换后的表达式，例如 "Fraction(3) + Fraction(4) * Fraction(5.5)"
+        """
+        # 使用正则表达式匹配表达式中的数字（包括整数、浮点数和科学计数法）
+        pattern = r'(?<!\w)(-?\d+\.?\d*|\.\d+)([eE][-+]?\d+)?(?!\w)'
+
+        # 替换每个数字为 Fraction(数字)
         def replace_with_fraction(match):
-            num_str = match.group(0)
-            if num_str.startswith('.'):
-                num_str = '0' + num_str
-            return f'Fraction({num_str})'
-        converted_expression = re.sub(pattern, replace_with_fraction, expression)
-        return converted_expression
+            number = match.group(0)
+            return f"Fraction('{number}')"
+
+        new_expression = re.sub(pattern, replace_with_fraction, expression)
+        # print(new_expression)
+        return new_expression
 
     def ProcessUserInput(self):
         replace_map = {
