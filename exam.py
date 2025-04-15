@@ -69,6 +69,7 @@ class Exam:
 
     def Exit(self):
         self.record.Dump()
+        self.wb.Save(self.record.data)
 
     def UpdateSetting(self, type = None, subtype = None, range = None):
         if type is not None: self.type = type
@@ -536,6 +537,8 @@ class Workbook:
         self.path = os.path.join(self.desktop, "答题记录")
         self.filename = None
         self.fullpath = None
+        self.workbook = None
+        self.worksheet = None
         # print(self.username)
         self.Open()
 
@@ -581,11 +584,10 @@ class Workbook:
         # ])
         self.worksheet.freeze_panes(1, 1)
 
-    def Close(self):
-        pass
-
-    def Write(self, data):
-        pass
+    def Save(self, data):
+        if self.workbook:
+            # self.worksheet.autofilter(0, 0, self.current_row - 1, 8)
+            self.workbook.close()
 
 """
 测试代码
