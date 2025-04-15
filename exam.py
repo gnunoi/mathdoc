@@ -110,6 +110,7 @@ class Exam:
             if threshold_index == 0:
                 threshold = float('inf')
             else:
+                # time_used_list[threshold_index - 1][7]：注意7是硬编码，对应导出数据的TimeUsed列
                 threshold = time_used_list[threshold_index - 1][7] if time_used_list else float('inf')
             db.cursor.execute(f"{query} WHERE TimeUsed >= {threshold} ORDER BY TimeUsed DESC")
         data = db.cursor.fetchall()
