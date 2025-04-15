@@ -382,6 +382,33 @@ class Record:
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             self.list)
         db.connect.commit()
+        self.Reorganize()
+
+    def Reorganize(self):
+        db = self.db
+        try:
+            db.cursor.execute("SELECT * FROM Exam01 ORDER BY ID")
+            data = db.cursor.fetchall()
+
+            if not data:
+                print("Exam01表中没有数据需要整理")
+                return
+
+            new_question_number = 1
+            previous_question = data[0][2]
+
+            for row in data:
+                current_id = row[0]
+                current_question = row[2]
+
+                if current_question != previous_question:
+                    new_question_number += 1
+                db.cursor.execute("UPDATE Exam01 SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
+                previous_question = current_question
+            db.connect.commit()
+            print("Exam01表数据整理完成")
+        except Exception as e:
+            print(f"整理Exam01表数据时出错: {e}")
 
     def SaveDatabase(self, q):
         # q = Question()
