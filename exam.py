@@ -98,7 +98,7 @@ class Exam:
                 print(f'答题提示：{q.answer_tips}')
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
-            self.record.SaveDatabase(q)
+            # self.record.SaveDatabase(q)
         else: # 回答正确
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
@@ -107,7 +107,7 @@ class Exam:
                 print('回答正确: {} = {}'.format(q.user_input, q.correct_answer))
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
-            self.record.SaveDatabase(q)
+            # self.record.SaveDatabase(q)
             self.record.question_number += 1
             q.Generate()  # 生成下一题
 
@@ -148,6 +148,7 @@ class Exam:
             self.SubmitAnswer(q.user_input)
             print()
         print(self.record.list)
+        self.record.Dump()
 
 
 """
@@ -375,7 +376,11 @@ class Record:
 
     def Dump(self):
         db = self.db
-
+        db.cursor.executemany('''
+            INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
+            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            self.list)
         db.connect.commit()
 
     def SaveDatabase(self, q):
