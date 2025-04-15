@@ -74,6 +74,12 @@ class Mail():
         except Exception as e:
             print(e)
 
+    def SendVCode(self):
+        self.Subject = '验证码'
+        self.Body = '验证码：' + str(random.randint(100000, 999999))
+        self.Receiver = 'sunsdbh@126.com'
+        self.Send()
+
     def Encode(self, s):
         rs = s[::-1] # 字符串逆序
         # 将每个字符的 ASCII 值-20再*2，并以十六进制格式拼接成一个字符串
@@ -107,8 +113,5 @@ class Mail():
 # 示例用法
 if __name__ == "__main__":
     m = Mail()
-    m.Subject='验证码'
-    m.Body='验证码：' + str(random.randint(100000,999999))
-    m.Receiver = 'sunsdbh@126.com'
-    m.Send()
+    m.SendVCode()
     # m.SendDB()
