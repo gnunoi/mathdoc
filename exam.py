@@ -540,8 +540,8 @@ class Workbook:
         self.workbook = None
         self.worksheet = None
         # print(self.username)
-        self.title = ('题号', '题目', '用户答案', '正确答案', '是否正确',
-            '开始时间', '结束时间', '用时(秒)', '检查提示', '答题提示')
+        self.title = ['题号', '题目', '用户答案', '正确答案', '是否正确',
+            '开始时间', '结束时间', '用时(秒)', '检查提示', '答题提示']
         self.cell_format = {
             "bg_color": "#FFFFFF",
             "border": 1,
@@ -581,8 +581,9 @@ class Workbook:
         self.worksheet.set_zoom(120)
         for row in range(0, 1000):
             self.worksheet.set_row(row, 25)
-        self.Append(0, self.title)
-        self.worksheet.freeze_panes(1, 1)
+        # self.Append(0, self.title)
+        # self.worksheet.freeze_panes(1, 1)
+        self.workbook.close()
 
     def Append(self, row, row_data):
         print(row_data)
@@ -596,6 +597,7 @@ class Workbook:
             row += 1
 
     def Save(self, data):
+        pass
         rows = len(data)
         print(rows)
         if self.workbook:
