@@ -25,12 +25,13 @@ numbers: 操作数的数组
 operators: 运算符的数组
 question: 题目的题干
 range: 取值范围
+solution: 各种解法
 start_time: 答题开始时间
 subtype: 数组，分别是题目子类型及更详细的分类
+time_used: 解题所用时间
 type: 题目类型编号
 user_input: 用户输入的原始答案
 user_answer: 整理并计算后的用户答案
-used_time: 提提所用时间
 
 函数: 
 Dump(): 输出所有成员
@@ -54,24 +55,26 @@ SuperName(): 获取父类名称
 """
 class Question():
     def __init__(self, type=0, subtype=[0], range=[1, 10]):
-        self.type = type
-        self.name = None
-        self.subtype = subtype
-        self.range = range
-        self.numbers = []
-        self.operators = []
-        self.expression = None
-        self.question = None
-        self.user_input = None
-        self.user_answer = None
+        self.answer_tips = None
+        self.check_tips = None
         self.correct_answer = None
         self.comments = None
-        self.check_tips = None
-        self.answer_tips = None
-        self.is_correct = None
-        self.start_time = None
         self.end_time = None
-        self.used_time = None
+        self.expression = None
+        self.is_correct = None
+        self.name = None
+        self.numbers = []
+        self.operators = []
+        self.question = None
+        self.range = range
+        self.start_time = None
+        self.solution = None
+        self.subtype = subtype
+        self.time_used = None
+        self.type = type
+        self.user_input = None
+        self.user_answer = None
+
 
     def ClassName(self):
         return self.__class__.__name__
@@ -112,7 +115,7 @@ class Question():
 
     def JudgeAnswer(self):
         self.end_time = datetime.now()
-        self.used_time = round((self.end_time - self.start_time).total_seconds(), 1)
+        self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
         self.start_time = datetime.now()
 
     def ConvertToFraction(self, expression):
@@ -164,12 +167,12 @@ class Question():
 
 """
 类名称：Question24Point
-题目类型：24点游戏
+题目类型：计算24点
 """
 class Question24Point(Question):
     def __init__(self, range=[1, 10]):
         super().__init__(type=0, subtype=[0], range=range)
-        self.name = "24点游戏"
+        self.name = "计算24点"
         self.comments = "输入表达式，使得表达式的值为24。如: (5+3)*(8-5)。"
         self.Generate()
 
@@ -207,7 +210,7 @@ class Question24Point(Question):
         return None
 
     def Question(self):
-        self.question = f'24点游戏: {self.numbers}'
+        self.question = f'计算24点: {self.numbers}'
         return self.question
 
     def Answer(self):
@@ -229,7 +232,7 @@ class Question24Point(Question):
         return self.check_tips
 
     def AnswerTips(self):
-        # print('24点游戏：AnswerTips()')
+        # print('计算24点：AnswerTips()')
         self.answer_tips = f'{self.Validate24Point()}'
         return self.answer_tips
 
@@ -242,7 +245,8 @@ class Question24Point(Question):
             return False
         if not self.CheckUserInput():
             return False
-        return user_answer == self.correct_answer
+        self.is_correct = user_answer == self.correct_answer
+        return self.is_correct
 
 
 """
@@ -345,7 +349,8 @@ class QuestionLR(Question):
         super().JudgeAnswer()
         try:
             user_answer = eval(self.ConvertToFraction(self.user_answer))
-            return user_answer == self.correct_answer
+            self.is_correct = user_answer == self.correct_answer
+            return self.is_correct
         except:
             return False
 
