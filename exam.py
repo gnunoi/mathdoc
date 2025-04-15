@@ -437,16 +437,15 @@ class Record:
 class Database:
     def __init__(self):
         # 初始化 SQLite 数据库
-        self.home = os.path.expanduser("~")
-        # print(f'home direcotry: {self.home}')
         self.path = None
         self.connect = None
         self.cursor = None
         self.InitDB()
 
     def InitDB(self):
-        desktop_path = os.path.join(self.home, "Desktop")
-        db_folder = os.path.join(desktop_path, ".mathdoc")
+        home = os.path.expanduser("~")
+        desktop = os.path.join(home, "Desktop")
+        db_folder = os.path.join(desktop, ".mathdoc")
         if not os.path.exists(db_folder):
             os.mkdir(db_folder)
         self.Hide(db_folder)
@@ -529,7 +528,9 @@ Write(): 保存工作簿
 """
 class Workbook:
     def __init__(self):
-        self.path = None
+        home = os.path.expanduser("~")
+        desktop = os.path.join(home, "Desktop")
+        self.path = os.path.join(desktop, "答题记录")
 
     def Open(self):
         pass
