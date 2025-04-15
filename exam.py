@@ -585,6 +585,8 @@ class Workbook:
         self.worksheet.freeze_panes(1, 1)
 
     def Save(self, data):
+        rows = len(data)
+        print(rows)
         if self.workbook:
             # self.worksheet.autofilter(0, 0, self.current_row - 1, 8)
             self.workbook.close()
