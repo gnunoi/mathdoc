@@ -113,7 +113,7 @@ class Exam:
             self.record.question_number += 1
             q.Generate()  # 生成下一题
 
-    def Run(self):
+    def Register(self):
         while not self.user.IsCompleted():
             print('请先注册')
             print('输入用户名：')
@@ -125,8 +125,11 @@ class Exam:
             print('输入年级（1至12）：')
             grade = input()
             self.user.Register(username = username, email = email, mobile = mobile, grade = grade)
+
+    def Run(self):
+        self.Register()
         print()
-        type = 1
+        type = 2
         parms = [{'type': 0, 'subtype': [], 'range': [1, 10]},
                  {'type': 1, 'subtype': [2], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
@@ -134,10 +137,6 @@ class Exam:
         self.Update(parms[type]['type'], parms[type]['subtype'], parms[type]['range'])
         q = self.q
         print(q.name)
-        # 初始化题目
-        if q.Generate() == False:
-            return
-        # q.Dump()
         while True:
             print(q.comments)
             print("输入EXIT或QUIT退出程序")
