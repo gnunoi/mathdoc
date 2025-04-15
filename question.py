@@ -368,11 +368,6 @@ class QuestionQC(QuestionLR):
         self.Generate()
 
     def Instance(self):
-        """
-        :return:
-            False，错误
-            True，正确
-        """
         self.numbers = []
         self.operators = []
         subtype = self.subtype[0]
@@ -503,7 +498,6 @@ class Question4AO(QuestionLR):
     def Instance(self):
         self.numbers = []
         self.operators = []
-        # ops = ['+', '-', '*', '/']
         ops = [['+'], ['-'], ['*'], ['/'], ['+', '-', '*', '/']]
         term_count = self.subtype[0] + 2
         try:
