@@ -34,7 +34,8 @@ subtype: 子类型
 range: 取值范围
 user: 用户对象
 setting: 设置对象
-Record: 复习对象
+record: 答题记录对象
+wb: 工作簿对象
 q: Question对象
 
 函数: 
@@ -53,6 +54,7 @@ class Exam:
         self.user = User(self.db)
         self.setting = Setting(self.db)
         self.record = Record(self.db)
+        self.wb = Workbook()
         self.q = self.CreateQuestion()
 
 
@@ -519,7 +521,7 @@ class Database:
 说明: 处理工作簿相关事项
 
 变量：
-path: 工作部文件的完整路径
+path: 保存工作部文件的文件夹的完整路径
 
 函数：
 Open(): 打开工作簿
@@ -528,11 +530,13 @@ Write(): 保存工作簿
 """
 class Workbook:
     def __init__(self):
-        home = os.path.expanduser("~")
-        desktop = os.path.join(home, "Desktop")
-        self.path = os.path.join(desktop, "答题记录")
+        self.home = os.path.expanduser("~")
+        self.desktop = os.path.join(self.home, "Desktop")
+        self.path = os.path.join(self.desktop, "答题记录")
 
     def Open(self):
+        if not os.path.exists(self.path):
+            os.mkdir(self.path)
         pass
 
     def Close(self):
