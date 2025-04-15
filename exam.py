@@ -88,36 +88,32 @@ class Exam:
             return
         else:
             current_date = datetime.now().strftime("%Y%m%d")
-            path = os.path.join(self.wb.path, str(name[type])+f'{current_date}.xlsx')
-            print(path)
+            filename = str(name[type])+f'{current_date}.xlsx'
+            # print(filename)
             table_name = 'Exam01'
             db.cursor.execute(f"PRAGMA table_info({table_name})")
             columns = db.cursor.fetchall()
             column_names = [column[1] for column in columns]
             selected_columns = column_names[1:]
             query = f"SELECT {', '.join(selected_columns)} FROM {table_name}"
-            print(query)
+            # print(query)
 
         if type == 0:
             db.cursor.execute(f"{query}")
         elif type == 1:
             db.cursor.execute(f"{query} WHERE IsCorrect = '错误'")
         elif type == 2:
-            db.cursor.execute(f"{query} ORDER BY TimeUsed DESC")
+            db.cursor.execute(f"SELECT TimeUsed FROM {table_name} ORDER BY TimeUsed DESC")
             time_used_list = db.cursor.fetchall()
             total_count = len(time_used_list)
             threshold_index = min(int(total_count * 0.1), 50)
-            if threshold_index == 0:
-                threshold = float('inf')
-            else:
-                # time_used_list[threshold_index - 1][7]：注意7是硬编码，对应导出数据的TimeUsed列
-                threshold = time_used_list[threshold_index - 1][7] if time_used_list else float('inf')
+            threshold = time_used_list[threshold_index - 1][0] if time_used_list else 0
             db.cursor.execute(f"{query} WHERE TimeUsed >= {threshold} ORDER BY TimeUsed DESC")
         data = db.cursor.fetchall()
         for i in range(len(data)):
             print(f'{i}: {data[i]}')
-        wb = Workbook(fullpath = path)
-        wb.Save(data) # dataframe
+        wb = Workbook(filename = filename)
+        wb.Save(data)
 
 
     def SendRecords(self):
@@ -595,13 +591,13 @@ Close(): 关闭工作簿
 Write(): 保存工作簿
 """
 class Workbook:
-    def __init__(self, username = None, fullpath = None):
+    def __init__(self, username = None, filename = None):
         self.username = username
         self.home = os.path.expanduser("~")
         self.desktop = os.path.join(self.home, "Desktop")
         self.path = os.path.join(self.desktop, "答题记录")
-        self.filename = None
-        self.fullpath = fullpath
+        self.filename = filename
+        self.fullpath = None
         self.workbook = None
         self.worksheet = None
         self.max_rows = 65536 # xlsx工作表共有2^20 = 1048576行
@@ -633,10 +629,10 @@ class Workbook:
         else:
             # print(f'"{self.path}"目录已存在')
             pass
-        if self.fullpath is None:
+        if self.filename is None:
             current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
             self.filename = f"{self.username}_{current_datetime}.xlsx"
-            self.fullpath = os.path.join(self.path, self.filename)
+        self.fullpath = os.path.join(self.path, self.filename)
 
         self.workbook = xlsxwriter.Workbook(self.fullpath)
         self.worksheet = self.workbook.add_worksheet("答题记录")
