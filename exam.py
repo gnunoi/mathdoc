@@ -541,6 +541,14 @@ class Workbook:
         self.worksheet = None
         # print(self.username)
         self.Open()
+        self.cell_format = self.workbook.add_format({
+            "bg_color": "#FFFFFF",
+            "border": 1,
+            "border_color": "black",
+            "align": "center",
+            "valign": "vcenter",
+            "font_size": "12",
+        })
 
     def Open(self):
         if not os.path.exists(self.path):
@@ -578,11 +586,20 @@ class Workbook:
             "valign": "vcenter",
             "font_size": "12",
         })
-        # self.Append([
-        #     '题号', '题目', '用户答案', '正确答案', '是否正确',
-        #     '开始时间', '结束时间', '用时(秒)', '检查提示'
-        # ])
+        self.Append(0, [
+            '题号', '题目', '用户答案', '正确答案', '是否正确',
+            '开始时间', '结束时间', '用时(秒)', '检查提示'
+        ])
         self.worksheet.freeze_panes(1, 1)
+
+    def Append(self, row, row_data):
+        self.worksheet.write_row(row, 0, row_data, self.cell_format)
+
+    def Dump(self, data):
+        row = 1
+        for row_data in data:
+            self.Append(row, row_data, self.cell_format)
+            row += 1
 
     def Save(self, data):
         rows = len(data)
