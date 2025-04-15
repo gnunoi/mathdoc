@@ -168,22 +168,25 @@ class User:
 
     def CreateTable(self):
         db = self.db
-        db.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Users (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Username TEXT UNIQUE,
-            Email TEXT UNIQUE,
-            Mobile TEXT UNIQUE,
-            Grade INTEGER,
-            RegisterDate TEXT,
-            IsVerified BOOLEAN DEFAULT FALSE,
-            MentorEmail TEXT,
-            ExpiredDate TEXT
-        )
-        ''')
-        db.AddColumn('Users', 'MentorEmail', 'TEXT')
-        db.AddColumn('Users', 'ExpiredDate', 'TEXT')
-        db.connect.commit()
+        if not db.ExistTable('Users'):
+            db.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Users (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Username TEXT UNIQUE,
+                Email TEXT UNIQUE,
+                Mobile TEXT UNIQUE,
+                Grade INTEGER,
+                RegisterDate TEXT,
+                IsVerified BOOLEAN DEFAULT FALSE,
+                MentorEmail TEXT,
+                ExpiredDate TEXT
+            )
+            ''')
+            db.connect.commit()
+        else:
+            db.AddColumn('Users', 'MentorEmail', 'TEXT')
+            db.AddColumn('Users', 'ExpiredDate', 'TEXT')
+
 
     def Read(self):
         db = self.db
@@ -258,17 +261,18 @@ class Setting:
         self.max_divisor = self.default['max_divisor'] # 除数最大值
         self.CreateTable()
         self.Read()
-        # self.Write()
 
     def CreateTable(self):
         db = self.db
-        db.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Setting (
-            Key TEXT PRIMARY KEY,
-            Value TEXT
-        )
-        ''')
-        db.connect.commit()
+        if not db.ExistTable('Setting'):
+            db.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Setting (
+                Key TEXT PRIMARY KEY,
+                Value TEXT
+            )
+            ''')
+            db.connect.commit()
+            self.Write()
 
     def Read(self):
         import ast
@@ -310,6 +314,15 @@ class Setting:
         for key, value in settings.items():
             db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))
         db.connect.commit()
+
+    def IsCompleted(self):
+        if self.type is None: return False
+        if self.subtype is None: return False
+        if self.min_addend is None: return False
+        if self.max_addend is None: return False
+        if self.min_divisor is None: return False
+        if self.max_divisor is None: return False
+        return True
 
 class Review:
     def __init__(self, db):
@@ -373,6 +386,18 @@ class Database:
             except Exception as e:
                 print(f"隐藏文件或目录时出错：{e}")
 
+    def ExistTable(self, table_name):
+
+        # 查询 sqlite_master 表，检查是否存在指定的表格
+        self.cursor.execute(f"""
+            SELECT name 
+            FROM sqlite_master 
+            WHERE type='table' AND name=?
+        """, (table_name,))
+
+        result = self.cursor.fetchone()
+        return result is not None
+
     def ShowTables(self):
         cursor = self.cursor
         # 查询 sqlite_master 表，获取所有表名
@@ -392,6 +417,7 @@ class Database:
 
         try:
             self.cursor.execute(f'ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type};')
+            self.connect.commit()
             print(f"字段 '{column_name}' 添加成功！")
         except sqlite3.OperationalError as e:
             if "duplicate column name" in str(e):
