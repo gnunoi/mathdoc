@@ -80,5 +80,8 @@
 ## [Release V1.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.0)
 代码重构：使用类及其派生类生成新题目、检查答案、生成检查提示、答题提示。
 
-## [Release V1.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.0)
+## [Release V1.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.1)
 代码重构：UI重构。
+
+## [Release V1.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.1.1)
+完善认证。
