@@ -78,7 +78,9 @@ class Exam:
         self.record.Dump()
         if len(self.record.data):
             self.wb.Save(self.record.data)
+            print('发送邮件...')
             self.SendRecords()
+            print('邮件发送完毕')
 
     def ExportRecords(self, type):
         db = self.db
@@ -182,7 +184,7 @@ class Exam:
     def Run(self):
         self.Register()
         print()
-        type = 2
+        type = 0
         parms = [{'type': 0, 'subtype': [], 'range': [1, 10]},
                  {'type': 1, 'subtype': [2], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},

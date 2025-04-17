@@ -30,7 +30,8 @@ subtype: 数组，分别是题目子类型及更详细的分类
 time_used: 解题所用时间
 type: 题目类型编号
 user_input: 用户输入的原始答案
-user_answer: 整理并计算后的用户答案
+user_answer: 最后一个等于号之后的用户答案
+user_results: 列表，包括两个元素，计算user_answer和转化为分数之后的user_answer的结果
 
 函数: 
 Dump(): 输出所有成员
@@ -78,6 +79,7 @@ class Question():
         self.type = type
         self.user_input = None
         self.user_answer = None
+        self.user_results = None
 
 
     def ClassName(self):
@@ -122,6 +124,7 @@ class Question():
         self.time_used = None
         self.user_input = None
         self.user_answer = None
+        self.user_rusults = None
 
     def Generate(self):
         pass
@@ -157,6 +160,12 @@ class Question():
         self.end_time = datetime.now()
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
         self.start_time = datetime.now()
+        if self.correct_answer in [self.user_answer] + self.user_results:
+            self.is_correct = True
+            return True
+        else:
+            self.is_correct = False
+            return False
 
     def ConvertToFraction(self, expression):
         """
@@ -192,13 +201,16 @@ class Question():
             user_input = user_input.replace(old, new)
         user_input = user_input.split('=')[-1]
         self.user_answer = user_input
+        self.user_results = []
+        try:
+            result = eval(self.user_answer)
+            self.user_results.append(result)
+            result = eval(self.ConvertToFraction(self.user_answer))
+            self.user_results.append(result)
+            print(self.results)
+        except:
+            pass
         return True
-
-    def CheckUserInput(self):
-        digits_in_expression = re.findall(r'\d+\.?\d*', self.user_answer)
-        digits_in_expression = [float(digit) for digit in digits_in_expression]
-        numbers = [float(num) for num in self.numbers]
-        return Counter(digits_in_expression) == Counter(numbers)
 
     def ProcessCalculation(self):
         print(self.expression)
@@ -259,17 +271,16 @@ class Question24Point(Question):
         return self.correct_answer
 
     def CheckTips(self):
-        if not self.CheckUserInput():
+        if not self.UsedAllNumbers():
             self.check_tips = f'{self.user_input} ，未包括全部数字'
         else:
             try:
-                user_answer = eval(self.ConvertToFraction(self.user_answer))
-                if user_answer != self.correct_answer:
-                    self.check_tips = f'{self.user_input} = {user_answer} != {self.correct_answer}'
-                else:
+                if self.is_correct:
                     self.check_tips = '正确！'
+                else:
+                    self.check_tips = f'{self.user_input} = {self.user_results[0]} != {self.correct_answer}'
             except:
-                self.check_tips = '无法正确求值，请检查输入是否正确'
+                self.check_tips = f'{self.user_answer}表达式不正确'
         return self.check_tips
 
     def AnswerTips(self):
@@ -277,17 +288,23 @@ class Question24Point(Question):
         self.answer_tips = f'{self.Validate24Point()}'
         return self.answer_tips
 
+    def UsedAllNumbers(self):
+        # 使用正则表达式提取表达式中的所有数字
+        numbers_in_expression = re.findall(r'\d+', self.user_answer)
+
+        # 将提取的数字字符串转换为整数
+        numbers_in_expression = [int(num_str) for num_str in numbers_in_expression]
+
+        # 检查两个数组是否完全相同（数量和内容都相同，顺序可以不同）
+        print(sorted(numbers_in_expression))
+        print(sorted(self.numbers))
+        return sorted(numbers_in_expression) == sorted(self.numbers)
+
     def JudgeAnswer(self):
-        super().JudgeAnswer()
-        try:
-            # 转化为分数再计算，处理诸如: [3, 3, 8, 8]: 8 / (3 - (8 / 3))
-            user_answer = eval(self.ConvertToFraction(self.user_answer))
-        except:
+        if not self.UsedAllNumbers():
+            self.is_correct = False
             return False
-        if not self.CheckUserInput():
-            return False
-        self.is_correct = user_answer == self.correct_answer
-        return self.is_correct
+        return super().JudgeAnswer()
 
 
 """
@@ -383,14 +400,14 @@ class QuestionLR(Question):
     def AnswerTips(self):
         pass
 
-    def JudgeAnswer(self):
-        super().JudgeAnswer()
-        try:
-            user_answer = eval(self.ConvertToFraction(self.user_answer))
-            self.is_correct = user_answer == self.correct_answer
-            return self.is_correct
-        except:
-            return False
+    # def JudgeAnswer(self):
+    #     super().JudgeAnswer()
+    #     try:
+    #         user_answer = eval(self.ConvertToFraction(self.user_answer))
+    #         self.is_correct = user_answer == self.correct_answer
+    #         return self.is_correct
+    #     except:
+    #         return False
 
 
 """
