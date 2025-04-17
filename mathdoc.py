@@ -295,10 +295,10 @@ class MathQuizUI(QWidget):
     def UpdateSettings(self):
         for i in range(4):
             try:
-                self.exam.num_range[i] = int(self.exam.num_edit[i].text())
+                self.exam.q.subtype[i] = int(self.exam.num_edit[i].text())
             except:
                 pass
-        if self.exam.num_range[0] > self.exam.num_range[1]:
+        if self.exam.q.subtype[0] > self.exam.num_range[1]:
             self.exam.num_range[0] = int(self.exam.num_edit[1].text())
             self.exam.num_range[1] = int(self.exam.num_edit[0].text())
             self.exam.num_edit[0].setText(str(self.exam.num_range[0]))
