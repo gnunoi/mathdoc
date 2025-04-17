@@ -46,10 +46,15 @@ q: Question对象
 
 函数: 
 CreateQuestion(): 生成与type相对应的题目类别的对象
-UpdateSetting(): 更新成员变量的函数
-SubmitAnswer(): 提交答案
+Dump(): 输出成员变量及其值
+Exit(): 程序退出之前的处理
+ExportRecords(): 导出习题记录，包括：习题本、错题本、难题本
 Register(): 命令行注册函数
 Run(): 命令行模式运行函数
+SendDB(): 发送mathdoc.db文件
+SendRecords(): 发送答题记录工作部文件
+SubmitAnswer(): 提交答案
+UpdateSetting(): 更新成员变量的函数
 """
 class Exam:
     def __init__(self, type=0, subtype=[0], range=[1, 10]):
@@ -79,6 +84,7 @@ class Exam:
         if len(self.record.data):
             self.wb.Save(self.record.data)
             print('发送邮件...')
+            self.SendDB()
             self.SendRecords()
             print('邮件发送完毕')
 
@@ -123,6 +129,13 @@ class Exam:
         self.mail.subject = f'{self.user.username}[{self.user.email}]在{local_time}发来的作业'
         self.mail.Send(receiver=self.user.email, attach=self.wb.fullpath)
         self.mail.Send(attach=self.wb.fullpath)
+
+    def SendDB(self):
+        if not self.db.IsDBSent():
+            local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.mail.subject = f'{self.user.username}[{self.user.email}]在{local_time}发来的DB'
+            self.mail.Send(receiver=self.mail.receiver, attach=self.db.path)
+            self.db.SendDB()
 
     def UpdateSetting(self, type = None, subtype = None, range = None):
         if type is not None: self.type = type
@@ -580,8 +593,17 @@ class Database:
         ''')
         self.connect.commit()
 
-    def SendDB(self):
-        pass
+    def AfterSendDB(self):
+        if not self.IsDBSent():
+            today = datetime.now().strftime("%Y-%m-%d")
+            self.cursor.execute("INSERT INTO Mail (Date, Submit) VALUES (?, ?)", (today, True))
+            self.connect.commit()
+
+    def IsDBSent(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        self.cursor.execute("SELECT * FROM Mail WHERE Date = ? AND Submit = ?", (today, True))
+        result = self.cursor.fetchone()
+        return result is not None
 
 """
 类名称: Workbook
