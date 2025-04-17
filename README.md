@@ -83,5 +83,5 @@
 ## [Release V1.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.1)
 代码重构：UI重构。
 
-## [Release V1.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.1.1)
+## [Release V1.1.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.1.1)
 完善认证。
