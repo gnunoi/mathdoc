@@ -293,21 +293,20 @@ class MathQuizUI(QWidget):
         self.setStyleSheet(style)
 
     def UpdateSettings(self):
-        for i in range(4):
-            try:
-                self.exam.q.subtype[i] = int(self.exam.num_edit[i].text())
-            except:
-                pass
-        if self.exam.q.subtype[0] > self.exam.num_range[1]:
-            self.exam.num_range[0] = int(self.exam.num_edit[1].text())
-            self.exam.num_range[1] = int(self.exam.num_edit[0].text())
-            self.exam.num_edit[0].setText(str(self.exam.num_range[0]))
-            self.exam.num_edit[1].setText(str(self.exam.num_range[1]))
-        if self.exam.num_range[2] > self.exam.num_range[3]:
-            self.exam.num_range[2] = int(self.exam.num_edit[3].text())
-            self.exam.num_range[3] = int(self.exam.num_edit[2].text())
-            self.exam.num_edit[2].setText(str(self.exam.num_range[2]))
-            self.exam.num_edit[3].setText(str(self.exam.num_range[3]))
+        self.exam.setting.min_addend = int(self.exam.num_edit[0].text())
+        self.exam.setting.max_addend = int(self.exam.num_edit[1].text())
+        self.exam.setting.min_divisor = int(self.exam.num_edit[2].text())
+        self.exam.setting.max_divisor = int(self.exam.num_edit[3].text())
+
+        if self.exam.setting.min_addend > self.exam.setting.max_addend:
+            self.exam.setting.min_addend, self.exam.setting.max_addend = (self.exam.setting.max_addend, self.exam.setting.min_addend)
+            self.self.exam.num_edit[0].setText(str(self.exam.setting.min_addend))
+            self.self.exam.num_edit[1].setText(str(self.exam.setting.max_addend))
+
+        if self.exam.setting.min_divisor > self.exam.setting.max_divisor:
+            self.exam.setting.min_divisor, self.exam.setting.max_divisor = (self.exam.setting.max_divisor, self.exam.setting.min_divisor)
+            self.self.exam.num_edit[2].setText(str(self.exam.setting.min_divisor))
+            self.self.exam.num_edit[3].setText(str(self.exam.setting.max_divisor))
 
         for i in range(5):
             if self.radio_operator[i].isChecked():
@@ -325,33 +324,26 @@ class MathQuizUI(QWidget):
                     self.term_group.setVisible(True)
                     self.operator_group.setVisible(True)
                     self.range_group.setVisible(True)
-                    self.answer_label.setText(self.answer_label_text)
+                    self.answer_label.setText(self.exam.q.answer_tips)
                 elif i == 1:
                     self.qc_group.setVisible(True)
                     self.term_group.setVisible(False)
                     self.operator_group.setVisible(False)
                     self.range_group.setVisible(True)
-                    self.answer_label.setText(self.answer_label_text)
+                    self.answer_label.setText(self.exam.q.answer_tips)
                 elif i == 2:
                     self.qc_group.setVisible(False)
                     self.term_group.setVisible(False)
                     self.operator_group.setVisible(False)
                     self.range_group.setVisible(False)
-                    self.answer_label.setText('')
+                    self.answer_label.setText(self.exam.q.answer_tips)
 
-        qc_type = None
         for i, rb in enumerate(self.qc_options):
             if rb.isChecked():
                 qc_type = i
                 break
         if qc_type is not None:
             self.exam.q.qc_type = qc_type
-
-        self.exam.q.Set(
-            range=self.exam.num_range,
-            term_count=self.exam.q.subtype[0],
-            user_operators=self.exam.ops[self.exam.operator]
-        )
 
         self.exam.SaveSettingsToDB()
         self.UpdateQuestion()
