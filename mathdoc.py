@@ -1,15 +1,10 @@
 import sys
-import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
                              QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
                              QDialog)
 from PyQt5.QtGui import (QFont, QPalette, QColor)
 from PyQt5.QtCore import Qt
-
-import random
-from datetime import datetime
-import time
 
 from exam import *
 
@@ -23,11 +18,12 @@ class MathQuizUI(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.04.13(V1.0)"
+        self.version_number = "2025.04.18(V1.1)"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
-        self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
+        self.magic_date = "2025-04-16"  # 月份2位，不满2位补0
         self.exam = Exam()
         self.Register()
+        self.a = Authorization()
         if os.name == "nt":
             self.base_font = QFont("SimSun", 24)
         else:
@@ -35,13 +31,14 @@ class MathQuizUI(QWidget):
         self.big_font = QFont("Arial", 32)
 
         self.initUI()
+        # self.exam.Dump(self)
         self.GetScreenSize()
         self.SetWindowSize()
 
     def UpdateQuestion(self):
-        # if self.exam.authorization == False:
-        #     QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
-        #     self.ExitApp()
+        if self.a.authorization == False:
+            QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
+            self.ExitApp()
         self.exam.q.Generate()
         self.tips_label.setText(self.exam.q.check_tips)
         self.answer_tips_label.setText(self.exam.q.answer_tips)
@@ -59,7 +56,7 @@ class MathQuizUI(QWidget):
         self.exam.q.user_input = self.answer_input.text()
         print(self.exam.q.user_input)
         self.exam.SubmitAnswer()
-        self.exam.Dump(self.exam.q)
+        # self.exam.Dump(self.exam.q)
         self.answer_input.clear()
         if not self.exam.q.is_correct:
             self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
@@ -70,8 +67,8 @@ class MathQuizUI(QWidget):
 
     def Register(self):
         while not self.exam.user.IsCompleted():
-            self.Signup = SignupDialog(self.exam)
-            self.Signup.exec()
+            signup = SignupDialog(self.exam)
+            signup.exec()
 
     def GetScreenSize(self):
         self.width, self.height = GetScreenSize()
@@ -347,9 +344,9 @@ class MathQuizUI(QWidget):
                     self.exam.UpdateSetting(type=setting.type, subtype=setting.subtype,
                                             range = [setting.min_addend, setting.max_addend,
                                                      setting.min_divisor, setting.max_divisor])
-                self.answer_label.setText(self.exam.q.answer_tips)
         setting.Write()
         self.UpdateQuestion()
+        self.answer_label.setText(self.exam.q.comments)
 
     def closeEvent(self, event):
         self.exam.Exit()
