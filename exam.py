@@ -132,8 +132,8 @@ class Exam:
 
     def SendDB(self):
         if not self.db.IsDBSent():
-            local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            self.mail.subject = f'{self.user.username}[{self.user.email}]在{local_time}发来的DB'
+            current_date = datetime.now().strftime("%Y-%m-%d")
+            self.mail.subject = f'{self.user.username}在{current_date}发来的DB'
             self.mail.Send(receiver=self.mail.receiver, attach=self.db.path)
             self.db.AfterSendDB()
 
