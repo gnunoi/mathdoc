@@ -20,7 +20,7 @@ class MathQuizUI(QWidget):
         self.author = "致慧星空工作室出品"
         self.version_number = "2025.04.18(V1.1)"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
-        self.magic_date = "2025-04-16"  # 月份2位，不满2位补0
+        self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.exam = Exam()
         self.Register()
         self.a = Authorization()
