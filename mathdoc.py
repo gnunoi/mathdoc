@@ -21,18 +21,52 @@ def GetScreenSize():
 class MathQuizUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.exam = Exam()
-
+        self.appname = "数字博士"
+        self.author = "致慧星空工作室出品"
+        self.version_number = "2025.04.13(V1.0)"
+        self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
+        self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
+        self.exam = Exam(type=0, subtype=[0, 0], range=[1, 10, 1, 10])
         self.Register()
-
-        if self.exam.os == "nt":
+        if os.name == "nt":
             self.base_font = QFont("SimSun", 24)
         else:
             self.base_font = QFont("Pingfang SC", 24)
         self.big_font = QFont("Arial", 32)
+
         self.initUI()
         self.GetScreenSize()
         self.SetWindowSize()
+
+    def UpdateQuestion(self):
+        # if self.exam.authorization == False:
+        #     QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
+        #     self.ExitApp()
+        self.exam.q.Generate()
+        self.tips_label.setText(self.exam.q.check_tips)
+        self.answer_tips_label.setText(self.exam.q.answer_tips)
+        self.question_label.setText(f"当前题目：\n{self.exam.q.question}")
+
+        total = self.exam.record.question_number - 1
+        correct_rate = self.exam.record.correct_number / total * 100 if total > 0 else 0
+        self.status_label.setText(
+            f"已答题：{total} 道 | 正确：{self.exam.record.correct_number} 道 | "
+            f"错误：{total - self.exam.record.correct_number} 道 | 正确率：{correct_rate:.1f}%"
+        )
+        self.answer_input.setFocus()
+
+    def SubmitAnswer(self):
+        self.exam.q.user_input = self.answer_input.text()
+        print(self.exam.q.user_input)
+        self.exam.SubmitAnswer()
+        self.exam.Dump(self.exam.q)
+        self.answer_input.clear()
+        if not self.exam.q.is_correct:
+            self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
+            if self.exam.q.answer_tips:
+                self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
+        else:
+            self.UpdateQuestion()
 
     def Register(self):
         while not self.exam.user.IsCompleted():
@@ -46,18 +80,19 @@ class MathQuizUI(QWidget):
         self.setGeometry(0, 0, self.width, self.height)
 
     def initUI(self):
-        self.setWindowTitle(self.exam.title)
+        self.setWindowTitle(self.title)
         main_layout = QVBoxLayout()
         control_panel = QHBoxLayout()
 
+        # self.exam.Dump(self.exam.q)
         # 题型
         self.type_group = QGroupBox("题型")
         self.type_group.setFont(self.base_font)
         type_layout = QVBoxLayout()
         self.type_options = [
-            QRadioButton('四则运算'),
-            QRadioButton('乘法速算'),
-            QRadioButton('24点游戏'),
+            QRadioButton('24点游戏'), # type = 0
+            QRadioButton('乘法速算'), # type = 1
+            QRadioButton('四则运算'), # type = 2
         ]
         self.type_options[self.exam.q.type].setChecked(True)
         for rb in self.type_options:
@@ -68,43 +103,41 @@ class MathQuizUI(QWidget):
         control_panel.addWidget(self.type_group, 1)
 
         # 速算
-        self.quick_calc_group = QGroupBox("乘法速算")
-        self.quick_calc_group.setFont(self.base_font)
-        quick_calc_layout = QVBoxLayout()
-        self.quick_calc_options = [
+        self.qc_group = QGroupBox("乘法速算")
+        self.qc_group.setFont(self.base_font)
+        qc_layout = QVBoxLayout()
+        self.qc_options = [
             QRadioButton('平方数'),
             QRadioButton('平方差法'),
             QRadioButton('和十速算法'),
             QRadioButton('大数凑十法'),
             QRadioButton('逢五凑十法'),
             QRadioButton('双向凑十法'),
-            # QRadioButton('因数分解发'),
-            # QRadioButton('二项式展开法')
         ]
-        if not any(rb.isChecked() for rb in self.quick_calc_options):
-            self.quick_calc_options[self.exam.q.quick_calc_type].setChecked(True)
-        for rb in self.quick_calc_options:
+        if not any(rb.isChecked() for rb in self.qc_options):
+            self.qc_options[self.exam.q.subtype[0]].setChecked(True)
+        for rb in self.qc_options:
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            quick_calc_layout.addWidget(rb)
-        self.quick_calc_group.setLayout(quick_calc_layout)
-        control_panel.addWidget(self.quick_calc_group, 1)
+            qc_layout.addWidget(rb)
+        self.qc_group.setLayout(qc_layout)
+        control_panel.addWidget(self.qc_group, 1)
         if self.exam.q.type != 1:
-            self.quick_calc_group.setVisible(False)
+            self.qc_group.setVisible(False)
 
         # 算术项式
         self.term_group = QGroupBox("算术项式")
         self.term_group.setFont(self.base_font)
         term_layout = QVBoxLayout()
         self.radio_terms = [QRadioButton(f'{i + 2}项式') for i in range(4)]
-        self.radio_terms[self.exam.q.term_count - 2].setChecked(True)
+        self.radio_terms[self.exam.q.subtype[0] - 2].setChecked(True)
         for rb in self.radio_terms:
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
             term_layout.addWidget(rb)
         self.term_group.setLayout(term_layout)
         control_panel.addWidget(self.term_group, 1)
-        if self.exam.q.type != 0:
+        if self.exam.q.type != 2:
             self.term_group.setVisible(False)
 
         # 运算类型
@@ -112,18 +145,20 @@ class MathQuizUI(QWidget):
         self.operator_group.setFont(self.base_font)
         operator_layout = QVBoxLayout()
         self.radio_operator = [
-            QRadioButton('加法'), QRadioButton('减法'),
-            QRadioButton('乘法'), QRadioButton('除法'),
+            QRadioButton('加法'),
+            QRadioButton('减法'),
+            QRadioButton('乘法'),
+            QRadioButton('除法'),
             QRadioButton('混合运算')
         ]
-        self.radio_operator[self.exam.operator].setChecked(True)
+        self.radio_operator[self.exam.q.subtype[1]].setChecked(True)
         for rb in self.radio_operator:
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
             operator_layout.addWidget(rb)
         self.operator_group.setLayout(operator_layout)
         control_panel.addWidget(self.operator_group, 1)
-        if self.exam.q.type != 0:
+        if self.exam.q.type != 2:
             self.operator_group.setVisible(False)
 
         # 数值范围
@@ -131,7 +166,7 @@ class MathQuizUI(QWidget):
         self.range_group.setFont(self.base_font)
         range_layout = QFormLayout()
         labels = ["加减数最小值:", "加减数最大值:", "乘除数最小值:", "乘除数最大值:"]
-        self.exam.num_edit = [QLineEdit(str(n)) for n in self.exam.num_range]
+        self.exam.num_edit = [QLineEdit(str(n)) for n in self.exam.q.range]
         for i in range(4):
             self.exam.num_edit[i].setFont(self.base_font)
             self.exam.num_edit[i].setFixedWidth(360)
@@ -140,7 +175,7 @@ class MathQuizUI(QWidget):
             self.exam.num_edit[i].editingFinished.connect(self.UpdateSettings)
         self.range_group.setLayout(range_layout)
         control_panel.addWidget(self.range_group, 2)
-        if self.exam.q.type == 2:
+        if self.exam.q.type == 0:
             self.range_group.setVisible(False)
         main_layout.addLayout(control_panel)
 
@@ -160,10 +195,7 @@ class MathQuizUI(QWidget):
         self.answer_label = QLabel()
         self.answer_label.setFont(self.big_font)
         self.answer_label.setAlignment(Qt.AlignCenter)
-        if self.exam.q.type == 2:
-            self.answer_label.setText('输入表达式，使得表达式的值为24。如：(5+3)*(8-5)。')
-        else:
-            self.answer_label.setText(self.answer_label_text)
+        self.answer_label.setText(self.exam.q.comments)
         main_layout.addWidget(self.answer_input, 1)
         main_layout.addWidget(self.answer_label, 1)
 
@@ -212,7 +244,7 @@ class MathQuizUI(QWidget):
 
         self.setLayout(main_layout)
         self.answer_input.setObjectName("answer_input")
-        if self.exam.os == "posix":
+        if os.name == "posix":
             self.apply_styles()
         self.answer_input.setFont(self.big_font)
         # 创建 QPalette 对象并设置颜色
@@ -283,129 +315,53 @@ class MathQuizUI(QWidget):
 
         for i in range(4):
             if self.radio_terms[i].isChecked():
-                self.exam.q.term_count = i + 2
+                self.exam.q.subtype[0] = i + 2
 
         for i, rb in enumerate(self.type_options):
             if rb.isChecked():
                 self.exam.q.type = i
                 if i == 0:
-                    self.quick_calc_group.setVisible(False)
+                    self.qc_group.setVisible(False)
                     self.term_group.setVisible(True)
                     self.operator_group.setVisible(True)
                     self.range_group.setVisible(True)
                     self.answer_label.setText(self.answer_label_text)
                 elif i == 1:
-                    self.quick_calc_group.setVisible(True)
+                    self.qc_group.setVisible(True)
                     self.term_group.setVisible(False)
                     self.operator_group.setVisible(False)
                     self.range_group.setVisible(True)
                     self.answer_label.setText(self.answer_label_text)
                 elif i == 2:
-                    self.quick_calc_group.setVisible(False)
+                    self.qc_group.setVisible(False)
                     self.term_group.setVisible(False)
                     self.operator_group.setVisible(False)
                     self.range_group.setVisible(False)
                     self.answer_label.setText('')
 
-        quick_calc_type = None
-        for i, rb in enumerate(self.quick_calc_options):
+        qc_type = None
+        for i, rb in enumerate(self.qc_options):
             if rb.isChecked():
-                quick_calc_type = i
+                qc_type = i
                 break
-        if quick_calc_type is not None:
-            self.exam.q.quick_calc_type = quick_calc_type
+        if qc_type is not None:
+            self.exam.q.qc_type = qc_type
 
         self.exam.q.Set(
             range=self.exam.num_range,
-            term_count=self.exam.q.term_count,
+            term_count=self.exam.q.subtype[0],
             user_operators=self.exam.ops[self.exam.operator]
         )
 
         self.exam.SaveSettingsToDB()
         self.UpdateQuestion()
 
-    def UpdateQuestion(self):
-        if self.exam.authorization == False:
-            QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
-            self.ExitApp()
-        question = self.exam.NextQuestion()
-        self.tips_label.setText('')
-        self.answer_tips_label.setText('')
-        self.question_label.setText(f"当前题目：\n{question}")
-
-        total = self.exam.question_number - 1
-        correct_rate = self.exam.correct_number / total * 100 if total > 0 else 0
-        self.status_label.setText(
-            f"已答题：{total} 道 | 正确：{self.exam.correct_number} 道 | "
-            f"错误：{total - self.exam.correct_number} 道 | 正确率：{correct_rate:.1f}%"
-        )
-        self.answer_input.setFocus()
-
-    def SubmitAnswer(self):
-        # 定义替换映射
-        replace_map = {
-            "（": "(",
-            "）": ")",
-            "[": "(",
-            "]": ")",
-            "{": "(",
-            "}": ")",
-            "【": "(",
-            "】": ")",
-            "＋": "+",
-            "➖": "-",
-            "×": "*",
-            "÷": "/",
-        }
-
-        answer_input = self.answer_input.text().strip()
-        # 执行替换
-        for old, new in replace_map.items():
-            answer_input = answer_input.replace(old, new)
-        answer_input = answer_input.split('=')[-1]
-        result = self.exam.SubmitAnswer(answer_input)
-        self.answer_input.clear()
-        if result[0]:
-            self.UpdateQuestion()
-        else:
-            self.tips_label.setText(f'用户答案：{self.exam.user_answer}；检查提示：{self.exam.tips}')
-            if self.exam.answer_tips is not None and len(self.exam.answer_tips) > 0:
-                self.answer_tips_label.setText(f'答题提示：{self.exam.answer_tips}')
-
-    def ExportWorkbook(self, type=None):
-        wb = None
-        if type == 1:
-            wb = "错题本"
-        elif type == 2:
-            wb = "难题本"
-        elif type == 0:
-            wb = "习题本"
-        else:
-            pass
-        self.exam.export_workbook(type)
-        QMessageBox.information(self, "导出成功", f"{wb}已成功导出。")
-
-    def Quit(self):
-        self.exam.SaveSettingsToDB()
-        self.exam.SaveWorkbook()
-        self.exam.CloseDatabase()
-        if self.exam.current_row == 1:
-            try:
-                if os.path.exists(self.exam.workbook_file):
-                    os.remove(self.exam.workbook_file)
-            except Exception as e:
-                print(f"删除文件时出错: {e}")
-        else:
-            self.exam.mail.Send(attach=self.exam.workbook_file)
-            self.exam.mail.Send(receiver=self.email, attach=self.exam.workbook_file)
-            QMessageBox.information(self, '作业发送', f'今日作业发送至邮箱：{self.email}')
-
     def closeEvent(self, event):
-        self.Quit()
+        self.exam.Exit()
         event.accept()
 
     def ExitApp(self):
-        self.Quit()
+        self.exam.Exit()
         QApplication.quit()
 
 class SignupDialog(QDialog):
@@ -570,6 +526,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MathQuizUI()
     window.showMaximized()
-    window.exam.mail.Subject = f'{window.username}[{window.email}]在{local_time}发来的作业'
-    window.exam.SubmitHomework()
     sys.exit(app.exec())
