@@ -580,6 +580,9 @@ class Database:
         ''')
         self.connect.commit()
 
+    def SendDB(self):
+        pass
+
 """
 类名称: Workbook
 说明: 处理工作簿相关事项
