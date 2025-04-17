@@ -8,7 +8,6 @@ from PyQt5.QtCore import Qt
 
 from exam import *
 
-
 def GetScreenSize():
     screen = QDesktopWidget().screenGeometry()
     return screen.width(), screen.height()
@@ -20,7 +19,6 @@ class MathQuizUI(QWidget):
         self.author = "致慧星空工作室出品"
         self.version_number = "2025.04.18(V1.1)"
         self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
-        self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
         self.exam = Exam()
         self.Register()
         self.a = Authorization()
@@ -512,6 +510,45 @@ class SignupDialog(QDialog):
         }
         """
         self.setStyleSheet(style)
+
+import ntplib
+class Authorization:
+    def __init__(self):
+        self.magic_date = "2025-12-28"  # 月份2位，不满2位补0
+        self.authorization = True
+        self.GetNetTimeInThread(self.HandleAuthorization)
+        # self.GetNetTime()
+
+    def GetNetTime(self):
+        servers = ['ntp.aliyun.com', 'time.hicloud.com', 'ntp.ntsc.ac.cn',
+                   'ntp.tuna.tsinghua.edu.cn']
+        ntp_client = ntplib.NTPClient()
+        for server in servers:
+            try:
+                response = ntp_client.request(server)
+                utc_time = datetime.fromtimestamp(response.tx_time)
+                tz_time = utc_time.astimezone()
+                local_date = tz_time.strftime("%Y-%m-%d")
+                local_time = tz_time.strftime("%Y-%m-%d %H:%M:%S")
+                print(f'Date from network: {local_date}')
+                return local_date
+            except Exception as e:
+                print(f"Error fetching NTP time: {e}")
+        return None
+
+    def GetNetTimeInThread(self, callback):
+        print('GetNetTimeInThread()')
+        def wrapper():
+            callback(self.GetNetTime())
+
+        Thread(target=wrapper).start()
+
+    def HandleAuthorization(self, net_time):
+        if net_time:
+            self.authorization = net_time <= self.magic_date
+        else:
+            self.authorization = True
+
 
 if __name__ == '__main__':
     local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
