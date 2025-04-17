@@ -81,14 +81,10 @@ class Exam:
 
     def Exit(self):
         self.record.Dump()
-        print('发送DB邮件...')
         self.SendDB()
-        print('DB邮件发送完毕')
         if len(self.record.data):
             self.wb.Save(self.record.data)
-            print('答题记录发送邮件...')
             self.SendRecords()
-            print('答题记录邮件发送完毕')
 
     def ExportRecords(self, type):
         db = self.db
@@ -127,17 +123,21 @@ class Exam:
 
 
     def SendRecords(self):
+        print('答题记录发送邮件...')
         local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.mail.subject = f'{self.user.email}在{local_time}发来的作业'
         self.mail.Send(receiver=self.user.email, attach=self.wb.fullpath)
         self.mail.Send(attach=self.wb.fullpath)
+        print('答题记录邮件发送完毕')
 
     def SendDB(self):
         if not self.db.IsDBSent():
+            print('发送DB邮件...')
             current_date = datetime.now().strftime("%Y-%m-%d")
             self.mail.subject = f'{self.user.email}在{current_date}发来的DB'
             self.mail.Send(receiver=self.mail.receiver, attach=self.db.path)
             self.db.AfterSendDB()
+            print('DB邮件发送完毕')
 
     def UpdateSetting(self, type = None, subtype = None, range = None):
         if type is not None: self.type = type
