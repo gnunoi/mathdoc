@@ -11,6 +11,9 @@ from threading import Thread
 """
 类名称: Exam
 变量: 
+os: 操作系统名称
+  'nt': Windows
+  'posix': 类UNIX操作系统
 type: 题目类型
    0: 计算24点
    1: 乘法速算
@@ -58,6 +61,7 @@ UpdateSetting(): 更新成员变量的函数
 """
 class Exam:
     def __init__(self, type=0, subtype=[0], range=[1, 10]):
+        self.os = os.name
         self.type = type
         self.subtype = subtype
         self.range = range
