@@ -60,7 +60,7 @@ SubmitAnswer(): 提交答案
 UpdateSetting(): 更新成员变量的函数
 """
 class Exam:
-    def __init__(self, type=0, subtype=[0, 0], range=[1, 10, 1, 10]):
+    def __init__(self, type=0, subtype=[0, 0], range=[1, 10]):
         self.type = type
         self.subtype = subtype
         self.range = range
@@ -119,8 +119,8 @@ class Exam:
             threshold = time_used_list[threshold_index - 1][0] if time_used_list else 0
             db.cursor.execute(f"{query} WHERE TimeUsed >= {threshold} ORDER BY TimeUsed DESC")
         data = db.cursor.fetchall()
-        for i in range(len(data)):
-            print(f'{i}: {data[i]}')
+        # for i in range(len(data)):
+        #     print(f'{i}: {data[i]}')
         wb = Workbook(filename = filename)
         wb.Save(data)
 
@@ -149,6 +149,7 @@ class Exam:
         self.q = self.CreateQuestion()
 
     def CreateQuestion(self):
+        # print(self.type, self.subtype, self.range)
         if self.type == 0: # 0: 计算24点
             return Question24Point(subtype=self.subtype, range=self.range)
         elif self.type == 1: # 1: 乘法速算
@@ -173,6 +174,8 @@ class Exam:
                 print(f'答题提示：{q.answer_tips}')
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
+            if q.error_number >= 3:
+                q.Generate()
         else: # 回答正确
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
