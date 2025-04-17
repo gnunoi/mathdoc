@@ -263,7 +263,7 @@ class Question24Point(Question):
         return None
 
     def Question(self):
-        self.question = f'计算24点: {self.numbers}'
+        self.question = f'24点: {self.numbers}'
         return self.question
 
     def Answer(self):
@@ -291,20 +291,19 @@ class Question24Point(Question):
     def UsedAllNumbers(self):
         # 使用正则表达式提取表达式中的所有数字
         numbers_in_expression = re.findall(r'\d+', self.user_answer)
-
         # 将提取的数字字符串转换为整数
         numbers_in_expression = [int(num_str) for num_str in numbers_in_expression]
-
         # 检查两个数组是否完全相同（数量和内容都相同，顺序可以不同）
-        print(sorted(numbers_in_expression))
-        print(sorted(self.numbers))
+        # print(sorted(numbers_in_expression))
+        # print(sorted(self.numbers))
         return sorted(numbers_in_expression) == sorted(self.numbers)
 
     def JudgeAnswer(self):
+        self.is_correct = super().JudgeAnswer()
         if not self.UsedAllNumbers():
             self.is_correct = False
-            return False
-        return super().JudgeAnswer()
+        return self.is_correct
+
 
 
 """
