@@ -218,10 +218,23 @@ class Question():
 
 
 """
+类名称：QuestionRL
+题目类型：从右向左求值，即答案是表达式，题目是数值
+"""
+class QuestionRL(Question):
+    def __init__(self, type=0, subtype = [0], range=[1, 10]):
+        super().__init__(type=1, subtype=subtype, range=range)
+        self.type = type
+        self.subtype = subtype
+        self.range = range
+        self.Generate()
+
+
+"""
 类名称：Question24Point
 题目类型：计算24点
 """
-class Question24Point(Question):
+class Question24Point(QuestionRL):
     def __init__(self, range=[1, 10]):
         super().__init__(type=0, subtype=[0], range=range)
         self.name = "计算24点"
@@ -256,9 +269,9 @@ class Question24Point(Question):
                 for expr in expressions:
                     try:
                         converted_expr = self.ConvertToFraction(expr)
-                        if eval(converted_expr) == 24:
+                        if eval(expr) == 24 or eval(converted_expr) == 24:
                             return expr
-                    except ZeroDivisionError:
+                    except:
                         continue
         return None
 
@@ -284,7 +297,7 @@ class Question24Point(Question):
         return self.check_tips
 
     def AnswerTips(self):
-        # print('计算24点：AnswerTips()')
+        # print('24点：AnswerTips()')
         self.answer_tips = f'{self.Validate24Point()}'
         return self.answer_tips
 
