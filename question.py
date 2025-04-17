@@ -17,6 +17,7 @@ check_tips: 检查提示
 comments: 答题说明
 correct_answer: 正确答案
 end_time: 答题结束时间
+error_number: 答错次数
 expression: 题目的表达式
 is_correct: 答题是否正确
 name: 题目类型名称
@@ -65,6 +66,7 @@ class Question():
         self.correct_answer = ''
         self.comments = ''
         self.end_time = ''
+        self.error_number = 0
         self.expression = ''
         self.is_correct = False
         self.name = ''
@@ -79,8 +81,7 @@ class Question():
         self.type = type
         self.user_input = ''
         self.user_answer = ''
-        self.user_results = ''
-
+        self.user_results = []
 
     def ClassName(self):
         return self.__class__.__name__
@@ -113,6 +114,7 @@ class Question():
         self.correct_answer = ''
         # self.comments = ''
         self.end_time = ''
+        self.error_number = 0
         self.expression = ''
         self.is_correct = False
         # self.name = ''
@@ -124,7 +126,7 @@ class Question():
         self.time_used = ''
         self.user_input = ''
         self.user_answer = ''
-        self.user_rusults = ''
+        self.user_rusults = []
 
     def Generate(self):
         pass
@@ -165,6 +167,7 @@ class Question():
             return True
         else:
             self.is_correct = False
+            self.error_number += 1
             return False
 
     def ConvertToFraction(self, expression):
@@ -222,7 +225,7 @@ class Question():
 题目类型：从右向左求值，即答案是表达式，题目是数值
 """
 class QuestionRL(Question):
-    def __init__(self, type = 0, subtype = [0], range = [1, 10, 1, 10]):
+    def __init__(self, type = 0, subtype = [0], range = [1, 10]):
         super().__init__(type = type, subtype = subtype, range = range)
         self.type = type
         self.subtype = subtype
@@ -235,8 +238,9 @@ class QuestionRL(Question):
 题目类型：计算24点
 """
 class Question24Point(QuestionRL):
-    def __init__(self, subtype=[0, 0], range=[1, 10, 1, 10]):
-        super().__init__(type=0, subtype = subtype, range = range)
+    def __init__(self, subtype = [0], range=[1, 10]):
+        super().__init__(type = 0, subtype = subtype, range = range)
+        # print(range)
         self.name = "计算24点"
         self.comments = "输入表达式，使得表达式的值为24。如: (5+3)*(8-5)。"
         self.Generate()
