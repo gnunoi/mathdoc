@@ -808,40 +808,6 @@ class Mail():
         print("解码后的字符串:", nstr)
         m.Send()
 
-import ntplib
-class Authorization:
-    def __init__(self):
-        self.authorization = True
-        self.GetNetTimeInThread(self.HandleAuthorization)
-        # self.GetNetTime()
-
-    def GetNetTime(self):
-        servers = ['ntp.aliyun.com', 'time.hicloud.com', 'ntp.ntsc.ac.cn',
-                   'ntp.tuna.tsinghua.edu.cn']
-        ntp_client = ntplib.NTPClient()
-        for server in servers:
-            try:
-                response = ntp_client.request(server)
-                utc_time = datetime.fromtimestamp(response.tx_time)
-                tz_time = utc_time.astimezone()
-                local_date = tz_time.strftime("%Y-%m-%d")
-                print(f'local_date: {local_date}')
-                return local_date
-            except Exception as e:
-                print(f"Error fetching NTP time: {e}")
-        return None
-
-    def GetNetTimeInThread(self, callback):
-        def wrapper():
-            callback(self.GetNetTime())
-            Thread(target=wrapper).start()
-
-    def HandleAuthorization(self, net_time):
-        if net_time:
-            self.authorization = net_time <= self.magic_date
-        else:
-            self.authorization = True
-        self.authorization = True
 
 """
 测试代码
