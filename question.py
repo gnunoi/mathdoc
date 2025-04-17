@@ -60,26 +60,26 @@ SuperName(): 获取父类名称
 """
 class Question():
     def __init__(self, type=0, subtype=[0], range=[1, 10]):
-        self.answer_tips = None
-        self.check_tips = None
-        self.correct_answer = None
-        self.comments = None
-        self.end_time = None
-        self.expression = None
+        self.answer_tips = ''
+        self.check_tips = ''
+        self.correct_answer = ''
+        self.comments = ''
+        self.end_time = ''
+        self.expression = ''
         self.is_correct = False
-        self.name = None
+        self.name = ''
         self.numbers = []
         self.operators = []
-        self.question = None
+        self.question = ''
         self.range = range
-        self.start_time = None
-        self.solution = None
+        self.start_time = ''
+        self.solution = ''
         self.subtype = subtype
-        self.time_used = None
+        self.time_used = ''
         self.type = type
-        self.user_input = None
-        self.user_answer = None
-        self.user_results = None
+        self.user_input = ''
+        self.user_answer = ''
+        self.user_results = ''
 
 
     def ClassName(self):
@@ -108,23 +108,23 @@ class Question():
         subtype
         range
         """
-        self.answer_tips = None
-        self.check_tips = None
-        self.correct_answer = None
-        # self.comments = None
-        self.end_time = None
-        self.expression = None
+        self.answer_tips = ''
+        self.check_tips = ''
+        self.correct_answer = ''
+        # self.comments = ''
+        self.end_time = ''
+        self.expression = ''
         self.is_correct = False
-        # self.name = None
+        # self.name = ''
         self.numbers = []
         self.operators = []
-        self.question = None
-        self.start_time = None
-        self.solution = None
-        self.time_used = None
-        self.user_input = None
-        self.user_answer = None
-        self.user_rusults = None
+        self.question = ''
+        self.start_time = ''
+        self.solution = ''
+        self.time_used = ''
+        self.user_input = ''
+        self.user_answer = ''
+        self.user_rusults = ''
 
     def Generate(self):
         pass
@@ -150,9 +150,9 @@ class Question():
         self.AnswerTips()
 
     def BeforeJudgeAnswer(self):
-        self.check_tips = None
-        self.answer_tips = None
-        self.solution = None
+        self.check_tips = ''
+        self.answer_tips = ''
+        self.solution = ''
         self.is_correct = False
 
     def JudgeAnswer(self):
@@ -222,8 +222,8 @@ class Question():
 题目类型：从右向左求值，即答案是表达式，题目是数值
 """
 class QuestionRL(Question):
-    def __init__(self, type=0, subtype = [0], range=[1, 10]):
-        super().__init__(type=1, subtype=subtype, range=range)
+    def __init__(self, type = 0, subtype = [0], range = [1, 10, 1, 10]):
+        super().__init__(type = type, subtype = subtype, range = range)
         self.type = type
         self.subtype = subtype
         self.range = range
@@ -235,8 +235,8 @@ class QuestionRL(Question):
 题目类型：计算24点
 """
 class Question24Point(QuestionRL):
-    def __init__(self, range=[1, 10]):
-        super().__init__(type=0, subtype=[0], range=range)
+    def __init__(self, subtype=[0, 0], range=[1, 10, 1, 10]):
+        super().__init__(type=0, subtype = subtype, range = range)
         self.name = "计算24点"
         self.comments = "输入表达式，使得表达式的值为24。如: (5+3)*(8-5)。"
         self.Generate()
@@ -427,7 +427,7 @@ class QuestionLR(Question):
 题目类型：两位数乘法速算
 """
 class QuestionQC(QuestionLR):
-    def __init__(self, subtype=[0, 0], range=[10, 50]):
+    def __init__(self, subtype=[0, 0], range=[10, 50, 1, 10]):
         super().__init__(type=1, subtype=subtype, range=range)
         self.name = "两位数乘法速算"
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
@@ -557,7 +557,7 @@ class QuestionQC(QuestionLR):
 """
 class Question4AO(QuestionLR):
     def __init__(self, subtype=[0, 0], range=[1, 50, 10, 50]):
-        super().__init__(type=2, subtype=subtype, range=range)
+        super().__init__(type = 2, subtype = subtype, range = range)
         self.name = "四则速算"
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
         self.Generate()
