@@ -29,10 +29,10 @@ subtype: 子类型
       5: 双向凑十法
   四则运算:
     参数一：
-      2: 二项式
-      3: 三项式 
-      4: 四项式
-      5: 五项式
+      0: 二项式
+      1: 三项式 
+      2: 四项式
+      3: 五项式
     参数二:
       0: 加法
       1: 减法
@@ -60,8 +60,7 @@ SubmitAnswer(): 提交答案
 UpdateSetting(): 更新成员变量的函数
 """
 class Exam:
-    def __init__(self, type=0, subtype=[0], range=[1, 10]):
-        self.os = os.name
+    def __init__(self, type=0, subtype=[0, 0], range=[1, 10, 1, 10]):
         self.type = type
         self.subtype = subtype
         self.range = range
@@ -151,7 +150,7 @@ class Exam:
 
     def CreateQuestion(self):
         if self.type == 0: # 0: 计算24点
-            return Question24Point(range=self.range)
+            return Question24Point(subtype=self.subtype, range=self.range)
         elif self.type == 1: # 1: 乘法速算
             return QuestionQC(subtype=self.subtype, range=self.range)
         elif self.type == 2: # 2: 四则运算
@@ -160,7 +159,7 @@ class Exam:
             print(f'{self.type}: 无效的类型')
             return None
 
-    def SubmitAnswer(self, user_input):
+    def SubmitAnswer(self):
         q = self.q
         if not q.ProcessUserInput():
             print('无效输入，继续做题')
@@ -168,13 +167,12 @@ class Exam:
         if q.JudgeAnswer() == False: # 回答错误
             print('回答错误: 再来一次')
             q.Tips()
-            if q.check_tips is not None:
+            if q.check_tips:
                 print(f'检查提示：{q.check_tips}')
-            if q.answer_tips is not None:
+            if q.answer_tips:
                 print(f'答题提示：{q.answer_tips}')
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
-            # self.record.SaveDatabase(q)
         else: # 回答正确
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
@@ -183,9 +181,8 @@ class Exam:
                 print('回答正确: {} = {}'.format(q.user_input, q.correct_answer))
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
-            # self.record.SaveDatabase(q)
+            self.record.correct_number += 1
             self.record.question_number += 1
-            q.Generate()  # 生成下一题
 
     def Register(self):
         while not self.user.IsCompleted():
@@ -204,8 +201,8 @@ class Exam:
         self.Register()
         print()
         type = 0
-        parms = [{'type': 0, 'subtype': [], 'range': [1, 10]},
-                 {'type': 1, 'subtype': [2], 'range': [10, 50]},
+        parms = [{'type': 0, 'subtype': [0, 0], 'range': [1, 10]},
+                 {'type': 1, 'subtype': [2, 0], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
                  ]
         self.UpdateSetting(parms[type]['type'], parms[type]['subtype'], parms[type]['range'])
@@ -221,7 +218,7 @@ class Exam:
             if upper_input == 'EXIT' or upper_input == 'QUIT':
                 print('用户退出程序')
                 break
-            print(upper_input)
+            # print(upper_input)
             if upper_input == 'EXPORT0':
                 self.ExportRecords(0)
                 continue
@@ -231,7 +228,9 @@ class Exam:
             elif upper_input == 'EXPORT2':
                 self.ExportRecords(2)
                 continue
-            self.SubmitAnswer(q.user_input)
+            self.SubmitAnswer()
+            if self.q.is_correct:
+                q.Generate()  # 生成下一题
             print()
         self.Exit() # 处理程序退出的收尾工作，如保存数据，发送邮件。
 
@@ -423,6 +422,8 @@ class Setting:
 变量：
 db: 数据库对象，从Exam初始化函数传入db参数
 data: 答题记录列表，元素是每次答题记录构成的元组
+correct_number: 回答正确的题目数量
+question_number: 总的题目数量
 
 函数：
 CreateTable(): 创建答题记录数据表
@@ -434,7 +435,9 @@ Reorganize(): 重新整理答题记录数据表，保证题号按照数字顺序
 class Record:
     def __init__(self, db):
         self.db = db
+        self.correct_number = 0
         self.question_number = 1
+
         self.data = []
         self.CreateTable()
         # self.Read()
