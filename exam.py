@@ -350,23 +350,74 @@ class User:
         if self.register_date is None: return False
         return True
 
+import ast
 class Setting:
     def __init__(self, db):
         self.db = db
+
         self.default = {
             'type': 0,
             'subtype': [2, 0],
+            'min_24point': 1,
+            'max_24point': 10,
+            'min_qc': 10,
+            'max_qc': 50,
+            'type_qc': 0,
             'min_addend': 1,
             'max_addend': 50,
             'min_divisor': 1,
             'max_divisor': 10,
+            'sn_term': 0,
+            'sn_operator': 0,
         }
+
         self.type = self.default['type'] # 题目类型
         self.subtype = self.default['subtype'] # 题目子类型
+        # 24点：
+        self.min_24point = self.default['min_24point'] # 乘法速算数最小值
+        self.max_24point = self.default['max_24point'] # 乘法速算数最大值
+        # 乘法速算：
+        self.min_qc = self.default['min_qc'] # 乘法速算数最小值
+        self.max_qc = self.default['max_qc'] # 乘法速算数最大值
+        self.type_qc = self.default['type_qc'] # 乘法速算数子类型
+        # 四则运算：
         self.min_addend = self.default['min_addend'] # 加数最小值
         self.max_addend = self.default['max_addend'] # 加数最大值
         self.min_divisor = self.default['min_divisor'] # 除数最小值
         self.max_divisor = self.default['max_divisor'] # 除数最大值
+        self.sn_term = self.default['sn_term'] # 算式的项数序号
+        self.sn_operator = self.default['sn_operator'] # 算式的运算符序号
+
+        self.default_map = {
+            'type': int,
+            'subtype': ast.literal_eval,
+            'min_24point': int,
+            'max_24point': int,
+            'min_qc': int,
+            'max_qc': int,
+            'type_qc': int,
+            'min_addend': int,
+            'max_addend': int,
+            'min_divisor': int,
+            'max_divisor': int,
+            'sn_term': int,
+            'sn_operator': int,
+        }
+        self.settings = {
+            'type': str(self.type),
+            'subtype': str(self.subtype),
+            'min_24point': str(self.min_24point),
+            'max_24point': str(self.max_24point),
+            'min_qc': str(self.min_qc),
+            'max_qc': str(self.max_qc),
+            'type_qc': str(self.type_qc),
+            'min_addend': str(self.min_addend),
+            'max_addend': str(self.max_addend),
+            'min_divisor': str(self.min_divisor),
+            'max_divisor': str(self.max_divisor),
+            'sn_term': str(self.sn_term),
+            'sn_operator': str(self.sn_operator),
+        }
         self.CreateTable()
         self.Read()
 
@@ -383,7 +434,6 @@ class Setting:
             self.Write()
 
     def Read(self):
-        import ast
         db = self.db
         for key, value in self.default.items():
             db.cursor.execute("SELECT Value FROM Setting WHERE Key = ?", (key,))
@@ -391,46 +441,18 @@ class Setting:
             if result == None:
                 break
             value = result[0]
-            if key == 'type':
-                self.type = int(value)
-            elif key == 'subtype':
-                self.subtype = ast.literal_eval(value)
-            elif key == 'min_addend':
-                self.min_addend = int(value)
-            elif key == 'max_addend':
-                self.max_addend = int(value)
-            elif key == 'min_divisor':
-                self.min_divisor = int(value)
-            elif key == 'max_divisor':
-                self.max_divisor = int(value)
+            # 获取对应的转换函数
+            converter = self.default_map.get(key, ast.literal_eval)
+            setattr(self, key, converter(value))
 
             if not result:
-                db.cursor.execute("INSERT INTO Setting (Key, Value) VALUES (?, ?)", (key, default_value))
-                db.connect.commit()
+                self.Write()
 
     def Write(self):
         db = self.db
-        settings = {
-            'type': str(self.type),
-            'subtype': str(self.subtype),
-            'min_addend': str(self.min_addend),
-            'max_addend': str(self.max_addend),
-            'min_divisor': str(self.min_divisor),
-            'max_divisor': str(self.max_divisor),
-        }
-
-        for key, value in settings.items():
+        for key, value in self.settings.items():
             db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))
         db.connect.commit()
-
-    def IsCompleted(self):
-        if self.type is None: return False
-        if self.subtype is None: return False
-        if self.min_addend is None: return False
-        if self.max_addend is None: return False
-        if self.min_divisor is None: return False
-        if self.max_divisor is None: return False
-        return True
 
 """
 类名称：Record

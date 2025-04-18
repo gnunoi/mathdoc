@@ -8,34 +8,61 @@ from PyQt5.QtCore import Qt
 
 from exam import *
 
+
 def GetScreenSize():
     screen = QDesktopWidget().screenGeometry()
     return screen.width(), screen.height()
 
-class MathQuizUI(QWidget):
+"""
+类名称：MathDoc
+说明：数字博士App的UI
+
+成员变量：
+appname: 软件名称
+author：软件作者
+authorization: 软件授权
+base_font: 基本字体
+big_font: 大字体
+height: 窗口高度
+title: 软件标题
+version: 软件版本
+width: 窗口宽度
+
+成员对象：
+exam: 测试对象
+
+成员函数：
+Register(): 用户注册
+InitUI(): UI初始化
+UpdateQuestion(): 更新试题
+SubmitAnswer(): 提交答案
+SetWindowSize(): 设置窗口大小
+
+"""
+class MathDoc(QWidget):
     def __init__(self):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version_number = "2025.04.18(V1.1)"
-        self.title = f"{self.appname}({self.author})，版本：{self.version_number}"
+        self.version = "2025.04.18(V1.1)"
+        self.title = f"{self.appname}({self.author})，版本：{self.version}"
+        self.width, self.height = GetScreenSize()
+
         self.exam = Exam()
         # self.exam.Dump(self.exam.setting)
         self.Register()
-        self.a = Authorization()
+        self.authorization= Authorization()
         if os.name == "nt":
             self.base_font = QFont("SimSun", 24)
         else:
             self.base_font = QFont("Pingfang SC", 24)
         self.big_font = QFont("Arial", 32)
-
-        self.initUI()
+        self.InitUI()
         # self.exam.Dump(self)
-        self.GetScreenSize()
         self.SetWindowSize()
 
     def UpdateQuestion(self):
-        if self.a.authorization == False:
+        if self.authorization.authorization == False:
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
         self.exam.q.Generate()
@@ -69,13 +96,10 @@ class MathQuizUI(QWidget):
             signup = SignupDialog(self.exam)
             signup.exec()
 
-    def GetScreenSize(self):
-        self.width, self.height = GetScreenSize()
-
     def SetWindowSize(self):
         self.setGeometry(0, 0, self.width, self.height)
 
-    def initUI(self):
+    def InitUI(self):
         self.setWindowTitle(self.title)
         main_layout = QVBoxLayout()
         control_panel = QHBoxLayout()
@@ -126,6 +150,8 @@ class MathQuizUI(QWidget):
         self.term_group.setFont(self.base_font)
         term_layout = QVBoxLayout()
         self.radio_terms = [QRadioButton(f'{i + 2}项式') for i in range(4)]
+        if self.exam.setting.subtype[0] > 3:
+            self.exam.setting.subtype[0] = 0
         self.radio_terms[self.exam.setting.subtype[0]].setChecked(True)
         for rb in self.radio_terms:
             rb.setFont(self.base_font)
@@ -552,6 +578,6 @@ class Authorization:
 if __name__ == '__main__':
     local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     app = QApplication(sys.argv)
-    window = MathQuizUI()
+    window = MathDoc()
     window.showMaximized()
     sys.exit(app.exec())

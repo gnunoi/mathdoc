@@ -354,7 +354,7 @@ class QuestionLR(Question):
                 operator = f' {self.operators[i]} ' if i < len(self.operators) else ''
                 expr += operator
             self.expression = expr
-            self.question = expr.replace('*', '×') + " = "
+            self.question = expr.replace('*', '×').replace('/', '÷') + " = "
             return self.expression
         except:
             print('无法生成题目')
