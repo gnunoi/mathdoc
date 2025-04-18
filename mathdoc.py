@@ -44,7 +44,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.04.18(V1.1.2)"
+        self.version = "2025.04.18(V1.2)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
 
@@ -68,7 +68,7 @@ class MathDoc(QWidget):
         self.exam.q.Generate()
         self.tips_label.setText(self.exam.q.check_tips)
         self.answer_tips_label.setText(self.exam.q.answer_tips)
-        self.question_label.setText(f"当前题目：\n{self.exam.q.question}")
+        self.question_label.setText(f"题目：{self.exam.q.question}")
 
         total = self.exam.record.question_number - 1
         correct_rate = self.exam.record.correct_number / total * 100 if total > 0 else 0
@@ -135,32 +135,26 @@ class MathDoc(QWidget):
             QRadioButton('双向凑十法'),
         ]
         if not any(rb.isChecked() for rb in self.qc_options):
-            self.qc_options[self.exam.setting.subtype[0]].setChecked(True)
+            self.qc_options[self.exam.setting.type_qc].setChecked(True)
         for rb in self.qc_options:
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
             qc_layout.addWidget(rb)
         self.qc_group.setLayout(qc_layout)
         control_panel.addWidget(self.qc_group, 1)
-        if self.exam.setting.type != 1:
-            self.qc_group.setVisible(False)
 
         # 算术项式
         self.term_group = QGroupBox("算术项式")
         self.term_group.setFont(self.base_font)
         term_layout = QVBoxLayout()
         self.radio_terms = [QRadioButton(f'{i + 2}项式') for i in range(4)]
-        if self.exam.setting.subtype[0] > 3:
-            self.exam.setting.subtype[0] = 0
-        self.radio_terms[self.exam.setting.subtype[0]].setChecked(True)
+        self.radio_terms[self.exam.setting.sn_term].setChecked(True)
         for rb in self.radio_terms:
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
             term_layout.addWidget(rb)
         self.term_group.setLayout(term_layout)
         control_panel.addWidget(self.term_group, 1)
-        if self.exam.setting.type != 2:
-            self.term_group.setVisible(False)
 
         # 运算类型
         self.operator_group = QGroupBox("运算类型")
@@ -173,34 +167,44 @@ class MathDoc(QWidget):
             QRadioButton('除法'),
             QRadioButton('混合运算')
         ]
-        self.radio_operator[self.exam.setting.subtype[1]].setChecked(True)
+        self.radio_operator[self.exam.setting.sn_operator].setChecked(True)
         for rb in self.radio_operator:
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
             operator_layout.addWidget(rb)
         self.operator_group.setLayout(operator_layout)
         control_panel.addWidget(self.operator_group, 1)
-        if self.exam.setting.type != 2:
-            self.operator_group.setVisible(False)
 
         # 数值范围
         self.range_group = QGroupBox("数值范围")
         self.range_group.setFont(self.base_font)
         range_layout = QFormLayout()
-        labels = ["加减数最小值:", "加减数最大值:", "乘除数最小值:", "乘除数最大值:"]
-        range_numbers = [self.exam.setting.min_addend, self.exam.setting.max_addend,
-         self.exam.setting.min_divisor, self.exam.setting.max_divisor]
-        self.exam.num_edit = [QLineEdit(str(n)) for n in range_numbers]
-        for i in range(4):
-            self.exam.num_edit[i].setFont(self.base_font)
-            self.exam.num_edit[i].setFixedWidth(360)
-            self.exam.num_edit[i].setAlignment(Qt.AlignCenter)
-            range_layout.addRow(QLabel(labels[i], font=self.base_font), self.exam.num_edit[i])
-            self.exam.num_edit[i].editingFinished.connect(self.UpdateSettings)
+        labels = ["24点最小值:",
+                  "24点最大值:",
+                  "乘数最小值:",
+                  "乘数最大值:",
+                  "加减数最小值:",
+                  "加减数最大值:",
+                  "乘除数最小值:",
+                  "乘除数最大值:"]
+        range_numbers = [self.exam.setting.min_24point,
+                         self.exam.setting.max_24point,
+                         self.exam.setting.min_qc,
+                         self.exam.setting.max_qc,
+                         self.exam.setting.min_addend,
+                         self.exam.setting.max_addend,
+                         self.exam.setting.min_divisor,
+                         self.exam.setting.max_divisor]
+        self.num_edit = [QLineEdit(str(n)) for n in range_numbers]
+        self.num_label = [QLabel(labels[i], font=self.base_font) for i in range(len(labels))]
+        for i in range(8):
+            self.num_edit[i].setFont(self.base_font)
+            self.num_edit[i].setFixedWidth(360)
+            self.num_edit[i].setAlignment(Qt.AlignCenter)
+            range_layout.addRow(self.num_label[i], self.num_edit[i])
+            self.num_edit[i].editingFinished.connect(self.UpdateSettings)
         self.range_group.setLayout(range_layout)
         control_panel.addWidget(self.range_group, 2)
-        if self.exam.setting.type == 0:
-            self.range_group.setVisible(False)
         main_layout.addLayout(control_panel)
 
         # 题目显示
@@ -216,8 +220,9 @@ class MathDoc(QWidget):
         self.answer_input.setAlignment(Qt.AlignCenter)
         self.answer_input.returnPressed.connect(self.SubmitAnswer)
 
+        # 答题注释
         self.answer_label = QLabel()
-        self.answer_label.setFont(self.big_font)
+        self.answer_label.setFont(self.base_font)
         self.answer_label.setAlignment(Qt.AlignCenter)
         self.answer_label.setText(self.exam.q.comments)
         main_layout.addWidget(self.answer_input, 1)
@@ -236,7 +241,7 @@ class MathDoc(QWidget):
 
         # 状态栏
         self.status_label = QLabel()
-        self.status_label.setFont(self.big_font)
+        self.status_label.setFont(self.base_font)
         self.status_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.status_label, 1)
 
@@ -276,7 +281,41 @@ class MathDoc(QWidget):
         palette.setColor(QPalette.WindowText, QColor(0, 120, 215)) #0078D7
         self.tips_label.setPalette(palette)
         self.answer_tips_label.setPalette(palette)
+
+        self.ChangeState()
         self.UpdateQuestion()
+
+    def ChangeState(self):
+        # 状态机
+        if self.exam.setting.type != 2:
+            self.term_group.setVisible(False)
+            self.operator_group.setVisible(False)
+        if self.exam.setting.type != 1:
+            self.qc_group.setVisible(False)
+        if self.exam.setting.type == 0:
+            for i in [0, 1]:
+                self.num_edit[i].setVisible(True)
+                self.num_label[i].setVisible(True)
+            for i in [2, 3, 4, 5, 6, 7]:
+                self.num_edit[i].setVisible(False)
+                self.num_label[i].setVisible(False)
+        elif self.exam.setting.type == 1:
+            self.qc_group.setVisible(True)
+            for i in [2, 3]:
+                self.num_edit[i].setVisible(True)
+                self.num_label[i].setVisible(True)
+            for i in [0, 1, 4, 5, 6, 7]:
+                self.num_edit[i].setVisible(False)
+                self.num_label[i].setVisible(False)
+        elif self.exam.setting.type == 2:
+            self.term_group.setVisible(True)
+            self.operator_group.setVisible(True)
+            for i in [4, 5, 6, 7]:
+                self.num_edit[i].setVisible(True)
+                self.num_label[i].setVisible(True)
+            for i in [0, 1, 2, 3]:
+                self.num_edit[i].setVisible(False)
+                self.num_label[i].setVisible(False)
 
     def apply_styles(self):
         style = """
@@ -317,55 +356,72 @@ class MathDoc(QWidget):
         self.setStyleSheet(style)
 
     def UpdateSettings(self):
-        self.exam.setting.min_addend = int(self.exam.num_edit[0].text())
-        self.exam.setting.max_addend = int(self.exam.num_edit[1].text())
-        self.exam.setting.min_divisor = int(self.exam.num_edit[2].text())
-        self.exam.setting.max_divisor = int(self.exam.num_edit[3].text())
+        self.exam.setting.min_24point = int(self.num_edit[0].text())
+        self.exam.setting.max_24point = int(self.num_edit[1].text())
+        self.exam.setting.min_qc = int(self.num_edit[2].text())
+        self.exam.setting.max_qc = int(self.num_edit[3].text())
+        self.exam.setting.min_addend = int(self.num_edit[4].text())
+        self.exam.setting.max_addend = int(self.num_edit[5].text())
+        self.exam.setting.min_divisor = int(self.num_edit[6].text())
+        self.exam.setting.max_divisor = int(self.num_edit[7].text())
+        if self.exam.setting.min_24point > self.exam.setting.max_24point:
+            self.exam.setting.min_24point, self.exam.setting.max_24point = (self.exam.setting.max_24point, self.exam.setting.min_24point)
+            self.num_edit[0].setText(str(self.exam.setting.min_24point))
+            self.num_edit[1].setText(str(self.exam.setting.max_24point))
+        if not self.exam.setting.min_24point in [1, 2]:
+            self.exam.setting.min_24point = 2
+            self.num_edit[0].setText(str(self.exam.setting.min_24point))
+        if not self.exam.setting.max_24point in [10, 11, 12, 13]:
+            self.exam.setting.max_24point = 10
+            self.num_edit[1].setText(str(self.exam.setting.max_24point))
+        if self.exam.setting.min_qc > self.exam.setting.max_qc:
+            self.exam.setting.min_qc, self.exam.setting.max_qc = (self.exam.setting.max_qc, self.exam.setting.min_qc)
+            self.num_edit[2].setText(str(self.exam.setting.min_qc))
+            self.num_edit[3].setText(str(self.exam.setting.max_qc))
+        if self.exam.setting.max_qc - self.exam.setting.min_qc < 10:
+            self.exam.setting.max_24point = self.exam.setting.min_qc + 10
+            self.num_edit[3].setText(str(self.exam.setting.max_qc))
         if self.exam.setting.min_addend > self.exam.setting.max_addend:
             self.exam.setting.min_addend, self.exam.setting.max_addend = (self.exam.setting.max_addend, self.exam.setting.min_addend)
-            self.self.exam.num_edit[0].setText(str(self.exam.setting.min_addend))
-            self.self.exam.num_edit[1].setText(str(self.exam.setting.max_addend))
-
+            self.num_edit[4].setText(str(self.exam.setting.min_addend))
+            self.num_edit[5].setText(str(self.exam.setting.max_addend))
         if self.exam.setting.min_divisor > self.exam.setting.max_divisor:
             self.exam.setting.min_divisor, self.exam.setting.max_divisor = (self.exam.setting.max_divisor, self.exam.setting.min_divisor)
-            self.self.exam.num_edit[2].setText(str(self.exam.setting.min_divisor))
-            self.self.exam.num_edit[3].setText(str(self.exam.setting.max_divisor))
+            self.num_edit[6].setText(str(self.exam.setting.min_divisor))
+            self.num_edit[7].setText(str(self.exam.setting.max_divisor))
 
         for i, rb in enumerate(self.type_options):
             if rb.isChecked():
                 self.exam.setting.type = i
+                self.ChangeState()
                 if i == 0:
-                    self.qc_group.setVisible(False)
-                    self.term_group.setVisible(False)
-                    self.operator_group.setVisible(False)
-                    self.range_group.setVisible(False)
-                    self.exam.UpdateSetting(type=self.exam.setting.type, subtype = [0], range = [1, 10])
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype = [],
+                                            range = [self.exam.setting.min_24point,
+                                                     self.exam.setting.max_24point])
                 elif i == 1:
-                    self.qc_group.setVisible(True)
-                    self.term_group.setVisible(False)
-                    self.operator_group.setVisible(False)
-                    self.range_group.setVisible(True)
                     for i, rb in enumerate(self.qc_options):
                         if rb.isChecked():
-                            self.exam.setting.subtype[0] = i
+                            self.exam.setting.type_qc = i
                             break
-                    self.exam.UpdateSetting(type=self.exam.setting.type, subtype=self.exam.setting.subtype,
-                                            range = [self.exam.setting.min_divisor, self.exam.setting.max_divisor])
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype = [self.exam.setting.type_qc],
+                                            range = [self.exam.setting.min_qc,
+                                                     self.exam.setting.max_qc])
                 elif i == 2:
-                    self.qc_group.setVisible(False)
-                    self.term_group.setVisible(True)
-                    self.operator_group.setVisible(True)
-                    self.range_group.setVisible(True)
                     for i in range(4):
                         if self.radio_terms[i].isChecked():
-                            self.exam.setting.subtype[0] = i
-                            print(f'self.exam.setting.subtype[0]: {self.exam.setting.subtype[0]}')
+                            self.exam.setting.sn_term = i
                     for i in range(5):
                         if self.radio_operator[i].isChecked():
-                            self.exam.setting.subtype[1] = i
-                    self.exam.UpdateSetting(type=self.exam.setting.type, subtype=self.exam.setting.subtype,
-                                            range = [self.exam.setting.min_addend, self.exam.setting.max_addend,
-                                                     self.exam.setting.min_divisor, self.exam.setting.max_divisor])
+                            self.exam.setting.sn_operator = i
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype = [self.exam.setting.sn_term,
+                                                       self.exam.setting.sn_operator],
+                                            range = [self.exam.setting.min_addend,
+                                                     self.exam.setting.max_addend,
+                                                     self.exam.setting.min_divisor,
+                                                     self.exam.setting.max_divisor])
 
         self.exam.setting.Write()
         self.UpdateQuestion()
@@ -376,6 +432,7 @@ class MathDoc(QWidget):
         event.accept()
 
     def ExitApp(self):
+        # QMessageBox.information(self, '发送邮件', f'正在发送答题记录的邮件')
         self.exam.Exit()
         QApplication.quit()
 
@@ -555,7 +612,7 @@ class Authorization:
                 tz_time = utc_time.astimezone()
                 local_date = tz_time.strftime("%Y-%m-%d")
                 local_time = tz_time.strftime("%Y-%m-%d %H:%M:%S")
-                print(f'Date from network: {local_date}')
+                # print(f'Date from network: {local_date}')
                 return local_date
             except Exception as e:
                 print(f"Error fetching NTP time: {e}")

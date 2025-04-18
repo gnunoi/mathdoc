@@ -565,7 +565,7 @@ class QuestionQC(QuestionLR):
 class Question4AO(QuestionLR):
     def __init__(self, subtype=[0, 0], range=[1, 50, 10, 50]):
         super().__init__(type = 2, subtype = subtype, range = range)
-        print(self.subtype)
+        # print(self.subtype)
         self.name = "四则速算"
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
         self.Generate()
@@ -574,7 +574,7 @@ class Question4AO(QuestionLR):
         super().BeforeGenerate()
         ops = [['+'], ['-'], ['*'], ['/'], ['+', '-', '*', '/']]
         term_count = self.subtype[0] + 2
-        print(f'term_count: {term_count}')
+        # print(f'term_count: {term_count}')
         try:
             user_operators = ops[self.subtype[1]]
         except:

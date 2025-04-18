@@ -94,7 +94,6 @@ class Exam:
     def ReadSetting(self):
         self.setting.Read()
         self.type = self.setting.type
-        self.subtype = self.setting.subtype
         if self.type == 0:
             self.range = [1, 10]
         elif self.type == 1:
@@ -357,7 +356,6 @@ class Setting:
 
         self.default = {
             'type': 0,
-            'subtype': [2, 0],
             'min_24point': 1,
             'max_24point': 10,
             'min_qc': 10,
@@ -372,7 +370,6 @@ class Setting:
         }
 
         self.type = self.default['type'] # 题目类型
-        self.subtype = self.default['subtype'] # 题目子类型
         # 24点：
         self.min_24point = self.default['min_24point'] # 乘法速算数最小值
         self.max_24point = self.default['max_24point'] # 乘法速算数最大值
@@ -390,7 +387,6 @@ class Setting:
 
         self.default_map = {
             'type': int,
-            'subtype': ast.literal_eval,
             'min_24point': int,
             'max_24point': int,
             'min_qc': int,
@@ -405,7 +401,6 @@ class Setting:
         }
         self.settings = {
             'type': str(self.type),
-            'subtype': str(self.subtype),
             'min_24point': str(self.min_24point),
             'max_24point': str(self.max_24point),
             'min_qc': str(self.min_qc),
