@@ -70,8 +70,10 @@ class Exam:
         self.record = Record(self.db)
         self.wb = Workbook(self.user.username)
         self.mail = Mail()
+        self.ReadSetting()
+        # self.Dump(self.setting)
+        # self.Dump(self)
         self.q = self.CreateQuestion()
-
 
     def Dump(self, obj = None):
         if obj == None:
@@ -83,11 +85,23 @@ class Exam:
         print()
 
     def Exit(self):
-        self.record.Dump()
+        # self.record.SaveRecords()
         self.SendDB()
         if len(self.record.data):
             self.wb.Save(self.record.data)
             self.SendRecords()
+
+    def ReadSetting(self):
+        self.setting.Read()
+        self.type = self.setting.type
+        self.subtype = self.setting.subtype
+        if self.type == 0:
+            self.range = [1, 10]
+        elif self.type == 1:
+            self.range = [self.setting.min_divisor, self.setting.max_divisor]
+        elif self.type == 2:
+            self.range = [self.setting.min_addend, self.setting.max_addend,
+                self.setting.min_divisor, self.setting.max_divisor]
 
     def ExportRecords(self, type):
         db = self.db
@@ -431,8 +445,8 @@ question_number: 总的题目数量
 函数：
 CreateTable(): 创建答题记录数据表
 Append(): 向记录列表追加记录
-Dump(): 将所有答题记录保存到答题记录数据表
 SaveRecord(): 将一条答题记录保存到数据表
+SaveRecords(): 将所有答题记录保存到答题记录数据表
 Reorganize(): 重新整理答题记录数据表，保证题号按照数字顺序写入
 """
 class Record:
@@ -476,7 +490,7 @@ class Record:
                   q.time_used, q.check_tips, q.answer_tips, q.solution)
         self.data.append(record)
 
-    def Dump(self):
+    def SaveRecords(self):
         db = self.db
         db.cursor.executemany('''
             INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
@@ -627,7 +641,8 @@ path: 保存工作部文件的文件夹的完整路径
 函数：
 Open(): 打开工作簿
 Close(): 关闭工作簿
-Write(): 保存工作簿
+Save(): 保存工作簿
+SaveRecords(): 保存所有答题记录
 """
 class Workbook:
     def __init__(self, username = None, filename = None):
@@ -691,7 +706,7 @@ class Workbook:
         cell_format = self.workbook.add_format(self.cell_format)
         self.worksheet.write_row(row, 0, row_data, cell_format)
 
-    def Dump(self, data):
+    def SaveRecords(self, data):
         row = 1
         for row_data in data:
             self.Append(row, row_data[:-1])
@@ -700,7 +715,7 @@ class Workbook:
     def Save(self, data):
         rows = len(data)
         if self.workbook and rows:
-            self.Dump(data)
+            self.SaveRecords(data)
             self.worksheet.autofilter(0, 0, rows, len(self.title)-1)
             self.workbook.close()
 
