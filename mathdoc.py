@@ -427,6 +427,11 @@ class MathDoc(QWidget):
         self.UpdateQuestion()
         self.answer_label.setText(self.exam.q.comments)
 
+    def ExportWorkbook(self, type):
+        self.exam.ExportRecords(type)
+        name = ['习题本', '错题本', '难题本']
+        QMessageBox.information(self, '导出答题记录', f'{name[type]}已导出')
+
     def closeEvent(self, event):
         self.exam.Exit()
         event.accept()

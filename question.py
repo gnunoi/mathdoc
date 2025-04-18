@@ -1,10 +1,8 @@
 import random
-import numpy as np
 import itertools
 import re
 from fractions import Fraction
 from datetime import datetime
-from collections import Counter
 from itertools import combinations
 
 """
@@ -101,7 +99,7 @@ class Question():
         if a > b:
             return None
         else:
-            return np.random.randint(a, b)
+            return random.randint(a, b)
 
     def BeforeGenerate(self):
         """
