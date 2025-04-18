@@ -85,3 +85,6 @@
 
 ## [Release V1.1.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.1.1)
 完善认证。
+
+## [Release V1.1.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.1.2)
+完善Setting类及数据库。
