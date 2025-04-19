@@ -44,7 +44,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.04.18(V1.2)"
+        self.version = "2025.04.19(V1.2.1)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
 
@@ -368,11 +368,11 @@ class MathDoc(QWidget):
             self.exam.setting.min_24point, self.exam.setting.max_24point = (self.exam.setting.max_24point, self.exam.setting.min_24point)
             self.num_edit[0].setText(str(self.exam.setting.min_24point))
             self.num_edit[1].setText(str(self.exam.setting.max_24point))
-        if not self.exam.setting.min_24point in [1, 2]:
-            self.exam.setting.min_24point = 2
+        if not self.exam.setting.min_24point in range(1, 4):
+            self.exam.setting.min_24point = 3
             self.num_edit[0].setText(str(self.exam.setting.min_24point))
-        if not self.exam.setting.max_24point in [10, 11, 12, 13]:
-            self.exam.setting.max_24point = 10
+        if not self.exam.setting.max_24point in range(8, 14):
+            self.exam.setting.max_24point = 8
             self.num_edit[1].setText(str(self.exam.setting.max_24point))
         if self.exam.setting.min_qc > self.exam.setting.max_qc:
             self.exam.setting.min_qc, self.exam.setting.max_qc = (self.exam.setting.max_qc, self.exam.setting.min_qc)
