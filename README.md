@@ -91,3 +91,6 @@
 
 ## [Release V1.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.2)
 完成整体代码重构。
+
+## [Release V1.2.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.1)
+修复代码重构Setting不保存的BUG。
