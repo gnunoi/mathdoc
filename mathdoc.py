@@ -143,11 +143,11 @@ class MathDoc(QWidget):
         self.qc_group.setLayout(qc_layout)
         control_panel.addWidget(self.qc_group, 1)
 
-        # 算术项式
-        self.term_group = QGroupBox("算术项式")
+        # 算术项数
+        self.term_group = QGroupBox("算术项数")
         self.term_group.setFont(self.base_font)
         term_layout = QVBoxLayout()
-        self.radio_terms = [QRadioButton(f'{i + 2}项式') for i in range(4)]
+        self.radio_terms = [QRadioButton(f'{i + 2}项') for i in range(4)]
         self.radio_terms[self.exam.setting.sn_term].setChecked(True)
         for rb in self.radio_terms:
             rb.setFont(self.base_font)
@@ -282,8 +282,8 @@ class MathDoc(QWidget):
         self.tips_label.setPalette(palette)
         self.answer_tips_label.setPalette(palette)
 
-        self.ChangeState()
-        self.UpdateQuestion()
+        self.UpdateSettings()
+        # self.UpdateQuestion()
 
     def ChangeState(self):
         # 状态机

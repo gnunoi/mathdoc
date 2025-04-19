@@ -368,7 +368,20 @@ class Setting:
             'sn_term': 0,
             'sn_operator': 0,
         }
-
+        self.default_map = {
+            'type': int,
+            'min_24point': int,
+            'max_24point': int,
+            'min_qc': int,
+            'max_qc': int,
+            'type_qc': int,
+            'min_addend': int,
+            'max_addend': int,
+            'min_divisor': int,
+            'max_divisor': int,
+            'sn_term': int,
+            'sn_operator': int,
+        }
         self.type = self.default['type'] # 题目类型
         # 24点：
         self.min_24point = self.default['min_24point'] # 乘法速算数最小值
@@ -385,34 +398,6 @@ class Setting:
         self.sn_term = self.default['sn_term'] # 算式的项数序号
         self.sn_operator = self.default['sn_operator'] # 算式的运算符序号
 
-        self.default_map = {
-            'type': int,
-            'min_24point': int,
-            'max_24point': int,
-            'min_qc': int,
-            'max_qc': int,
-            'type_qc': int,
-            'min_addend': int,
-            'max_addend': int,
-            'min_divisor': int,
-            'max_divisor': int,
-            'sn_term': int,
-            'sn_operator': int,
-        }
-        self.settings = {
-            'type': str(self.type),
-            'min_24point': str(self.min_24point),
-            'max_24point': str(self.max_24point),
-            'min_qc': str(self.min_qc),
-            'max_qc': str(self.max_qc),
-            'type_qc': str(self.type_qc),
-            'min_addend': str(self.min_addend),
-            'max_addend': str(self.max_addend),
-            'min_divisor': str(self.min_divisor),
-            'max_divisor': str(self.max_divisor),
-            'sn_term': str(self.sn_term),
-            'sn_operator': str(self.sn_operator),
-        }
         self.CreateTable()
         self.Read()
 
@@ -445,7 +430,21 @@ class Setting:
 
     def Write(self):
         db = self.db
-        for key, value in self.settings.items():
+        settings = {
+            'type': str(self.type),
+            'min_24point': str(self.min_24point),
+            'max_24point': str(self.max_24point),
+            'min_qc': str(self.min_qc),
+            'max_qc': str(self.max_qc),
+            'type_qc': str(self.type_qc),
+            'min_addend': str(self.min_addend),
+            'max_addend': str(self.max_addend),
+            'min_divisor': str(self.min_divisor),
+            'max_divisor': str(self.max_divisor),
+            'sn_term': str(self.sn_term),
+            'sn_operator': str(self.sn_operator),
+        }
+        for key, value in settings.items():
             db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))
         db.connect.commit()
 

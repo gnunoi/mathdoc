@@ -12,4 +12,4 @@ for %%i in (%directories%) do (
 )
 
 endlocal
-pyinstaller -F -w -i favicon.ico mathdoc.py
+pyinstaller -F -w -i favicon.ico --noupx mathdoc.py
