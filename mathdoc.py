@@ -468,7 +468,7 @@ class SignupDialog(QDialog):
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         form_layout.setSpacing(36)
-        self.username_label = QLabel("用 户 名:")
+        self.username_label = QLabel("用 户 名（必填）:")
         self.username_label.setFont(self.base_font)
         self.username_input = QLineEdit()
         self.username_input.setFont(self.base_font)
@@ -477,7 +477,7 @@ class SignupDialog(QDialog):
             self.username_input.setEnabled(False)
         form_layout.addRow(self.username_label, self.username_input)
 
-        self.grade_label = QLabel("年级（数字）:")
+        self.grade_label = QLabel("年级（数字1-12，必填）:")
         self.grade_label.setFont(self.base_font)
         self.grade_input = QLineEdit()
         self.grade_input.setFont(self.base_font)
@@ -486,7 +486,7 @@ class SignupDialog(QDialog):
             self.grade_input.setEnabled(False)
         form_layout.addRow(self.grade_label, self.grade_input)
 
-        self.mobile_label = QLabel("手　　机:")
+        self.mobile_label = QLabel("手　　机（必填）:")
         self.mobile_label.setFont(self.base_font)
         self.mobile_input = QLineEdit()
         self.mobile_input.setFont(self.base_font)
@@ -495,7 +495,7 @@ class SignupDialog(QDialog):
             self.mobile_input.setText(self.mobile)
         form_layout.addRow(self.mobile_label, self.mobile_input)
 
-        self.email_label = QLabel("本人邮箱:")
+        self.email_label = QLabel("本人邮箱（必填）:")
         self.email_label.setFont(self.base_font)
         self.email_input = QLineEdit()
         self.email_input.setFont(self.base_font)
@@ -504,7 +504,7 @@ class SignupDialog(QDialog):
             self.email_input.setText(self.email)
         form_layout.addRow(self.email_label, self.email_input)
 
-        self.mentor_email_label = QLabel("导师邮箱:")
+        self.mentor_email_label = QLabel("教师邮箱（选填）:")
         self.mentor_email_label.setFont(self.base_font)
         self.mentor_email_input = QLineEdit()
         self.mentor_email_input.setFont(self.base_font)
@@ -513,7 +513,7 @@ class SignupDialog(QDialog):
             self.mentor_email_input.setText(self.mentor_email)
         form_layout.addRow(self.mentor_email_label, self.mentor_email_input)
 
-        self.code_label = QLabel("验 证 码:")
+        self.code_label = QLabel("邮箱验证码（必填）:")
         self.code_label.setFont(self.base_font)
         self.code_input = QLineEdit()
         self.code_input.setFont(self.base_font)
@@ -529,11 +529,11 @@ class SignupDialog(QDialog):
             self.send_code_btn.setEnabled(False)
         self.send_code_btn.clicked.connect(self.SendVCode)
 
-        self.register_btn = QPushButton("注    册")
+        self.register_btn = QPushButton("用户注册")
         self.register_btn.setFont(self.base_font)
         self.register_btn.clicked.connect(self.Register)
 
-        self.exit_btn = QPushButton("退    出")
+        self.exit_btn = QPushButton("退出软件")
         self.exit_btn.setFont(self.base_font)
         self.exit_btn.clicked.connect(self.Exit)
 
