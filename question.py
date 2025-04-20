@@ -162,7 +162,6 @@ class Question():
         self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
-        self.start_time = datetime.now()
         if self.correct_answer in [self.user_answer] + self.user_results:
             self.is_correct = True
             return True
@@ -446,10 +445,12 @@ class QuestionQC(QuestionLR):
         min_val = self.range[0]
         max_val = self.range[1]
 
-        if subtype < 0 or subtype > 5:
+        if subtype < 0 or subtype > 6:
             print(f"不支持的子类型: {subtype}")
             return False
 
+        if subtype == 6:
+            subtype = self.RandInt(0, 5)
         if subtype == 0:  # 平方数
             number = self.RandInt(min_val, max_val)
             self.numbers.append(number)
