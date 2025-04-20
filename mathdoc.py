@@ -454,18 +454,20 @@ class SignupDialog(QDialog):
         self.mobile = exam.user.mobile
         self.email = exam.user.email
         self.mentor_email = exam.user.mentor_email
-        self.initSignupDialog()
+        self.InitDialog()
 
-    def initSignupDialog(self):
+    def InitDialog(self):
         if os.name == "nt":
             self.base_font = QFont("SimSun", 24)
         else:
             self.base_font = QFont("Pingfang SC", 24)
         width, height = GetScreenSize()
         self.setWindowTitle("用户注册")
-        self.setFixedSize(int(width*2/3), int(height*4/5))
-        layout = QFormLayout()
-        layout.setSpacing(36)
+        # self.setFixedSize(int(width*2/3), int(height*4/5))
+
+        main_layout = QVBoxLayout()
+        form_layout = QFormLayout()
+        form_layout.setSpacing(36)
         self.username_label = QLabel("用 户 名:")
         self.username_label.setFont(self.base_font)
         self.username_input = QLineEdit()
@@ -473,7 +475,7 @@ class SignupDialog(QDialog):
         if self.username:
             self.username_input.setText(self.username)
             self.username_input.setEnabled(False)
-        layout.addRow(self.username_label, self.username_input)
+        form_layout.addRow(self.username_label, self.username_input)
 
         self.grade_label = QLabel("年级（数字）:")
         self.grade_label.setFont(self.base_font)
@@ -482,7 +484,7 @@ class SignupDialog(QDialog):
         if self.grade is not None and str(self.grade) != '':
             self.grade_input.setText(str(self.grade))
             self.grade_input.setEnabled(False)
-        layout.addRow(self.grade_label, self.grade_input)
+        form_layout.addRow(self.grade_label, self.grade_input)
 
         self.mobile_label = QLabel("手　　机:")
         self.mobile_label.setFont(self.base_font)
@@ -491,7 +493,7 @@ class SignupDialog(QDialog):
         if self.mobile is not None and self.mobile != '':
             self.mobile_input.setEnabled(False)
             self.mobile_input.setText(self.mobile)
-        layout.addRow(self.mobile_label, self.mobile_input)
+        form_layout.addRow(self.mobile_label, self.mobile_input)
 
         self.email_label = QLabel("本人邮箱:")
         self.email_label.setFont(self.base_font)
@@ -500,7 +502,7 @@ class SignupDialog(QDialog):
         if self.email is not None and self.email != '':
             self.email_input.setEnabled(False)
             self.email_input.setText(self.email)
-        layout.addRow(self.email_label, self.email_input)
+        form_layout.addRow(self.email_label, self.email_input)
 
         self.mentor_email_label = QLabel("导师邮箱:")
         self.mentor_email_label.setFont(self.base_font)
@@ -509,14 +511,7 @@ class SignupDialog(QDialog):
         if self.mentor_email is not None and self.mentor_email != '':
             self.mentor_email_input.setEnabled(False)
             self.mentor_email_input.setText(self.mentor_email)
-        layout.addRow(self.mentor_email_label, self.mentor_email_input)
-
-        self.send_code_btn = QPushButton("发送邮箱验证码")
-        self.send_code_btn.setFont(self.base_font)
-        if self.email is not None and self.email != '':
-            self.send_code_btn.setEnabled(False)
-        layout.addRow("", self.send_code_btn)
-        self.send_code_btn.clicked.connect(self.SendVCode)
+        form_layout.addRow(self.mentor_email_label, self.mentor_email_input)
 
         self.code_label = QLabel("验 证 码:")
         self.code_label.setFont(self.base_font)
@@ -525,17 +520,32 @@ class SignupDialog(QDialog):
         if self.email is not None and self.email != '':
             self.code_input.setText(self.vcode)
             self.code_input.setEnabled(False)
-        layout.addRow(self.code_label, self.code_input)
+        form_layout.addRow(self.code_label, self.code_input)
+
+        btn_layout = QHBoxLayout()
+        self.send_code_btn = QPushButton("发送邮箱验证码")
+        self.send_code_btn.setFont(self.base_font)
+        if self.email is not None and self.email != '':
+            self.send_code_btn.setEnabled(False)
+        self.send_code_btn.clicked.connect(self.SendVCode)
 
         self.register_btn = QPushButton("注    册")
         self.register_btn.setFont(self.base_font)
         self.register_btn.clicked.connect(self.Register)
+
         self.exit_btn = QPushButton("退    出")
         self.exit_btn.setFont(self.base_font)
         self.exit_btn.clicked.connect(self.Exit)
-        layout.addRow(self.register_btn, self.exit_btn)
 
-        self.setLayout(layout)
+        btn_layout.addStretch(1)
+        btn_layout.addWidget(self.send_code_btn)
+        btn_layout.addWidget(self.register_btn)
+        btn_layout.addWidget(self.exit_btn)
+        btn_layout.addStretch(1)
+        main_layout.addLayout(form_layout)
+        main_layout.addLayout(btn_layout)
+        self.setLayout(main_layout)
+
         if os.name == "posix":
             self.SetStyle()
 
@@ -601,7 +611,7 @@ class SignupDialog(QDialog):
     def SetStyle(self):
         style = """
         QPushButton {
-            min-width: 320px;
+            min-width: 200px;
             padding: 12px;
             font-size: 24px;
             background: #F0F0F0;
