@@ -342,11 +342,11 @@ class User:
             self.Write()
 
     def IsCompleted(self):
-        if self.username is None: return False
-        if self.email is None: return False
-        if self.mobile is None: return False
-        if self.grade is None: return False
-        if self.register_date is None: return False
+        if self.username is None or self.username == '': return False
+        if self.grade is None or self.grade == '': return False
+        if self.email is None or self.email == '': return False
+        if self.mobile is None or self.mobile == '': return False
+        if self.register_date is None or self.register_date == '': return False
         return True
 
 import ast

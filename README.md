@@ -94,3 +94,6 @@
 
 ## [Release V1.2.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.1)
 修复代码重构Setting不保存的BUG。
+
+## [Release V1.2.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.2)
+完善注册对话框，增加退出按钮；对年级、手机号进行有效检查。
