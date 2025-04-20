@@ -134,6 +134,7 @@ class MathDoc(QWidget):
             QRadioButton('大数凑十法'),
             QRadioButton('逢五凑十法'),
             QRadioButton('双向凑十法'),
+            QRadioButton('综合练习'),
         ]
         if not any(rb.isChecked() for rb in self.qc_options):
             self.qc_options[self.exam.setting.type_qc].setChecked(True)
@@ -463,11 +464,10 @@ class SignupDialog(QDialog):
             self.base_font = QFont("Pingfang SC", 24)
         width, height = GetScreenSize()
         self.setWindowTitle("用户注册")
-        # self.setFixedSize(int(width*2/3), int(height*4/5))
 
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
-        form_layout.setSpacing(36)
+        form_layout.setSpacing(32)
         self.username_label = QLabel("用 户 名（必填）:")
         self.username_label.setFont(self.base_font)
         self.username_input = QLineEdit()
@@ -564,7 +564,6 @@ class SignupDialog(QDialog):
         self.email= self.email_input.text()
         self.mentor_email = self.mentor_email_input.text()
 
-        # print(self.username, self.grade, self.mobile, self.email, self.ucode)
         try:
             grade = ast.literal_eval(self.grade)
         except:
@@ -633,6 +632,131 @@ class SignupDialog(QDialog):
         }
         """
         self.setStyleSheet(style)
+
+    def LI_Init(self):
+        pass
+
+    def InitDialog2(self):
+        if os.name == "nt":
+            self.base_font = QFont("SimSun", 24)
+        else:
+            self.base_font = QFont("Pingfang SC", 24)
+        width, height = GetScreenSize()
+        self.setWindowTitle("用户注册")
+
+        main_layout = QVBoxLayout()
+        form_layout = QFormLayout()
+        form_layout.setSpacing(32)
+
+
+        self.username_label = QLabel("用 户 名（必填）:")
+        self.username_label.setFont(self.base_font)
+        self.username_input = QLineEdit()
+        self.username_input.setFont(self.base_font)
+        if self.username:
+            self.username_input.setText(self.username)
+            self.username_input.setEnabled(False)
+        form_layout.addRow(self.username_label, self.username_input)
+
+        self.grade_label = QLabel("年级（数字1-12，必填）:")
+        self.grade_label.setFont(self.base_font)
+        self.grade_input = QLineEdit()
+        self.grade_input.setFont(self.base_font)
+        if self.grade is not None and str(self.grade) != '':
+            self.grade_input.setText(str(self.grade))
+            self.grade_input.setEnabled(False)
+        form_layout.addRow(self.grade_label, self.grade_input)
+
+        self.mobile_label = QLabel("手　　机（必填）:")
+        self.mobile_label.setFont(self.base_font)
+        self.mobile_input = QLineEdit()
+        self.mobile_input.setFont(self.base_font)
+        if self.mobile is not None and self.mobile != '':
+            self.mobile_input.setEnabled(False)
+            self.mobile_input.setText(self.mobile)
+        form_layout.addRow(self.mobile_label, self.mobile_input)
+
+        self.email_label = QLabel("本人邮箱（必填）:")
+        self.email_label.setFont(self.base_font)
+        self.email_input = QLineEdit()
+        self.email_input.setFont(self.base_font)
+        if self.email is not None and self.email != '':
+            self.email_input.setEnabled(False)
+            self.email_input.setText(self.email)
+        form_layout.addRow(self.email_label, self.email_input)
+
+        self.mentor_email_label = QLabel("教师邮箱（选填）:")
+        self.mentor_email_label.setFont(self.base_font)
+        self.mentor_email_input = QLineEdit()
+        self.mentor_email_input.setFont(self.base_font)
+        if self.mentor_email is not None and self.mentor_email != '':
+            self.mentor_email_input.setEnabled(False)
+            self.mentor_email_input.setText(self.mentor_email)
+        form_layout.addRow(self.mentor_email_label, self.mentor_email_input)
+
+        self.code_label = QLabel("邮箱验证码（必填）:")
+        self.code_label.setFont(self.base_font)
+        self.code_input = QLineEdit()
+        self.code_input.setFont(self.base_font)
+        if self.email is not None and self.email != '':
+            self.code_input.setText(self.vcode)
+            self.code_input.setEnabled(False)
+        form_layout.addRow(self.code_label, self.code_input)
+
+        btn_layout = QHBoxLayout()
+        self.send_code_btn = QPushButton("发送邮箱验证码")
+        self.send_code_btn.setFont(self.base_font)
+        if self.email is not None and self.email != '':
+            self.send_code_btn.setEnabled(False)
+        self.send_code_btn.clicked.connect(self.SendVCode)
+
+        self.register_btn = QPushButton("用户注册")
+        self.register_btn.setFont(self.base_font)
+        self.register_btn.clicked.connect(self.Register)
+
+        self.exit_btn = QPushButton("退出软件")
+        self.exit_btn.setFont(self.base_font)
+        self.exit_btn.clicked.connect(self.Exit)
+
+        btn_layout.addStretch(1)
+        btn_layout.addWidget(self.send_code_btn)
+        btn_layout.addWidget(self.register_btn)
+        btn_layout.addWidget(self.exit_btn)
+        btn_layout.addStretch(1)
+        main_layout.addLayout(form_layout)
+        main_layout.addLayout(btn_layout)
+        self.setLayout(main_layout)
+
+        if os.name == "posix":
+            self.SetStyle()
+
+"""
+类名称: LabelInput
+说明: 具有QLabel与QLineEdit的类
+
+成员变量：
+ql: QLabel对象
+qle: QLineEdit对象
+
+成员函数：
+Update(): 调用检查函数与更新函数
+"""
+class LabelInput:
+    def __init__(self, label_text = '', check_tips = '', func_update = None, func_check = None):
+        self.check_tips = check_tips
+        self.ql = QLabel(label_text)
+        self.qle = QLineEdit()
+        self.func_check = func_check
+        self.func_update = func_update
+        self.qle.editingFinished.connect(self.Update)
+
+    def Update(self):
+        label = self.ql.text()
+        input = self.qle.text()
+        if not self.func_check is None and not self.func_check(input):
+            QMessageBox.warning(label, f'{label}: {self.check_tips}')
+        else:
+            self.func_update()
 
 import ntplib
 class Authorization:
