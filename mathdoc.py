@@ -45,7 +45,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.04.20(V1.2.2)"
+        self.version = "2025.04.20(V1.2.3)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
 
@@ -87,6 +87,7 @@ class MathDoc(QWidget):
         self.answer_input.clear()
         if not self.exam.q.is_correct:
             self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
+            print(f'self.exam.q.answer_tips = {self.exam.q.answer_tips}')
             if self.exam.q.answer_tips:
                 self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
         else:

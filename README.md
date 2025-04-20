@@ -97,3 +97,6 @@
 
 ## [Release V1.2.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.2)
 完善注册对话框，增加退出按钮；对年级、手机号进行有效检查。
+
+## [Release V1.2.3](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.3)
+修复答题开始时间的Bug；增加乘法速算综合练习的功能。

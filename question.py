@@ -75,6 +75,7 @@ class Question():
         self.start_time = ''
         self.solution = ''
         self.subtype = subtype
+        self.subtype2 = subtype
         self.time_used = ''
         self.type = type
         self.user_input = ''
@@ -134,6 +135,8 @@ class Question():
 
     def AfterGenerate(self):
         self.start_time = datetime.now()
+        # self.AnswerTips()
+        # print(f'self.anwer_tips: {self.answer_tips}')
         pass
 
     def Question(self):
@@ -301,7 +304,6 @@ class Question24Point(QuestionRL):
         return self.check_tips
 
     def AnswerTips(self):
-        # print('24点：AnswerTips()')
         self.answer_tips = f'{self.Validate24Point()}'
         return self.answer_tips
 
@@ -416,16 +418,6 @@ class QuestionLR(Question):
     def AnswerTips(self):
         pass
 
-    # def JudgeAnswer(self):
-    #     super().JudgeAnswer()
-    #     try:
-    #         user_answer = eval(self.ConvertToFraction(self.user_answer))
-    #         self.is_correct = user_answer == self.correct_answer
-    #         return self.is_correct
-    #     except:
-    #         return False
-
-
 """
 类名称：QuestionQC
 题目类型：两位数乘法速算
@@ -451,6 +443,7 @@ class QuestionQC(QuestionLR):
 
         if subtype == 6:
             subtype = self.RandInt(0, 5)
+            self.subtype2[0] = subtype
         if subtype == 0:  # 平方数
             number = self.RandInt(min_val, max_val)
             self.numbers.append(number)
@@ -501,9 +494,8 @@ class QuestionQC(QuestionLR):
         return True
 
     def AnswerTips(self):
-        # print('乘法速算：AnswerTips()')
         tips = ''
-        if self.subtype[0] == 0: # 平方数
+        if self.subtype[0] == 0 or self.subtype2[0] == 0: # 平方数
             m = self.numbers[0]
             n = self.numbers[1]
             r = m % 10
@@ -514,26 +506,26 @@ class QuestionQC(QuestionLR):
             a = m + c
             b = m - c
             tips += f'{m} × {n} = ({m} + {c}) × ({m} - {c}) + {c} × {c} = {a} × {b} + {c} × {c} = {a*b} + {c*c} = {a*b+c*c}'
-        if self.subtype[0] == 1: # 平方差法
+        if self.subtype[0] == 1 or self.subtype2[0] == 1: # 平方差法
             m = self.numbers[0]
             n = self.numbers[1]
             a = int((m + n)/2)
             b = abs(a - self.numbers[0])
             tips += f'{m} × {n} = ({a} + {b})({a} - {b}) = {a} × {a} - {b} × {b} = {a*a} - {b*b} = {a*a-b*b}'
-        if self.subtype[0] == 2: # 和十速算法
+        if self.subtype[0] == 2 or self.subtype2[0] == 2: # 和十速算法
             m = self.numbers[0]
             n = self.numbers[1]
             a = int(m/10)
             b = m % 10
             c = 10 -b
             tips += f'{a} × ({a} + 1) = {a} × {a+1} = {a*(a+1)}；{b} × {c} = {b*c}；{m} × {n} = {m*n}'
-        if self.subtype[0] == 3: # 大数凑十法
+        if self.subtype[0] == 3 or self.subtype2[0] == 3: # 大数凑十法
             m = self.numbers[0]
             n = self.numbers[1]
             r = m % 10
             c = 10 - r
             tips += f'{m} × {n} = ({m+c} - {c}) × {n} = {m+c} × {n} - {c} × {n} = {(m+c)*n} - {c*n} = {m*n}'
-        if self.subtype[0] == 4: # 逢五凑十法
+        if self.subtype[0] == 4 or self.subtype2[0] == 4: # 逢五凑十法
             m = self.numbers[0]
             n = self.numbers[1]
             if m % 25 == 0 and n % 4 == 0:
@@ -547,7 +539,7 @@ class QuestionQC(QuestionLR):
                 c = 2
                 d = int(n / 2)
             tips += f'{m} × {n} = {a} × {b} × {c} × {d} = {a} × {d} × {b*c} = {a * d} × {b*c} = {m * n}'
-        if self.subtype[0] == 5: # 双向凑十法
+        if self.subtype[0] == 5 or self.subtype2[0] == 5: # 双向凑十法
             m = self.numbers[0]
             n = self.numbers[1]
             b = 10 - m % 10
@@ -619,7 +611,6 @@ class Question4AO(QuestionLR):
                     flag = 0
 
     def AnswerTips(self):
-        print('四则运算：AnswerTips()')
         self.answer_tips = self.ProcessCalculation()
         return self.answer_tips
         pass
