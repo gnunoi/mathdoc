@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
                              QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
@@ -455,7 +456,7 @@ class SignupDialog(QDialog):
         self.initSignupDialog()
 
     def initSignupDialog(self):
-        if self.exam.os == "nt":
+        if os.name == "nt":
             self.base_font = QFont("SimSun", 24)
         else:
             self.base_font = QFont("Pingfang SC", 24)
@@ -526,7 +527,7 @@ class SignupDialog(QDialog):
         layout.addRow("", self.register_btn)
 
         self.setLayout(layout)
-        if self.exam.os == "posix":
+        if os.name == "posix":
             self.SetStyle()
 
     def Register(self):
