@@ -169,6 +169,8 @@ class Exam:
             return QuestionQC(subtype=self.subtype, range=self.range)
         elif self.type == 2: # 2: 四则运算
             return Question4AO(subtype=self.subtype, range=self.range)
+        elif self.type == 3: # 3: 质因数分解
+            return QuestionFactor(subtype=self.subtype, range=self.range)
         else:
             print(f'{self.type}: 无效的类型')
             return None
@@ -190,11 +192,16 @@ class Exam:
             if q.error_number >= 3:
                 q.Generate()
         else: # 回答正确
+            print(q.type)
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
                 print('回答正确: {} = {}'.format(q.expression, q.user_answer))
             else: # 所有QuestionRL的题目：self.type == 0
-                print('回答正确: {} = {}'.format(q.user_input, q.correct_answer))
+                if self.q.type == 3:
+                    expr = ' * '.join(map(str, self.q.user_answer))
+                    print(f'回答正确: {expr} = {self.q.numbers[0]}')
+                else:
+                    print('回答正确: {} = {}'.format(q.user_input, q.correct_answer))
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
             self.record.correct_number += 1
@@ -216,10 +223,11 @@ class Exam:
     def Run(self):
         self.Register()
         print()
-        type = 0
-        parms = [{'type': 0, 'subtype': [0, 0], 'range': [1, 10]},
+        type = 3
+        parms = [{'type': 0, 'subtype': [], 'range': [1, 10]},
                  {'type': 1, 'subtype': [2, 0], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
+                 {'type': 3, 'subtype': [], 'range': [6, 100]},
                  ]
         self.UpdateSetting(parms[type]['type'], parms[type]['subtype'], parms[type]['range'])
         q = self.q

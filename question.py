@@ -235,6 +235,96 @@ class QuestionRL(Question):
         self.range = range
         self.Generate()
 
+"""
+类名称: QuestionFactor
+题目类型: 质因数分解
+
+成员函数：
+IsPrime(): 判断是否为质数
+PrimeFactors(): 返回质因数组成的列表
+"""
+class QuestionFactor(QuestionRL):
+    def __init__(self, subtype=[0, 0], range=[10, 50, 1, 10]):
+        super().__init__(type=3, subtype=subtype, range=range)
+        self.name = "质因数分解"
+        self.comments = "分解质因数（用空格或*分隔质因数），如: 72 = 2 * 2 * 2 * 3 * 3"
+        self.Generate()
+
+    def IsPrime(self, num):
+        """判断一个数是否为质数"""
+        if num <= 1:
+            return False
+        if num <= 3:
+            return True
+        if num % 2 == 0:
+            return False
+        i = 3
+        while i * i <= num:
+            if num % i == 0:
+                return False
+            i += 2
+        return True
+
+    def PrimeFactors(self, num):
+        """返回n的质因数分解结果"""
+        factors = []
+        # 处理2的因子
+        while num % 2 == 0:
+            factors.append(2)
+            num = num // 2
+
+        # 处理奇数因子
+        i = 3
+        while i * i <= num:
+            while num % i == 0:
+                factors.append(i)
+                num = num // i
+            i += 2
+
+        # 如果剩余的n是质数
+        if num > 1:
+            factors.append(num)
+
+        return factors
+
+    def Generate(self):
+        """生成一个10到1000之间的随机数，保证有至少3个质因数"""
+        min = self.range[0]
+        max = self.range[1]
+        while True:
+            self.numbers = []
+            self.numbers.append(random.randint(min, max))
+            self.correct_answer = sorted(self.PrimeFactors(self.numbers[0]))
+            if len(self.correct_answer) >= 3:  # 有3个及以上的质因数
+                self.question = f'质因数分解：{self.numbers[0]}'
+                self.start_time = datetime.now()
+                return self.numbers[0]
+
+    def BeforeJudgeAnswer(self):
+        self.user_answer = self.user_input.strip().replace('*', ' ').split()
+        for i in range(len(self.user_answer)):
+            self.user_answer[i] = int(self.user_answer[i])
+
+    def JudgeAnswer(self):
+        print(f'JudgeAnswer() in QuestionFactor')
+        super().BeforeJudgeAnswer()
+        self.BeforeJudgeAnswer()
+        self.end_time = datetime.now()
+        self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
+        if sorted(self.user_answer) == self.correct_answer:
+            self.is_correct = True
+            return True
+        else:
+            self.is_correct = False
+            self.error_number += 1
+            return False
+
+    def CheckTips(self):
+        expr = ' * '.join(map(str, self.user_answer))
+        self.check_tips = f'{expr} != {self.numbers[0]}'
+
+    def AnswerTips(self):
+        self.answer_tips = f"错误：质因数分解不完整。正确质因数为：{self.correct_answer}"
 
 """
 类名称：Question24Point
