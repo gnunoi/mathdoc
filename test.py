@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import random
 
 def is_prime(n):
