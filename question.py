@@ -247,7 +247,7 @@ class QuestionFactor(QuestionRL):
     def __init__(self, subtype=[0, 0], range=[10, 50, 1, 10]):
         super().__init__(type=3, subtype=subtype, range=range)
         self.name = "质因数分解"
-        self.comments = "分解质因数（用空格或*分隔质因数），如: 72 = 2 * 2 * 2 * 3 * 3"
+        self.comments = "分解质因数（用空格或*分隔质因数），如：72，输入：2 2 2 3 3 或：2 * 2 * 2 * 3 * 3"
         self.Generate()
 
     def IsPrime(self, num):
@@ -306,7 +306,7 @@ class QuestionFactor(QuestionRL):
             self.user_answer[i] = int(self.user_answer[i])
 
     def JudgeAnswer(self):
-        print(f'JudgeAnswer() in QuestionFactor')
+        # print(f'JudgeAnswer() in QuestionFactor')
         super().BeforeJudgeAnswer()
         self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
@@ -321,10 +321,20 @@ class QuestionFactor(QuestionRL):
 
     def CheckTips(self):
         expr = ' * '.join(map(str, self.user_answer))
-        self.check_tips = f'{expr} != {self.numbers[0]}'
+        l = []
+        err = ''
+        for answer in self.user_answer:
+            if not self.IsPrime(answer):
+                l.append(answer)
+        if len(l) > 0:
+            err = f'{l}中的数不是质数；'
+        ret = eval(expr)
+        if not ret == self.numbers[0]:
+            err += f'{expr} = {ret} != {self.numbers[0]}'
+        self.check_tips = f'错误：质因数分解不完整。{err}'
 
     def AnswerTips(self):
-        self.answer_tips = f"错误：质因数分解不完整。正确质因数为：{self.correct_answer}"
+        self.answer_tips = f"正确质因数为：{self.correct_answer}"
 
 """
 类名称：Question24Point
