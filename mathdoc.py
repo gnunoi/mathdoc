@@ -456,7 +456,7 @@ class SignupDialog(QDialog):
         self.mobile = exam.user.mobile
         self.email = exam.user.email
         self.mentor_email = exam.user.mentor_email
-        self.InitDialog()
+        self.InitDialog2()
 
     def InitDialog(self):
         if os.name == "nt":
