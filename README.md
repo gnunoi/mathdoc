@@ -100,3 +100,6 @@
 
 ## [Release V1.2.3](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.3)
 修复答题开始时间的Bug；增加乘法速算综合练习的功能。
+
+## [Release V1.2.4](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.4)
+所有题目做完之前，避免重复

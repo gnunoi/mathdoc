@@ -190,7 +190,7 @@ class Exam:
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
             if q.error_number >= 3:
-                q.Generate()
+                self.Generate()
         else: # 回答正确
             print(q.type)
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
@@ -206,6 +206,27 @@ class Exam:
             self.record.Append(q)
             self.record.correct_number += 1
             self.record.question_number += 1
+
+    def Generate(self):
+        """
+        在已做题目中查重，保证题目不重复
+        :return:
+        """
+        q = self.q
+        ql = self.record.question_list
+        q.Generate()
+
+        count = 0
+        for count in range(1000):
+            count += 1
+            # print(count)
+            if q.question in ql:
+                # print(f'{[q.question]} 存在于 {ql} 中')
+                q.Generate()
+            else:
+                # print(f'{[q.question]} 不存在于 {ql} 中')
+                return True
+        return False
 
     def Register(self):
         while not self.user.IsCompleted():
@@ -254,7 +275,7 @@ class Exam:
                 continue
             self.SubmitAnswer()
             if self.q.is_correct:
-                q.Generate()  # 生成下一题
+                self.Generate()  # 生成下一题
             print()
         self.Exit() # 处理程序退出的收尾工作，如保存数据，发送邮件。
 
@@ -462,8 +483,9 @@ class Setting:
 
 变量：
 db: 数据库对象，从Exam初始化函数传入db参数
-data: 答题记录列表，元素是每次答题记录构成的元组
 correct_number: 回答正确的题目数量
+data: 答题记录列表，元素是每次答题记录构成的元组
+question_list: 已做题目的列表，用于后续判断题目是否重复
 question_number: 总的题目数量
 
 函数：
@@ -478,11 +500,9 @@ class Record:
         self.db = db
         self.correct_number = 0
         self.question_number = 1
-
         self.data = []
+        self.question_list = []
         self.CreateTable()
-        # self.Read()
-        # self.Write()
 
     def CreateTable(self):
         db = self.db
@@ -513,6 +533,7 @@ class Record:
                   q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
                   q.time_used, q.check_tips, q.answer_tips, q.solution)
         self.data.append(record)
+        self.question_list.append(q.question)
 
     def SaveRecords(self):
         db = self.db
@@ -540,7 +561,6 @@ class Record:
             for row in data:
                 current_id = row[0]
                 current_question = row[2]
-
                 if current_question != previous_question:
                     new_question_number += 1
                 db.cursor.execute("UPDATE Exam01 SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
@@ -550,7 +570,6 @@ class Record:
             print(f"整理Exam01表数据时出错: {e}")
 
     def SaveRecord(self, q):
-        # q = Question()
         db = self.db
         db.cursor.execute('''
             INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
@@ -561,7 +580,6 @@ class Record:
             q.time_used, q.check_tips, q.answer_tips, q.solution)
         )
         db.connect.commit()
-
 
 class Database:
     def __init__(self):
@@ -579,11 +597,9 @@ class Database:
             os.mkdir(db_folder)
         self.Hide(db_folder)
         self.path = os.path.join(db_folder, "mathdoc.db")
-        # print(f'Database file: {self.path}')
         self.connect = sqlite3.connect(self.path)
         self.cursor = self.connect.cursor()
         self.CreateMailTable()
-        # self.ShowTables()
 
     def Hide(self, path):
         # 设置文件或目录为隐藏
@@ -726,7 +742,6 @@ class Workbook:
         self.worksheet.freeze_panes(1, 1)
 
     def Append(self, row, row_data):
-        # print(row_data)
         cell_format = self.workbook.add_format(self.cell_format)
         self.worksheet.write_row(row, 0, row_data, cell_format)
 
@@ -768,7 +783,7 @@ class Mail():
             receiver = self.receiver
         msg['To'] = receiver
         msg['Subject'] = self.subject
-        # print(msg['To'])
+
         # 添加邮件正文
         if self.body is not None:
             msg.attach(MIMEText(self.body, 'plain'))
@@ -792,7 +807,6 @@ class Mail():
             server = smtplib.SMTP_SSL(self.server, self.port)  # 使用SSL加密
             server.login(self.sender, self.Decode(self.authority))  # 登录SMTP服务器
             server.sendmail(self.sender, receiver, msg.as_string())  # 发送邮件
-            # print(f"{self.sender} to {receiver}: 邮件发送成功！")
             return True
         except Exception as e:
             print(f"邮件发送失败: {e}")
@@ -801,12 +815,6 @@ class Mail():
             server.quit()
 
     def SendDB(self):
-        # print(self.sender)
-        # print(self.receiver)
-        # print(self.Decode(self.authority))
-        # print(self.server)
-        # print(self.port)
-        # print(self.database)
         try:
             self.Send(attach=self.database)
         except Exception as e:

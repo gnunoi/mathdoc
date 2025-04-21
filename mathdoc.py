@@ -66,7 +66,7 @@ class MathDoc(QWidget):
         if self.authorization.authorization == False:
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
-        self.exam.q.Generate()
+        self.exam.Generate()
         self.tips_label.setText(self.exam.q.check_tips)
         self.answer_tips_label.setText(self.exam.q.answer_tips)
         self.question_label.setText(f"题目：{self.exam.q.question}")
@@ -456,7 +456,7 @@ class SignupDialog(QDialog):
         self.mobile = exam.user.mobile
         self.email = exam.user.email
         self.mentor_email = exam.user.mentor_email
-        self.InitDialog()
+        self.InitDialog2()
 
     def InitDialog(self):
         if os.name == "nt":
