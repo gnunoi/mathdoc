@@ -492,12 +492,9 @@ class Record:
         self.db = db
         self.correct_number = 0
         self.question_number = 1
-
         self.data = []
         self.question_list = []
         self.CreateTable()
-        # self.Read()
-        # self.Write()
 
     def CreateTable(self):
         db = self.db
@@ -529,7 +526,6 @@ class Record:
                   q.time_used, q.check_tips, q.answer_tips, q.solution)
         self.data.append(record)
         self.question_list.append(q.question)
-        # print(self.question_list)
 
     def SaveRecords(self):
         db = self.db
@@ -557,7 +553,6 @@ class Record:
             for row in data:
                 current_id = row[0]
                 current_question = row[2]
-
                 if current_question != previous_question:
                     new_question_number += 1
                 db.cursor.execute("UPDATE Exam01 SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
@@ -567,7 +562,6 @@ class Record:
             print(f"整理Exam01表数据时出错: {e}")
 
     def SaveRecord(self, q):
-        # q = Question()
         db = self.db
         db.cursor.execute('''
             INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
@@ -578,7 +572,6 @@ class Record:
             q.time_used, q.check_tips, q.answer_tips, q.solution)
         )
         db.connect.commit()
-
 
 class Database:
     def __init__(self):
@@ -596,11 +589,9 @@ class Database:
             os.mkdir(db_folder)
         self.Hide(db_folder)
         self.path = os.path.join(db_folder, "mathdoc.db")
-        # print(f'Database file: {self.path}')
         self.connect = sqlite3.connect(self.path)
         self.cursor = self.connect.cursor()
         self.CreateMailTable()
-        # self.ShowTables()
 
     def Hide(self, path):
         # 设置文件或目录为隐藏
@@ -743,7 +734,6 @@ class Workbook:
         self.worksheet.freeze_panes(1, 1)
 
     def Append(self, row, row_data):
-        # print(row_data)
         cell_format = self.workbook.add_format(self.cell_format)
         self.worksheet.write_row(row, 0, row_data, cell_format)
 
@@ -785,7 +775,7 @@ class Mail():
             receiver = self.receiver
         msg['To'] = receiver
         msg['Subject'] = self.subject
-        # print(msg['To'])
+
         # 添加邮件正文
         if self.body is not None:
             msg.attach(MIMEText(self.body, 'plain'))
@@ -809,7 +799,6 @@ class Mail():
             server = smtplib.SMTP_SSL(self.server, self.port)  # 使用SSL加密
             server.login(self.sender, self.Decode(self.authority))  # 登录SMTP服务器
             server.sendmail(self.sender, receiver, msg.as_string())  # 发送邮件
-            # print(f"{self.sender} to {receiver}: 邮件发送成功！")
             return True
         except Exception as e:
             print(f"邮件发送失败: {e}")
@@ -818,12 +807,6 @@ class Mail():
             server.quit()
 
     def SendDB(self):
-        # print(self.sender)
-        # print(self.receiver)
-        # print(self.Decode(self.authority))
-        # print(self.server)
-        # print(self.port)
-        # print(self.database)
         try:
             self.Send(attach=self.database)
         except Exception as e:
