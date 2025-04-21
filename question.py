@@ -98,7 +98,7 @@ class Question():
 
     def RandInt(self, a, b):
         if a > b:
-            return None
+            return random.randint(b, a)
         else:
             return random.randint(a, b)
 

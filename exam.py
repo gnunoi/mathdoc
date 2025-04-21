@@ -188,7 +188,7 @@ class Exam:
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
             if q.error_number >= 3:
-                q.Generate()
+                self.Generate()
         else: # 回答正确
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
@@ -199,6 +199,27 @@ class Exam:
             self.record.Append(q)
             self.record.correct_number += 1
             self.record.question_number += 1
+
+    def Generate(self):
+        """
+        在已做题目中查重，保证题目不重复
+        :return:
+        """
+        q = self.q
+        ql = self.record.question_list
+        q.Generate()
+
+        count = 0
+        for count in range(1000):
+            count += 1
+            # print(count)
+            if q.question in ql:
+                # print(f'{[q.question]} 存在于 {ql} 中')
+                q.Generate()
+            else:
+                # print(f'{[q.question]} 不存在于 {ql} 中')
+                return True
+        return False
 
     def Register(self):
         while not self.user.IsCompleted():
@@ -246,7 +267,7 @@ class Exam:
                 continue
             self.SubmitAnswer()
             if self.q.is_correct:
-                q.Generate()  # 生成下一题
+                self.Generate()  # 生成下一题
             print()
         self.Exit() # 处理程序退出的收尾工作，如保存数据，发送邮件。
 
@@ -454,8 +475,9 @@ class Setting:
 
 变量：
 db: 数据库对象，从Exam初始化函数传入db参数
-data: 答题记录列表，元素是每次答题记录构成的元组
 correct_number: 回答正确的题目数量
+data: 答题记录列表，元素是每次答题记录构成的元组
+question_list: 已做题目的列表，用于后续判断题目是否重复
 question_number: 总的题目数量
 
 函数：
@@ -472,6 +494,7 @@ class Record:
         self.question_number = 1
 
         self.data = []
+        self.question_list = []
         self.CreateTable()
         # self.Read()
         # self.Write()
@@ -505,6 +528,8 @@ class Record:
                   q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
                   q.time_used, q.check_tips, q.answer_tips, q.solution)
         self.data.append(record)
+        self.question_list.append(q.question)
+        # print(self.question_list)
 
     def SaveRecords(self):
         db = self.db
