@@ -456,7 +456,7 @@ class SignupDialog(QDialog):
         self.mobile = exam.user.mobile
         self.email = exam.user.email
         self.mentor_email = exam.user.mentor_email
-        self.InitDialog2()
+        self.InitDialog()
 
     def InitDialog(self):
         if os.name == "nt":
@@ -469,80 +469,50 @@ class SignupDialog(QDialog):
         main_layout = QVBoxLayout()
         form_layout = QFormLayout()
         form_layout.setSpacing(32)
-        self.username_label = QLabel("用 户 名（必填）:")
-        self.username_label.setFont(self.base_font)
-        self.username_input = QLineEdit()
-        self.username_input.setFont(self.base_font)
-        if self.username:
-            self.username_input.setText(self.username)
-            self.username_input.setEnabled(False)
-        form_layout.addRow(self.username_label, self.username_input)
 
-        self.grade_label = QLabel("年级（数字1-12，必填）:")
-        self.grade_label.setFont(self.base_font)
-        self.grade_input = QLineEdit()
-        self.grade_input.setFont(self.base_font)
-        if self.grade is not None and str(self.grade) != '':
-            self.grade_input.setText(str(self.grade))
-            self.grade_input.setEnabled(False)
-        form_layout.addRow(self.grade_label, self.grade_input)
+        # 创建控件的标签文本和初始值的列表
+        form_items = [
+            {"label": "用 户 名（必填）:", "value": self.username},
+            {"label": "年级（数字1-12，必填）:", "value": self.grade},
+            {"label": "手　　机（必填）:", "value": self.mobile},
+            {"label": "本人邮箱（必填）:", "value": self.email},
+            {"label": "教师邮箱（选填）:", "value": self.mentor_email},
+            {"label": "邮箱验证码（必填）:", "value": self.vcode}
+        ]
 
-        self.mobile_label = QLabel("手　　机（必填）:")
-        self.mobile_label.setFont(self.base_font)
-        self.mobile_input = QLineEdit()
-        self.mobile_input.setFont(self.base_font)
-        if self.mobile is not None and self.mobile != '':
-            self.mobile_input.setEnabled(False)
-            self.mobile_input.setText(self.mobile)
-        form_layout.addRow(self.mobile_label, self.mobile_input)
+        # 创建输入框对象并添加到表单布局中
+        self.input_fields = []
+        for item in form_items:
+            label = QLabel(item["label"])
+            label.setFont(self.base_font)
+            input_field = QLineEdit()
+            input_field.setFont(self.base_font)
+            if item["value"]:
+                input_field.setText(str(item["value"]))
+                # 如果不是验证码输入框，则禁用
+                if item["label"] != "邮箱验证码（必填）:":
+                    input_field.setEnabled(False)
+            form_layout.addRow(label, input_field)
+            self.input_fields.append(input_field)
 
-        self.email_label = QLabel("本人邮箱（必填）:")
-        self.email_label.setFont(self.base_font)
-        self.email_input = QLineEdit()
-        self.email_input.setFont(self.base_font)
-        if self.email is not None and self.email != '':
-            self.email_input.setEnabled(False)
-            self.email_input.setText(self.email)
-        form_layout.addRow(self.email_label, self.email_input)
+        # 创建按钮及其对应的槽函数的列表
+        buttons = [
+            {"text": "发送邮箱验证码", "func": self.SendVCode},
+            {"text": "用户注册", "func": self.Register},
+            {"text": "退出软件", "func": self.Exit}
+        ]
 
-        self.mentor_email_label = QLabel("教师邮箱（选填）:")
-        self.mentor_email_label.setFont(self.base_font)
-        self.mentor_email_input = QLineEdit()
-        self.mentor_email_input.setFont(self.base_font)
-        if self.mentor_email is not None and self.mentor_email != '':
-            self.mentor_email_input.setEnabled(False)
-            self.mentor_email_input.setText(self.mentor_email)
-        form_layout.addRow(self.mentor_email_label, self.mentor_email_input)
-
-        self.code_label = QLabel("邮箱验证码（必填）:")
-        self.code_label.setFont(self.base_font)
-        self.code_input = QLineEdit()
-        self.code_input.setFont(self.base_font)
-        if self.email is not None and self.email != '':
-            self.code_input.setText(self.vcode)
-            self.code_input.setEnabled(False)
-        form_layout.addRow(self.code_label, self.code_input)
-
+        # 创建按钮布局
         btn_layout = QHBoxLayout()
-        self.send_code_btn = QPushButton("发送邮箱验证码")
-        self.send_code_btn.setFont(self.base_font)
-        if self.email is not None and self.email != '':
-            self.send_code_btn.setEnabled(False)
-        self.send_code_btn.clicked.connect(self.SendVCode)
-
-        self.register_btn = QPushButton("用户注册")
-        self.register_btn.setFont(self.base_font)
-        self.register_btn.clicked.connect(self.Register)
-
-        self.exit_btn = QPushButton("退出软件")
-        self.exit_btn.setFont(self.base_font)
-        self.exit_btn.clicked.connect(self.Exit)
-
+        for button in buttons:
+            btn = QPushButton(button["text"])
+            btn.setFont(self.base_font)
+            btn.clicked.connect(button["func"])
+            btn_layout.addStretch(1)
+            btn_layout.addWidget(btn)
         btn_layout.addStretch(1)
-        btn_layout.addWidget(self.send_code_btn)
-        btn_layout.addWidget(self.register_btn)
-        btn_layout.addWidget(self.exit_btn)
-        btn_layout.addStretch(1)
+
+        # 组装主布局
         main_layout.addLayout(form_layout)
         main_layout.addLayout(btn_layout)
         self.setLayout(main_layout)
@@ -554,23 +524,20 @@ class SignupDialog(QDialog):
         sys.exit()
 
     def Register(self):
-        if not (self.email is None and self.email == ''):
-            self.ucode = self.vcode
-            self.code_input.setText(self.vcode)
-        else:
-            self.ucode = self.code_input.text()
-        self.username = self.username_input.text()
-        self.grade = self.grade_input.text()
-        self.mobile = self.mobile_input.text()
-        self.email= self.email_input.text()
-        self.mentor_email = self.mentor_email_input.text()
+        self.ucode = self.vcode
+        # 依次获取输入框中的值
+        self.username = self.input_fields[0].text()
+        self.grade = self.input_fields[1].text()
+        self.mobile = self.input_fields[2].text()
+        self.email = self.input_fields[3].text()
+        self.mentor_email = self.input_fields[4].text()
 
         try:
-            grade = ast.literal_eval(self.grade)
+            grade = self.ast.literal_eval(self.grade)
         except:
             grade = 0
         try:
-            mobile = ast.literal_eval(self.mobile)
+            mobile = self.ast.literal_eval(self.mobile)
         except:
             mobile = 0
         if self.username.strip() == '':
@@ -591,22 +558,21 @@ class SignupDialog(QDialog):
 
         QMessageBox.information(self, '注册成功', f'{self.username}用户注册成功，邮箱：{self.email}')
 
-        self.exam.user.Register(username = self.username, email = self.email, mobile = self.mobile,
-                 grade = self.grade, mentor_email = self.mentor_email)
+        self.exam.user.Register(username=self.username, email=self.email, mobile=self.mobile,
+                                grade=self.grade, mentor_email=self.mentor_email)
         self.close()
 
     def SendVCode(self):
-        self.email = self.email_input.text()
-        if self.email == '' or self.email.find('@') == -1:
+        email = self.input_fields[3].text()
+        if email == '' or email.find('@') == -1:
             QMessageBox.warning(self, '邮箱', '请输入有效的邮箱')
         else:
             m = Mail()
-            m.receiver = self.email
+            m.receiver = email
             m.subject = '验证码'
             m.body = '验证码：\n' + self.vcode
-            print()
             m.Send()
-            QMessageBox.information(self, '验证码已发送', f'验证码已发送，请在邮箱{self.email}中查收邮件。')
+            QMessageBox.information(self, '验证码已发送', f'验证码已发送，请在邮箱{email}中查收邮件。')
 
     def SetStyle(self):
         style = """
@@ -634,102 +600,6 @@ class SignupDialog(QDialog):
         """
         self.setStyleSheet(style)
 
-    def LI_Init(self):
-        pass
-
-    def InitDialog2(self):
-        if os.name == "nt":
-            self.base_font = QFont("SimSun", 24)
-        else:
-            self.base_font = QFont("Pingfang SC", 24)
-        width, height = GetScreenSize()
-        self.setWindowTitle("用户注册")
-
-        main_layout = QVBoxLayout()
-        form_layout = QFormLayout()
-        form_layout.setSpacing(32)
-
-
-        self.username_label = QLabel("用 户 名（必填）:")
-        self.username_label.setFont(self.base_font)
-        self.username_input = QLineEdit()
-        self.username_input.setFont(self.base_font)
-        if self.username:
-            self.username_input.setText(self.username)
-            self.username_input.setEnabled(False)
-        form_layout.addRow(self.username_label, self.username_input)
-
-        self.grade_label = QLabel("年级（数字1-12，必填）:")
-        self.grade_label.setFont(self.base_font)
-        self.grade_input = QLineEdit()
-        self.grade_input.setFont(self.base_font)
-        if self.grade is not None and str(self.grade) != '':
-            self.grade_input.setText(str(self.grade))
-            self.grade_input.setEnabled(False)
-        form_layout.addRow(self.grade_label, self.grade_input)
-
-        self.mobile_label = QLabel("手　　机（必填）:")
-        self.mobile_label.setFont(self.base_font)
-        self.mobile_input = QLineEdit()
-        self.mobile_input.setFont(self.base_font)
-        if self.mobile is not None and self.mobile != '':
-            self.mobile_input.setEnabled(False)
-            self.mobile_input.setText(self.mobile)
-        form_layout.addRow(self.mobile_label, self.mobile_input)
-
-        self.email_label = QLabel("本人邮箱（必填）:")
-        self.email_label.setFont(self.base_font)
-        self.email_input = QLineEdit()
-        self.email_input.setFont(self.base_font)
-        if self.email is not None and self.email != '':
-            self.email_input.setEnabled(False)
-            self.email_input.setText(self.email)
-        form_layout.addRow(self.email_label, self.email_input)
-
-        self.mentor_email_label = QLabel("教师邮箱（选填）:")
-        self.mentor_email_label.setFont(self.base_font)
-        self.mentor_email_input = QLineEdit()
-        self.mentor_email_input.setFont(self.base_font)
-        if self.mentor_email is not None and self.mentor_email != '':
-            self.mentor_email_input.setEnabled(False)
-            self.mentor_email_input.setText(self.mentor_email)
-        form_layout.addRow(self.mentor_email_label, self.mentor_email_input)
-
-        self.code_label = QLabel("邮箱验证码（必填）:")
-        self.code_label.setFont(self.base_font)
-        self.code_input = QLineEdit()
-        self.code_input.setFont(self.base_font)
-        if self.email is not None and self.email != '':
-            self.code_input.setText(self.vcode)
-            self.code_input.setEnabled(False)
-        form_layout.addRow(self.code_label, self.code_input)
-
-        btn_layout = QHBoxLayout()
-        self.send_code_btn = QPushButton("发送邮箱验证码")
-        self.send_code_btn.setFont(self.base_font)
-        if self.email is not None and self.email != '':
-            self.send_code_btn.setEnabled(False)
-        self.send_code_btn.clicked.connect(self.SendVCode)
-
-        self.register_btn = QPushButton("用户注册")
-        self.register_btn.setFont(self.base_font)
-        self.register_btn.clicked.connect(self.Register)
-
-        self.exit_btn = QPushButton("退出软件")
-        self.exit_btn.setFont(self.base_font)
-        self.exit_btn.clicked.connect(self.Exit)
-
-        btn_layout.addStretch(1)
-        btn_layout.addWidget(self.send_code_btn)
-        btn_layout.addWidget(self.register_btn)
-        btn_layout.addWidget(self.exit_btn)
-        btn_layout.addStretch(1)
-        main_layout.addLayout(form_layout)
-        main_layout.addLayout(btn_layout)
-        self.setLayout(main_layout)
-
-        if os.name == "posix":
-            self.SetStyle()
 
 """
 类名称: LabelInput
