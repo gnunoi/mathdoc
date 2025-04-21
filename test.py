@@ -1,98 +1,130 @@
 import random
-
-def is_prime(n):
-    """判断一个数是否为质数"""
-    if n <= 1:
-        return False
-    if n <= 3:
-        return True
-    if n % 2 == 0:
-        return False
-    i = 3
-    while i * i <= n:
-        if n % i == 0:
-            return False
-        i += 2
-    return True
+import re
+import math
 
 
-def prime_factors(n):
-    """返回n的质因数分解结果"""
-    factors = []
+def generate_equation():
+    """生成一个随机的一元一次方程，可以有各种变形"""
+    # 生成方程的三种基本形式中的一个
+    equation_form = random.randint(0, 5)
 
-    # 处理2的因子
-    while n % 2 == 0:
-        factors.append(2)
-        n = n // 2
+    # 方程中x的值
+    x_value = random.randint(-10, 10)
+    while x_value == 0:  # 避免x为0
+        x_value = random.randint(-10, 10)
 
-    # 处理奇数因子
-    i = 3
-    while i * i <= n:
-        while n % i == 0:
-            factors.append(i)
-            n = n // i
-        i += 2
+    if equation_form == 0:  # ax + b = c
+        a = random.randint(1, 10)
+        b = random.randint(-10, 10)
+        c = a * x_value + b
+        equation = f"{a}x + {b} = {c}"
 
-    # 如果剩余的n是质数
-    if n > 1:
-        factors.append(n)
+    elif equation_form == 1:  # ax = bx + c
+        a = random.randint(1, 10)
+        b = random.randint(1, 10)
+        while b == a:  # 确保方程有解
+            b = random.randint(1, 10)
+        c = (a - b) * x_value
+        equation = f"{a}x = {b}x + {c}"
 
-    return factors
+    elif equation_form == 2:  # ax + b = cx + d
+        a = random.randint(1, 10)
+        b = random.randint(-10, 10)
+        c = random.randint(1, 10)
+        while c == a:  # 确保方程有解
+            c = random.randint(1, 10)
+        d = (a - c) * x_value + b
+        equation = f"{a}x + {b} = {c}x + {d}"
+
+    elif equation_form == 3:  # a(x + b) = c
+        a = random.randint(1, 10)
+        b = random.randint(-10, 10)
+        c = a * (x_value + b)
+        equation = f"{a}(x + {b}) = {c}"
+
+    elif equation_form == 4:  # a(x + b) = c(x + d)
+        a = random.randint(1, 10)
+        b = random.randint(-10, 10)
+        c = random.randint(1, 10)
+        d = random.randint(-10, 10)
+        while c == a:  # 避免两边系数相同
+            c = random.randint(1, 10)
+        equation = f"{a}(x + {b}) = {c}(x + {d})"
+
+    elif equation_form == 5:  # 分数方程，如 (ax + b)/c = d
+        a = random.randint(1, 10)
+        b = random.randint(-10, 10)
+        c = random.randint(2, 5)
+        d = (a * x_value + b) / c
+        equation = f"({a}x + {b}) / {c} = {d}"
+
+    # 确保方程中没有多余的 '+' 符号，如在负数前
+    equation = equation.replace(" + -", " - ")
+
+    return equation, x_value
 
 
-def generate_random_number():
-    """生成一个10到1000之间的随机数，保证有至少3个质因数"""
-    while True:
-        num = random.randint(10, 100)
-        if len(prime_factors(num)) >= 3: # 有3个及以上的质因数
-            return num
-
-def validate_user_input(generated_num, user_factors):
-    """验证用户输入的质因数是否正确"""
-    # 将用户输入转换为整数列表
+def parse_user_input(user_input):
+    """解析用户输入，支持整数或分数形式"""
+    # 先尝试直接转换为浮点数
     try:
-        user_factors = [int(factor) for factor in user_factors]
+        return float(user_input)
     except ValueError:
-        return False, "输入中包含非整数值"
+        pass
 
-    # 获取正确的质因数分解
-    correct_factors = prime_factors(generated_num)
+    # 尝试解析分数形式 (如 "3/2" 或 "-5/4")
+    match = re.match(r"(-?\d+)\s*/\s*(-?\d+)", user_input)
+    if match:
+        numerator = int(match.group(1))
+        denominator = int(match.group(2))
+        if denominator == 0:
+            return None  # 避免除以零
+        return numerator / denominator
 
-    # 检查用户输入是否与正确分解匹配
-    if set(user_factors) == set(correct_factors):
-        return True, "正确！您提供的所有质因数都正确。"
-    elif set(user_factors) != set(correct_factors):
-        return False, f"错误：您提供的质因数不正确。正确质因数为：{correct_factors}"
-    else:
-        # 用户提供了正确的质因数，但数量或重复次数不正确
-        return False, f"错误：质因数分解不完整。正确质因数为：{correct_factors}"
+    return None
 
 
-def run():
-    print("欢迎使用质因数验证程序！")
-    print("我们将生成一个介于10-1000之间的随机数，该数有至少3个质因数（允许重复）。")
-    print("请输入您认为正确的所有质因数（用空格分隔）：")
+def run_exercise():
+    """运行一元一次方程练习程序"""
+    print("欢迎使用一元一次方程练习程序！")
+    print("输入你的答案，正确会进入下一题，错误需要重新回答当前方程")
+    print("输入 'q' 可以退出程序")
+
+    answered_correctly = 0
+    total_questions = 0
 
     while True:
-        # 生成随机数
-        random_num = generate_random_number()
-        print(f"\n生成的随机数为：{random_num}")
+        equation, correct_answer = generate_equation()
+        print(f"\n方程: {equation}")
 
-        # 获取用户输入
-        user_input = input("请输入质因数（用空格分隔），EXIT或QUIT退出：")
-        if user_input.strip().upper() in ['EXIT', 'QUIT']:
-            break
-        else:
-            user_input = user_input.replace('*', ' ')
-            print(user_input)
-            user_factors = user_input.split()
-            print(user_factors)
-            if not user_factors:
-                print("错误：您没有输入任何质因数！")
+        correct = False
+        while not correct:
+            user_input = input("请输入x的值: ")
+
+            # 检查是否要退出
+            if user_input.lower() == 'q':
+                print("退出程序")
                 return
 
-            is_valid, message = validate_user_input(random_num, user_factors)
-            print(message)
+            # 解析用户输入
+            user_answer = parse_user_input(user_input)
 
+            if user_answer is None:
+                print("输入格式不正确，请输入整数或分数形式 (如 3/2)")
+                continue
+
+            # 检查答案是否正确
+            if abs(user_answer - correct_answer) < 0.0001:  # 允许小数点后四位误差
+                print("恭喜你，回答正确！")
+                answered_correctly += 1
+                total_questions += 1
+                correct = True
+            else:
+                print(f"回答错误！请再试一次。")
+
+    print(f"\n练习结束！你正确回答了 {answered_correctly} 道题目，总共练习了 {total_questions} 道题目。")
+
+
+# 运行程序
 if __name__ == "__main__":
-    run()
+    run_exercise()
