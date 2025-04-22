@@ -545,6 +545,7 @@ class QuestionQC(QuestionLR):
 
         if subtype == 6:
             subtype = self.RandInt(0, 5)
+            self.subtype2 = [subtype]
             # print(f'subtpe = {subtype}')
 
         if subtype == 0:  # 平方数
