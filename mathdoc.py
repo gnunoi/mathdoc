@@ -127,7 +127,7 @@ class MathDoc(QWidget):
         control_panel.addWidget(self.type_group, 1)
 
         # 速算
-        self.qc_group = QGroupBox("乘法速算")
+        self.qc_group = QGroupBox("速算类型")
         self.qc_group.setFont(self.base_font)
         qc_layout = QVBoxLayout()
         self.qc_options = [
@@ -147,6 +147,21 @@ class MathDoc(QWidget):
             qc_layout.addWidget(rb)
         self.qc_group.setLayout(qc_layout)
         control_panel.addWidget(self.qc_group, 1)
+
+        # 算术项数
+        self.factor_group = QGroupBox("质因数题型")
+        self.factor_group.setFont(self.base_font)
+        factor_layout = QVBoxLayout()
+        self.factor_radios = [QRadioButton('质因数分解'),
+                              QRadioButton('最大公约数'),
+                              QRadioButton('最小公倍数')]
+        self.factor_radios[self.exam.setting.factor_type].setChecked(True)
+        for rb in self.factor_radios:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            factor_layout.addWidget(rb)
+        self.factor_group.setLayout(factor_layout)
+        control_panel.addWidget(self.factor_group, 1)
 
         # 算术项数
         self.term_group = QGroupBox("算术项数")
@@ -295,14 +310,15 @@ class MathDoc(QWidget):
 
         self.set_list = [
             set([self.num_edit[0], self.num_edit[1],
-                self.num_label[0], self.num_label[1]]), # type = 0
+                 self.num_label[0], self.num_label[1]]), # type = 0
             set([self.qc_group, self.num_edit[2], self.num_edit[3],
-                self.num_label[2], self.num_label[3]]), # type = 1
+                 self.num_label[2], self.num_label[3]]), # type = 1
             set([self.term_group, self.operator_group,
-                self.num_edit[4], self.num_edit[5], self.num_edit[6], self.num_edit[7],
-                self.num_label[4], self.num_label[5], self.num_label[6], self.num_label[7]]), # type = 2
-            set([self.num_edit[8], self.num_edit[9],
-                self.num_label[8], self.num_label[9]]), # type = 3
+                 self.num_edit[4], self.num_edit[5], self.num_edit[6], self.num_edit[7],
+                 self.num_label[4], self.num_label[5], self.num_label[6], self.num_label[7]]), # type = 2
+            set([self.factor_group,
+                 self.num_edit[8], self.num_edit[9],
+                 self.num_label[8], self.num_label[9]]), # type = 3
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -435,8 +451,12 @@ class MathDoc(QWidget):
                                                      self.exam.setting.min_divisor,
                                                      self.exam.setting.max_divisor])
                 elif i == 3:
+                    for i, rb in enumerate(self.factor_radios):
+                        if rb.isChecked():
+                            self.exam.setting.factor_type = i
+                            break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype = [],
+                                            subtype = [self.exam.setting.factor_type],
                                             range = [self.exam.setting.min_composite,
                                                      self.exam.setting.max_composite])
         # print(self.exam.setting.min_composite, self.exam.setting.max_composite)

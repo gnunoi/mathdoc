@@ -400,6 +400,7 @@ class Setting:
             'sn_operator': 0,
             'min_composite': 8,
             'max_composite': 100,
+            'factor_type': 0,
         }
         self.default_map = {
             'type': int,
@@ -416,6 +417,7 @@ class Setting:
             'sn_operator': int,
             'min_composite': int,
             'max_composite': int,
+            'factor_type': int,
         }
         self.type = self.default['type'] # 题目类型
         # 24点：
@@ -434,6 +436,7 @@ class Setting:
         self.sn_operator = self.default['sn_operator'] # 算式的运算符序号
         self.min_composite = self.default['min_composite'] # 合数最小值
         self.max_composite = self.default['max_composite'] # 合数最大值
+        self.factor_type = self.default['factor_type'] # 质因数题目子类型
         self.CreateTable()
         self.Read()
 

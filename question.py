@@ -136,7 +136,7 @@ class Question():
     def AfterGenerate(self):
         self.start_time = datetime.now()
         # self.AnswerTips()
-        print(f'self.anwer_tips: {self.answer_tips}')
+        # print(f'self.anwer_tips: {self.answer_tips}')
         pass
 
     def Question(self):
@@ -244,8 +244,9 @@ IsPrime(): 判断是否为质数
 PrimeFactors(): 返回质因数组成的列表
 """
 class QuestionFactor(QuestionRL):
-    def __init__(self, subtype=[0, 0], range=[8, 50]):
-        super().__init__(type=3, subtype=subtype, range=range)
+    def __init__(self, subtype = [0, 0], range = [8, 50]):
+        super().__init__(type=3, subtype = subtype, range = range)
+        # print(subtype)
         self.name = "质因数分解"
         self.comments = "分解质因数（用空格或*分隔质因数），如：72，输入：2 2 2 3 3 或：2 * 2 * 2 * 3 * 3"
         # print(range)
@@ -292,11 +293,15 @@ class QuestionFactor(QuestionRL):
         """生成一个10到1000之间的随机数，保证有至少3个质因数"""
         min = self.range[0]
         max = self.range[1]
+
+        subtype = self.subtype[0]
+        # print(f'subtype = {subtype}')
+
         while True:
             self.numbers = []
             self.numbers.append(random.randint(min, max))
             self.correct_answer = sorted(self.PrimeFactors(self.numbers[0]))
-            if len(self.correct_answer) >= 3:  # 有3个及以上的质因数
+            if len(self.correct_answer) >= 2:  # 有2个及以上的质因数
                 self.question = f'质因数分解：{self.numbers[0]}'
                 self.start_time = datetime.now()
                 return self.numbers[0]
