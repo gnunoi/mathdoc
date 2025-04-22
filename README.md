@@ -106,3 +106,6 @@
 
 ## [Release V1.2.5](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.5)
 增加质因数分解题目
+
+## [Release V1.2.6](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.6)
+在质因数分节题目中，增加最大公约数、最小公倍数子题型

@@ -289,27 +289,69 @@ class QuestionFactor(QuestionRL):
 
         return factors
 
+    def GCD(self, a, b):
+        while b:
+            a, b = b, a % b
+        return a
+
+    def LCM(self, a, b):
+        return a * b // self.GCD(a, b)
+
     def Generate(self):
         """生成一个10到1000之间的随机数，保证有至少3个质因数"""
+        subtype = self.subtype[0]
+        if subtype == 0: # 质因数分解
+            self.GenerateQFactor()
+        elif subtype == 1: # 最大公约数
+            self.GenerateGCD()
+        elif subtype == 2: # 最小公倍数
+            self.GenerateLCM()
+        self.start_time = datetime.now()
+
+    def GenerateComposite(self):
+        min = self.range[0]
+        max = self.range[1]
+        while True:
+            num = random.randint(min, max)
+            factors = sorted(self.PrimeFactors(num))
+            if len(factors) >= 2:
+                return num
+
+    def GenerateLCM(self): # 最小公倍数
         min = self.range[0]
         max = self.range[1]
 
-        subtype = self.subtype[0]
-        # print(f'subtype = {subtype}')
+    def GenerateGCD(self): # 最大公约数
+        self.numbers = []
+        gcd = 1
+        while gcd == 1:
+            a = self.GenerateComposite()
+            b = self.GenerateComposite()
+            gcd = self.GCD(a, b)
+        self.numbers.append(a)
+        self.numbers.append(b)
+        self.question = f'求最大公约数：{self.numbers[0]}, {self.numbers[1]}'
+        self.correct_answer = gcd
 
-        while True:
-            self.numbers = []
-            self.numbers.append(random.randint(min, max))
-            self.correct_answer = sorted(self.PrimeFactors(self.numbers[0]))
-            if len(self.correct_answer) >= 2:  # 有2个及以上的质因数
-                self.question = f'质因数分解：{self.numbers[0]}'
-                self.start_time = datetime.now()
-                return self.numbers[0]
+
+    def GenerateQFactor(self):
+        min = self.range[0]
+        max = self.range[1]
+        self.numbers = []
+        self.numbers.append(self.GenerateComposite())
+        self.correct_answer = sorted(self.PrimeFactors(self.numbers[0]))
+        self.question = f'质因数分解：{self.numbers[0]}'
 
     def BeforeJudgeAnswer(self):
-        self.user_answer = self.user_input.strip().replace('*', ' ').split()
-        for i in range(len(self.user_answer)):
-            self.user_answer[i] = int(self.user_answer[i])
+        subtype = self.subtype[0]
+        self.user_answer = self.user_input.strip().replace('*', ' ')
+
+        if subtype == 0:
+            self.user_answer = self.user_answer.split()
+            for i in range(len(self.user_answer)):
+                self.user_answer[i] = int(self.user_answer[i])
+        else:
+            self.user_answer = int(self.user_answer)
 
     def JudgeAnswer(self):
         # print(f'JudgeAnswer() in QuestionFactor')
@@ -317,15 +359,29 @@ class QuestionFactor(QuestionRL):
         self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
+
+        subtype = self.subtype[0]
+        if subtype == 0:
+            return self.JudgeAnswerQFactor()
+        elif subtype == 1:
+            self.is_correct = self.user_answer == self.correct_answer
+            print(self.is_correct)
+            return self.is_correct
+
+    def JudgeAnswerQFactor(self):
         if sorted(self.user_answer) == self.correct_answer:
             self.is_correct = True
-            return True
         else:
             self.is_correct = False
             self.error_number += 1
-            return False
+        return self.is_correct
 
     def CheckTips(self):
+        subtype = self.subtype[0]
+        if subtype == 0:
+            self.CheckTipsQFactor()
+
+    def CheckTipsQFactor(self):
         expr = ' * '.join(map(str, self.user_answer))
         l = []
         err = ''

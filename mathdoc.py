@@ -45,7 +45,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.04.22(V1.2.5)"
+        self.version = "2025.04.23(V1.2.6)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
         self.set_list = []
@@ -459,7 +459,7 @@ class MathDoc(QWidget):
                                             subtype = [self.exam.setting.factor_type],
                                             range = [self.exam.setting.min_composite,
                                                      self.exam.setting.max_composite])
-        # print(self.exam.setting.min_composite, self.exam.setting.max_composite)
+        # print(self.exam.setting.factor_type)
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_label.setText(self.exam.q.comments)

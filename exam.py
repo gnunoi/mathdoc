@@ -194,14 +194,17 @@ class Exam:
             if q.error_number >= 3:
                 self.Generate()
         else: # 回答正确
-            print(q.type)
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
                 print('回答正确: {} = {}'.format(q.expression, q.user_answer))
             else: # 所有QuestionRL的题目：self.type == 0
                 if q.__class__.__name__ == 'QuestionFactor':
-                    expr = ' * '.join(map(str, self.q.user_answer))
-                    print(f'回答正确: {expr} = {self.q.numbers[0]}')
+                    subtype = self.q.subtype[0]
+                    if subtype == 0:
+                        expr = ' * '.join(map(str, self.q.user_answer))
+                        print(f'回答正确: {expr} = {self.q.numbers[0]}')
+                    else:
+                        print(f'回答正确')
                 elif q.__class__.__name__ == 'Question24Point':
                     print('回答正确: {} = {}'.format(q.user_input, q.correct_answer))
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
@@ -402,23 +405,6 @@ class Setting:
             'max_composite': 100,
             'factor_type': 0,
         }
-        self.default_map = {
-            'type': int,
-            'min_24point': int,
-            'max_24point': int,
-            'min_qc': int,
-            'max_qc': int,
-            'type_qc': int,
-            'min_addend': int,
-            'max_addend': int,
-            'min_divisor': int,
-            'max_divisor': int,
-            'sn_term': int,
-            'sn_operator': int,
-            'min_composite': int,
-            'max_composite': int,
-            'factor_type': int,
-        }
         self.type = self.default['type'] # 题目类型
         # 24点：
         self.min_24point = self.default['min_24point'] # 乘法速算数最小值
@@ -460,32 +446,15 @@ class Setting:
             if result == None:
                 break
             value = result[0]
-            # 获取对应的转换函数
-            converter = self.default_map.get(key, ast.literal_eval)
-            setattr(self, key, converter(value))
+            setattr(self, key, int(value))
 
             if not result:
                 self.Write()
 
     def Write(self):
         db = self.db
-        settings = {
-            'type': str(self.type),
-            'min_24point': str(self.min_24point),
-            'max_24point': str(self.max_24point),
-            'min_qc': str(self.min_qc),
-            'max_qc': str(self.max_qc),
-            'type_qc': str(self.type_qc),
-            'min_addend': str(self.min_addend),
-            'max_addend': str(self.max_addend),
-            'min_divisor': str(self.min_divisor),
-            'max_divisor': str(self.max_divisor),
-            'sn_term': str(self.sn_term),
-            'sn_operator': str(self.sn_operator),
-            'min_composite': str(self.min_composite),
-            'max_composite': str(self.max_composite),
-        }
-        for key, value in settings.items():
+        for key, value in self.default.items():
+            value = str(getattr(self, key))
             db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))
         db.connect.commit()
 
