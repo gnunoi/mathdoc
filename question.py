@@ -299,13 +299,13 @@ class QuestionFactor(QuestionRL):
         """生成一个10到1000之间的随机数，保证有至少3个质因数"""
         subtype = self.subtype[0]
         if subtype == 0: # 质因数分解
-            self.comments = "分解质因数（用空格或*分隔质因数），如：72，输入：2 2 2 3 3 或：2 * 2 * 2 * 3 * 3"
+            self.comments = "分解质因数（用空格或*分隔质因数），如：72，输入：2 2 2 3 3 或：72 = 2 * 2 * 2 * 3 * 3"
             self.GenerateQFactor()
         elif subtype == 1: # 最大公约数
-            self.comments = "求最大公约数，如：24, 32，输入：8"
+            self.comments = "求最大公约数，如：24, 32，输入：8，或：24 = 8 * 3, 32 = 8 * 4, = 8"
             self.GenerateGCD()
         elif subtype == 2: # 最小公倍数
-            self.comments = "求最小公倍数，如：24, 40，输入：120"
+            self.comments = "求最小公倍数，如：24, 40，输入：120，或：24 = 8 * 3, 40 = 8 * 5, = 8 * 3 * 5 = 40 * 3 = 120"
             self.GenerateLCM()
         self.start_time = datetime.now()
 
@@ -336,11 +336,12 @@ class QuestionFactor(QuestionRL):
     def GenerateGCD(self): # 最大公约数
         self.numbers = []
         gcd = 1
-        while gcd == 1:
+        while True:
             a = self.GenerateComposite()
             b = self.GenerateComposite()
             gcd = self.GCD(a, b)
-            if a == b: continue
+            if a != b and gcd > 1:
+                break
         self.numbers.append(a)
         self.numbers.append(b)
         self.question = f'求最大公约数：{self.numbers[0]}, {self.numbers[1]}'
@@ -358,13 +359,12 @@ class QuestionFactor(QuestionRL):
     def BeforeJudgeAnswer(self):
         subtype = self.subtype[0]
         self.user_answer = self.user_input.strip().replace('*', ' ')
-
+        self.user_answer = self.user_answer.split('=')[-1]
         if subtype == 0:
             self.user_answer = self.user_answer.split()
             for i in range(len(self.user_answer)):
                 self.user_answer[i] = int(self.user_answer[i])
         else:
-            self.user_answer = self.user_answer.split('=')[-1]
             self.user_answer = int(self.user_answer)
 
     def JudgeAnswer(self):

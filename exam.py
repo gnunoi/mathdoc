@@ -387,7 +387,6 @@ import ast
 class Setting:
     def __init__(self, db):
         self.db = db
-
         self.default = {
             'type': 0,
             'min_24point': 1,
@@ -405,28 +404,12 @@ class Setting:
             'max_composite': 100,
             'factor_type': 0,
         }
-        self.type = self.default['type'] # 题目类型
-        # 24点：
-        self.min_24point = self.default['min_24point'] # 乘法速算数最小值
-        self.max_24point = self.default['max_24point'] # 乘法速算数最大值
-        # 乘法速算：
-        self.min_qc = self.default['min_qc'] # 乘法速算数最小值
-        self.max_qc = self.default['max_qc'] # 乘法速算数最大值
-        self.type_qc = self.default['type_qc'] # 乘法速算数子类型
-        # 四则运算：
-        self.min_addend = self.default['min_addend'] # 加数最小值
-        self.max_addend = self.default['max_addend'] # 加数最大值
-        self.min_divisor = self.default['min_divisor'] # 除数最小值
-        self.max_divisor = self.default['max_divisor'] # 除数最大值
-        self.sn_term = self.default['sn_term'] # 算式的项数序号
-        self.sn_operator = self.default['sn_operator'] # 算式的运算符序号
-        self.min_composite = self.default['min_composite'] # 合数最小值
-        self.max_composite = self.default['max_composite'] # 合数最大值
-        self.factor_type = self.default['factor_type'] # 质因数题目子类型
         self.CreateTable()
         self.Read()
 
     def CreateTable(self):
+        for key, value in self.default.items():
+            setattr(self, key, value)
         db = self.db
         if not db.ExistTable('Setting'):
             db.cursor.execute('''
@@ -453,7 +436,7 @@ class Setting:
 
     def Write(self):
         db = self.db
-        for key, value in self.default.items():
+        for key in self.default.keys():
             value = str(getattr(self, key))
             db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))
         db.connect.commit()
