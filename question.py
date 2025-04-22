@@ -135,8 +135,6 @@ class Question():
 
     def AfterGenerate(self):
         self.start_time = datetime.now()
-        # self.AnswerTips()
-        # print(f'self.anwer_tips: {self.answer_tips}')
         pass
 
     def Question(self):
@@ -174,15 +172,6 @@ class Question():
             return False
 
     def ConvertToFraction(self, expression):
-        """
-        将表达式中的每个数字转换为 Fraction 类型，并形成新的表达式。
-
-        参数:
-            expression (str): 输入的数学表达式，例如 "3 + 4 * 5.5"
-
-        返回:
-            str: 转换后的表达式，例如 "Fraction(3) + Fraction(4) * Fraction(5.5)"
-        """
         # 使用正则表达式匹配表达式中的数字（包括整数、浮点数和科学计数法）
         pattern = r'(?<!\w)(-?\d+\.?\d*|\.\d+)([eE][-+]?\d+)?(?!\w)'
 
@@ -192,7 +181,6 @@ class Question():
             return f"Fraction('{number}')"
 
         new_expression = re.sub(pattern, replace_with_fraction, expression)
-        # print(new_expression)
         return new_expression
 
     def ProcessUserInput(self):
@@ -213,7 +201,7 @@ class Question():
             self.user_results.append(result)
             result = eval(self.ConvertToFraction(self.user_answer))
             self.user_results.append(result)
-            print(self.results)
+            print(self.user_results)
         except:
             pass
         return True
@@ -228,7 +216,7 @@ class Question():
 题目类型：从右向左求值，即答案是表达式，题目是数值
 """
 class QuestionRL(Question):
-    def __init__(self, type = 0, subtype = [0], range = [1, 10]):
+    def __init__(self, type = 0, subtype = [], range = []):
         super().__init__(type = type, subtype = subtype, range = range)
         self.type = type
         self.subtype = subtype
@@ -768,7 +756,6 @@ class Question4AO(QuestionLR):
         super().BeforeGenerate()
         ops = [['+'], ['-'], ['*'], ['/'], ['+', '-', '*', '/']]
         term_count = self.subtype[0] + 2
-        # print(f'term_count: {term_count}')
         try:
             user_operators = ops[self.subtype[1]]
         except:
@@ -779,8 +766,6 @@ class Question4AO(QuestionLR):
             self.numbers.append(num)
             if i < term_count - 1:
                 self.operators.append(random.choice(user_operators))
-        # print(self.numbers)
-        # print(self.operators)
         self.Validate()
         self.Question()
         return True
@@ -815,6 +800,4 @@ class Question4AO(QuestionLR):
 
     def AnswerTips(self):
         self.answer_tips = f'正确答案：{self.question} {self.correct_answer}'
-        # print(self.answer_tips)
-        # self.answer_tips = self.ProcessCalculation()
         return self.answer_tips
