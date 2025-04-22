@@ -48,7 +48,8 @@ class MathDoc(QWidget):
         self.version = "2025.04.20(V1.2.3)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
-
+        self.set_list = []
+        self.sets = set([])
         self.exam = Exam()
         # self.exam.Dump(self.exam.setting)
         self.Register()
@@ -285,40 +286,38 @@ class MathDoc(QWidget):
         self.tips_label.setPalette(palette)
         self.answer_tips_label.setPalette(palette)
 
+        self.set_list = [
+            set([self.num_edit[0], self.num_edit[1],
+                self.num_label[0], self.num_label[1]]), # type = 0
+            set([self.qc_group, self.num_edit[2], self.num_edit[3],
+                self.num_label[2], self.num_label[3]]), # type = 1
+            set([self.term_group, self.operator_group,
+                self.num_edit[4], self.num_edit[5], self.num_edit[6], self.num_edit[7],
+                self.num_label[4], self.num_label[5], self.num_label[6], self.num_label[7]]), # type = 2
+        ]
+        self.sets = set([])
+        for s in self.set_list:
+            self.sets = self.sets | s
+
+        # print(self.set_list)
+        # print(self.sets)
+
         self.UpdateSettings()
         # self.UpdateQuestion()
 
     def ChangeState(self):
-        # 状态机
-        if self.exam.setting.type != 2:
-            self.term_group.setVisible(False)
-            self.operator_group.setVisible(False)
-        if self.exam.setting.type != 1:
-            self.qc_group.setVisible(False)
-        if self.exam.setting.type == 0:
-            for i in [0, 1]:
-                self.num_edit[i].setVisible(True)
-                self.num_label[i].setVisible(True)
-            for i in [2, 3, 4, 5, 6, 7]:
-                self.num_edit[i].setVisible(False)
-                self.num_label[i].setVisible(False)
-        elif self.exam.setting.type == 1:
-            self.qc_group.setVisible(True)
-            for i in [2, 3]:
-                self.num_edit[i].setVisible(True)
-                self.num_label[i].setVisible(True)
-            for i in [0, 1, 4, 5, 6, 7]:
-                self.num_edit[i].setVisible(False)
-                self.num_label[i].setVisible(False)
-        elif self.exam.setting.type == 2:
-            self.term_group.setVisible(True)
-            self.operator_group.setVisible(True)
-            for i in [4, 5, 6, 7]:
-                self.num_edit[i].setVisible(True)
-                self.num_label[i].setVisible(True)
-            for i in [0, 1, 2, 3]:
-                self.num_edit[i].setVisible(False)
-                self.num_label[i].setVisible(False)
+        type = self.exam.setting.type
+        if not type in range(0, 3):
+            print(f'无效的类型')
+            return False
+        for s in self.sets - self.set_list[type]:
+            print(s)
+            s.setVisible(False)
+        for s in self.set_list[type]:
+            s.setVisible(True)
+
+        return True
+
 
     def apply_styles(self):
         style = """
