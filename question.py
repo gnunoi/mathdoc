@@ -246,10 +246,8 @@ PrimeFactors(): 返回质因数组成的列表
 class QuestionFactor(QuestionRL):
     def __init__(self, subtype = [0, 0], range = [8, 50]):
         super().__init__(type=3, subtype = subtype, range = range)
-        # print(subtype)
         self.name = "质因数分解"
-        self.comments = "分解质因数（用空格或*分隔质因数），如：72，输入：2 2 2 3 3 或：2 * 2 * 2 * 3 * 3"
-        # print(range)
+        self.comments = ""
         self.Generate()
 
     def IsPrime(self, num):
@@ -301,10 +299,13 @@ class QuestionFactor(QuestionRL):
         """生成一个10到1000之间的随机数，保证有至少3个质因数"""
         subtype = self.subtype[0]
         if subtype == 0: # 质因数分解
+            self.comments = "分解质因数（用空格或*分隔质因数），如：72，输入：2 2 2 3 3 或：2 * 2 * 2 * 3 * 3"
             self.GenerateQFactor()
         elif subtype == 1: # 最大公约数
+            self.comments = "求最大公约数，如：24, 32，输入：8"
             self.GenerateGCD()
         elif subtype == 2: # 最小公倍数
+            self.comments = "求最小公倍数，如：24, 40，输入：120"
             self.GenerateLCM()
         self.start_time = datetime.now()
 
@@ -318,8 +319,19 @@ class QuestionFactor(QuestionRL):
                 return num
 
     def GenerateLCM(self): # 最小公倍数
-        min = self.range[0]
-        max = self.range[1]
+        self.numbers = []
+        gcd = random.randint(5, 20)
+        divisor1 = random.randint(2, 10)
+        divisor2 = random.randint(2, 10)
+        while self.GCD(divisor1, divisor2) > 1:
+            divisor2 = random.randint(2, 10)
+        # print(prime1, prime2)
+        num1 = gcd * divisor1
+        num2 = gcd * divisor2
+        self.numbers.append(num1)
+        self.numbers.append(num2)
+        self.correct_answer = gcd * divisor1 * divisor2
+        self.question = f'求最小公倍数：{self.numbers[0]}, {self.numbers[1]}'
 
     def GenerateGCD(self): # 最大公约数
         self.numbers = []
@@ -328,6 +340,7 @@ class QuestionFactor(QuestionRL):
             a = self.GenerateComposite()
             b = self.GenerateComposite()
             gcd = self.GCD(a, b)
+            if a == b: continue
         self.numbers.append(a)
         self.numbers.append(b)
         self.question = f'求最大公约数：{self.numbers[0]}, {self.numbers[1]}'
@@ -351,6 +364,7 @@ class QuestionFactor(QuestionRL):
             for i in range(len(self.user_answer)):
                 self.user_answer[i] = int(self.user_answer[i])
         else:
+            self.user_answer = self.user_answer.split('=')[-1]
             self.user_answer = int(self.user_answer)
 
     def JudgeAnswer(self):
@@ -363,7 +377,7 @@ class QuestionFactor(QuestionRL):
         subtype = self.subtype[0]
         if subtype == 0:
             return self.JudgeAnswerQFactor()
-        elif subtype == 1:
+        else:
             self.is_correct = self.user_answer == self.correct_answer
             print(self.is_correct)
             return self.is_correct
@@ -380,6 +394,23 @@ class QuestionFactor(QuestionRL):
         subtype = self.subtype[0]
         if subtype == 0:
             self.CheckTipsQFactor()
+        elif subtype == 1:
+            a = self.numbers[0]
+            b = self.numbers[1]
+            gcd = self.correct_answer
+            err = f'{a} = {gcd} * {a // gcd}；'
+            err += f'{b} = {gcd} * {b // gcd}'
+            # print(err)
+            self.check_tips = f'{err}'
+        elif subtype == 2:
+            a = self.numbers[0]
+            b = self.numbers[1]
+            gcd = self.GCD(a, b)
+            err = f'{a} = {gcd} * {a // gcd}；'
+            err += f'{b} = {gcd} * {b // gcd}；'
+            err += f'最小公倍数 = {gcd} * {a // gcd} * {b // gcd} = {self.correct_answer}'
+            print(err)
+            self.check_tips = f'{err}'
 
     def CheckTipsQFactor(self):
         expr = ' * '.join(map(str, self.user_answer))
@@ -395,8 +426,13 @@ class QuestionFactor(QuestionRL):
             err += f'{expr} = {ret} != {self.numbers[0]}'
         self.check_tips = f'错误：质因数分解不完整。{err}'
 
+
     def AnswerTips(self):
-        self.answer_tips = f"正确质因数为：{self.correct_answer}"
+        des = ['质因数',
+               '最大公约数',
+               '最小公倍数']
+        subtype = self.subtype[0]
+        self.answer_tips = f"{des[subtype]}为：{self.correct_answer}"
 
 """
 类名称：Question24Point
