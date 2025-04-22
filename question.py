@@ -359,7 +359,7 @@ class Question24Point(QuestionRL):
         min_val = self.range[0]
         max_val = self.range[1]
         while True:
-            self.numbers = [random.randint(min_val, max_val) for _ in range(4)]
+            self.numbers = sorted([random.randint(min_val, max_val) for _ in range(4)])
             if self.Validate24Point() is not None:
                 break
 
@@ -591,6 +591,7 @@ class QuestionQC(QuestionLR):
             self.numbers.append(num1)
             self.operators.append('*')
             self.numbers.append(num2)
+        self.numbers = sorted(self.numbers)
         return True
 
     def AnswerTips(self):
