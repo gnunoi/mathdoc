@@ -101,6 +101,8 @@ class Exam:
         elif self.type == 2:
             self.range = [self.setting.min_addend, self.setting.max_addend,
                 self.setting.min_divisor, self.setting.max_divisor]
+        elif self.type == 3:
+            self.range = [self.setting.min_composite, self.setting.max_composite]
 
     def ExportRecords(self, type):
         db = self.db
@@ -396,6 +398,8 @@ class Setting:
             'max_divisor': 10,
             'sn_term': 0,
             'sn_operator': 0,
+            'min_composite': 8,
+            'max_composite': 100,
         }
         self.default_map = {
             'type': int,
@@ -410,6 +414,8 @@ class Setting:
             'max_divisor': int,
             'sn_term': int,
             'sn_operator': int,
+            'min_composite': int,
+            'max_composite': int,
         }
         self.type = self.default['type'] # 题目类型
         # 24点：
@@ -426,7 +432,8 @@ class Setting:
         self.max_divisor = self.default['max_divisor'] # 除数最大值
         self.sn_term = self.default['sn_term'] # 算式的项数序号
         self.sn_operator = self.default['sn_operator'] # 算式的运算符序号
-
+        self.min_composite = self.default['min_composite'] # 合数最小值
+        self.max_composite = self.default['max_composite'] # 合数最大值
         self.CreateTable()
         self.Read()
 
@@ -472,6 +479,8 @@ class Setting:
             'max_divisor': str(self.max_divisor),
             'sn_term': str(self.sn_term),
             'sn_operator': str(self.sn_operator),
+            'min_composite': str(self.min_composite),
+            'max_composite': str(self.max_composite),
         }
         for key, value in settings.items():
             db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))

@@ -82,13 +82,13 @@ class MathDoc(QWidget):
 
     def SubmitAnswer(self):
         self.exam.q.user_input = self.answer_input.text()
-        print(self.exam.q.user_input)
+        # print(self.exam.q.user_input)
         self.exam.SubmitAnswer()
         # self.exam.Dump(self.exam.q)
         self.answer_input.clear()
         if not self.exam.q.is_correct:
             self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
-            print(f'self.exam.q.answer_tips = {self.exam.q.answer_tips}')
+            # print(f'self.exam.q.answer_tips = {self.exam.q.answer_tips}')
             if self.exam.q.answer_tips:
                 self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
         else:
@@ -116,6 +116,7 @@ class MathDoc(QWidget):
             QRadioButton('24点游戏'), # type = 0
             QRadioButton('乘法速算'), # type = 1
             QRadioButton('四则运算'), # type = 2
+            QRadioButton('质因数分解'), # type = 3
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for rb in self.type_options:
@@ -190,7 +191,10 @@ class MathDoc(QWidget):
                   "加减数最小值:",
                   "加减数最大值:",
                   "乘除数最小值:",
-                  "乘除数最大值:"]
+                  "乘除数最大值:",
+                  "合数最小值:",
+                  "合数最大值:",
+                  ]
         range_numbers = [self.exam.setting.min_24point,
                          self.exam.setting.max_24point,
                          self.exam.setting.min_qc,
@@ -198,10 +202,13 @@ class MathDoc(QWidget):
                          self.exam.setting.min_addend,
                          self.exam.setting.max_addend,
                          self.exam.setting.min_divisor,
-                         self.exam.setting.max_divisor]
+                         self.exam.setting.max_divisor,
+                         self.exam.setting.min_composite,
+                         self.exam.setting.max_composite
+                         ]
         self.num_edit = [QLineEdit(str(n)) for n in range_numbers]
         self.num_label = [QLabel(labels[i], font=self.base_font) for i in range(len(labels))]
-        for i in range(8):
+        for i in range(len(labels)):
             self.num_edit[i].setFont(self.base_font)
             self.num_edit[i].setFixedWidth(360)
             self.num_edit[i].setAlignment(Qt.AlignCenter)
@@ -294,24 +301,21 @@ class MathDoc(QWidget):
             set([self.term_group, self.operator_group,
                 self.num_edit[4], self.num_edit[5], self.num_edit[6], self.num_edit[7],
                 self.num_label[4], self.num_label[5], self.num_label[6], self.num_label[7]]), # type = 2
+            set([self.num_edit[8], self.num_edit[9],
+                self.num_label[8], self.num_label[9]]), # type = 3
         ]
         self.sets = set([])
         for s in self.set_list:
-            self.sets = self.sets | s
-
-        # print(self.set_list)
-        # print(self.sets)
-
+            self.sets |= s
         self.UpdateSettings()
-        # self.UpdateQuestion()
 
     def ChangeState(self):
         type = self.exam.setting.type
-        if not type in range(0, 3):
+        # print(len(self.set_list))
+        if not type in range(0, len(self.set_list)):
             print(f'无效的类型')
             return False
         for s in self.sets - self.set_list[type]:
-            print(s)
             s.setVisible(False)
         for s in self.set_list[type]:
             s.setVisible(True)
@@ -366,6 +370,8 @@ class MathDoc(QWidget):
         self.exam.setting.max_addend = int(self.num_edit[5].text())
         self.exam.setting.min_divisor = int(self.num_edit[6].text())
         self.exam.setting.max_divisor = int(self.num_edit[7].text())
+        self.exam.setting.min_composite = int(self.num_edit[8].text())
+        self.exam.setting.max_composite = int(self.num_edit[9].text())
         if self.exam.setting.min_24point > self.exam.setting.max_24point:
             self.exam.setting.min_24point, self.exam.setting.max_24point = (self.exam.setting.max_24point, self.exam.setting.min_24point)
             self.num_edit[0].setText(str(self.exam.setting.min_24point))
@@ -391,6 +397,10 @@ class MathDoc(QWidget):
             self.exam.setting.min_divisor, self.exam.setting.max_divisor = (self.exam.setting.max_divisor, self.exam.setting.min_divisor)
             self.num_edit[6].setText(str(self.exam.setting.min_divisor))
             self.num_edit[7].setText(str(self.exam.setting.max_divisor))
+        if self.exam.setting.min_composite > self.exam.setting.max_composite:
+            self.exam.setting.min_composite, self.exam.setting.max_composite = (self.exam.setting.max_composite, self.exam.setting.min_composite)
+            self.num_edit[8].setText(str(self.exam.setting.min_composite))
+            self.num_edit[9].setText(str(self.exam.setting.min_composite))
 
         for i, rb in enumerate(self.type_options):
             if rb.isChecked():
@@ -424,7 +434,12 @@ class MathDoc(QWidget):
                                                      self.exam.setting.max_addend,
                                                      self.exam.setting.min_divisor,
                                                      self.exam.setting.max_divisor])
-
+                elif i == 3:
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype = [],
+                                            range = [self.exam.setting.min_composite,
+                                                     self.exam.setting.max_composite])
+        # print(self.exam.setting.min_composite, self.exam.setting.max_composite)
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_label.setText(self.exam.q.comments)

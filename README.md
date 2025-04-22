@@ -103,3 +103,6 @@
 
 ## [Release V1.2.4](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.4)
 所有题目做完之前，避免重复
+
+## [Release V1.2.5](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.5)
+增加质因数分解题目

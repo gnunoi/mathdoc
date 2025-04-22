@@ -136,7 +136,7 @@ class Question():
     def AfterGenerate(self):
         self.start_time = datetime.now()
         # self.AnswerTips()
-        # print(f'self.anwer_tips: {self.answer_tips}')
+        print(f'self.anwer_tips: {self.answer_tips}')
         pass
 
     def Question(self):
@@ -244,10 +244,11 @@ IsPrime(): 判断是否为质数
 PrimeFactors(): 返回质因数组成的列表
 """
 class QuestionFactor(QuestionRL):
-    def __init__(self, subtype=[0, 0], range=[10, 50, 1, 10]):
+    def __init__(self, subtype=[0, 0], range=[8, 50]):
         super().__init__(type=3, subtype=subtype, range=range)
         self.name = "质因数分解"
         self.comments = "分解质因数（用空格或*分隔质因数），如：72，输入：2 2 2 3 3 或：2 * 2 * 2 * 3 * 3"
+        # print(range)
         self.Generate()
 
     def IsPrime(self, num):
@@ -518,6 +519,7 @@ class QuestionLR(Question):
     def AnswerTips(self):
         pass
 
+
 """
 类名称：QuestionQC
 题目类型：两位数乘法速算
@@ -543,7 +545,8 @@ class QuestionQC(QuestionLR):
 
         if subtype == 6:
             subtype = self.RandInt(0, 5)
-            self.subtype2[0] = subtype
+            # print(f'subtpe = {subtype}')
+
         if subtype == 0:  # 平方数
             number = self.RandInt(min_val, max_val)
             self.numbers.append(number)
@@ -650,6 +653,7 @@ class QuestionQC(QuestionLR):
             tips += f'{m} × {n} = ({a} - {b}) × ({c} - {d}) = {a} × {c} - {a} × {d} - {b} × {c} + {b} × {d} = {a*c} - {a*d} - {b*c} + {b*d} = {m*n}'
         self.answer_tips = tips
         return self.answer_tips
+
 """
 类名称：Question4AO
 题目类型：四则运算
@@ -712,6 +716,7 @@ class Question4AO(QuestionLR):
                     flag = 0
 
     def AnswerTips(self):
-        self.answer_tips = self.ProcessCalculation()
+        self.answer_tips = f'正确答案：{self.question} {self.correct_answer}'
+        # print(self.answer_tips)
+        # self.answer_tips = self.ProcessCalculation()
         return self.answer_tips
-        pass

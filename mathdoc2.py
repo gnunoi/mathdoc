@@ -297,13 +297,8 @@ class MathDoc(QWidget):
         ]
         self.sets = set([])
         for s in self.set_list:
-            self.sets = self.sets | s
-
-        # print(self.set_list)
-        # print(self.sets)
-
+            self.sets |= s
         self.UpdateSettings()
-        # self.UpdateQuestion()
 
     def ChangeState(self):
         type = self.exam.setting.type
