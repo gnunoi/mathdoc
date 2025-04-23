@@ -500,7 +500,7 @@ class SignupDialog(QDialog):
             {"label": "手　　机（必填）:", "value": self.mobile},
             {"label": "本人邮箱（必填）:", "value": self.email},
             {"label": "教师邮箱（选填）:", "value": self.mentor_email},
-            {"label": "邮箱验证码（必填）:", "value": self.vcode}
+            {"label": "邮箱验证码（必填）:", "value": ''}
         ]
 
         # 创建输入框对象并添加到表单布局中
@@ -517,6 +517,9 @@ class SignupDialog(QDialog):
                     input_field.setEnabled(False)
             form_layout.addRow(label, input_field)
             self.input_fields.append(input_field)
+
+        if not self.email is None and self.email.find('@'): # 已注册用户，补全其它信息，不重复发送验证码
+            self.input_fields[5].setText(str(self.vcode))
 
         # 创建按钮及其对应的槽函数的列表
         buttons = [
@@ -547,7 +550,9 @@ class SignupDialog(QDialog):
         sys.exit()
 
     def Register(self):
-        self.ucode = self.vcode
+        if not self.email is None:
+            print(f'self.email = {self.email}')
+            self.ucode = self.vcode
         # 依次获取输入框中的值
         self.username = self.input_fields[0].text()
         self.grade = self.input_fields[1].text()
