@@ -71,7 +71,7 @@ class MathDoc(QWidget):
         self.type_group.setFont(self.base_font)
         type_layout = QVBoxLayout()
         self.type_options = [
-            QRadioButton('24点游戏'), # type = 0
+            QRadioButton('计算24点'), # type = 0
             QRadioButton('乘法速算'), # type = 1
             QRadioButton('四则运算'), # type = 2
             QRadioButton('质因数分解'), # type = 3
@@ -415,6 +415,7 @@ class MathDoc(QWidget):
                                                      self.exam.setting.max_composite])
         self.exam.setting.Write()
         self.UpdateQuestion()
+        self.answer_input.clear() # 更新题目以后，清除用户答案
         self.answer_label.setText(self.exam.q.comments)
 
     def UpdateQuestion(self):
