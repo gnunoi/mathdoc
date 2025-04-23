@@ -502,24 +502,22 @@ class SignupDialog(QDialog):
             {"label": "教师邮箱（选填）:", "value": self.mentor_email},
             {"label": "邮箱验证码（必填）:", "value": ''}
         ]
-
         # 创建输入框对象并添加到表单布局中
-        self.input_fields = []
+        self.inputs = []
         for item in form_items:
             label = QLabel(item["label"])
             label.setFont(self.base_font)
-            input_field = QLineEdit()
-            input_field.setFont(self.base_font)
+            input = QLineEdit()
+            input.setFont(self.base_font)
             if item["value"]:
-                input_field.setText(str(item["value"]))
-                # 如果不是验证码输入框，则禁用
-                if item["label"] != "邮箱验证码（必填）:":
-                    input_field.setEnabled(False)
-            form_layout.addRow(label, input_field)
-            self.input_fields.append(input_field)
+                input.setText(str(item["value"]))
+                input.setEnabled(False)
+            form_layout.addRow(label, input)
+            self.inputs.append(input)
 
         if not self.email is None and self.email.find('@'): # 已注册用户，补全其它信息，不重复发送验证码
-            self.input_fields[5].setText(str(self.vcode))
+            self.inputs[5].setText(str(self.vcode))
+            self.inputs[5].setEnabled(False)
 
         # 创建按钮及其对应的槽函数的列表
         buttons = [
@@ -554,12 +552,12 @@ class SignupDialog(QDialog):
             print(f'self.email = {self.email}')
             self.ucode = self.vcode
         # 依次获取输入框中的值
-        self.username = self.input_fields[0].text()
-        self.grade = self.input_fields[1].text()
-        self.mobile = self.input_fields[2].text()
-        self.email = self.input_fields[3].text()
-        self.mentor_email = self.input_fields[4].text()
-
+        self.username = self.inputs[0].text()
+        self.grade = self.inputs[1].text()
+        self.mobile = self.inputs[2].text()
+        self.email = self.inputs[3].text()
+        self.mentor_email = self.inputs[4].text()
+        self.ucode = self.inputs[5].text()
         try:
             grade = self.ast.literal_eval(self.grade)
         except:
@@ -591,7 +589,7 @@ class SignupDialog(QDialog):
         self.close()
 
     def SendVCode(self):
-        email = self.input_fields[3].text()
+        email = self.inputs[3].text()
         if email == '' or email.find('@') == -1:
             QMessageBox.warning(self, '邮箱', '请输入有效的邮箱')
         else:
