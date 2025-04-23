@@ -8,6 +8,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from threading import Thread
+import pandas as pd
 """
 类名称: Exam
 变量: 
@@ -68,6 +69,7 @@ class Exam:
         self.user = User(self.db)
         self.setting = Setting(self.db)
         self.record = Record(self.db)
+        self.review = Review(self.db)
         self.wb = Workbook(self.user.username)
         self.mail = Mail()
         self.ReadSetting()
@@ -247,6 +249,8 @@ class Exam:
             self.user.Register(username = username, email = email, mobile = mobile, grade = grade)
 
     def Run(self):
+        self.review.Read()
+        return
         self.Register()
         print()
         type = 3
@@ -466,12 +470,13 @@ class Record:
         self.question_number = 1
         self.data = []
         self.question_list = []
+        self.table_name = 'Exam01'
         self.CreateTable()
 
     def CreateTable(self):
         db = self.db
-        db.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Exam01 (
+        db.cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS {self.table_name} (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
             QuestionNumber INTEGER,
             Question TEXT,
@@ -486,8 +491,8 @@ class Record:
             Solution TEXT
         )
         ''')
-        db.AddColumn('Exam01', 'AnswerTips', 'TEXT')
-        db.AddColumn('Exam01', 'Solution', 'TEXT')
+        db.AddColumn(self.table_name, 'AnswerTips', 'TEXT')
+        db.AddColumn(self.table_name, 'Solution', 'TEXT')
         db.connect.commit()
 
     def Append(self, q):
@@ -501,8 +506,8 @@ class Record:
 
     def SaveRecords(self):
         db = self.db
-        db.cursor.executemany('''
-            INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
+        db.cursor.executemany(f'''
+            INSERT INTO {self.table_name} (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
             StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             self.data)
@@ -512,11 +517,11 @@ class Record:
     def Reorganize(self):
         db = self.db
         try:
-            db.cursor.execute("SELECT * FROM Exam01 ORDER BY ID")
+            db.cursor.execute(f"SELECT * FROM {self.table_name} ORDER BY ID")
             data = db.cursor.fetchall()
 
             if not data:
-                print("Exam01表中没有数据需要整理")
+                print(f"{self.table_name}表中没有数据需要整理")
                 return
 
             new_question_number = 1
@@ -527,16 +532,16 @@ class Record:
                 current_question = row[2]
                 if current_question != previous_question:
                     new_question_number += 1
-                db.cursor.execute("UPDATE Exam01 SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
+                db.cursor.execute(f"UPDATE {self.table_name} SET QuestionNumber = ? WHERE ID = ?", (new_question_number, current_id))
                 previous_question = current_question
             db.connect.commit()
         except Exception as e:
-            print(f"整理Exam01表数据时出错: {e}")
+            print(f"整理{self.table_name}表数据时出错: {e}")
 
     def SaveRecord(self, q):
         db = self.db
-        db.cursor.execute('''
-            INSERT INTO Exam01 (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
+        db.cursor.execute(f'''
+            INSERT INTO {self.table_name} (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
             StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (self.question_number, q.question, str(q.user_answer), str(q.correct_answer), "正确" if q.is_correct else "错误",
@@ -819,6 +824,24 @@ class Mail():
         print("解码后的字符串:", nstr)
         m.Send()
 
+class Review:
+    def __init__(self, db):
+        self.db = db
+        self.df = None
+        self.table_name = 'Exam01'
+
+    def Read(self):
+        self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name};", self.db.connect)
+        self.df['Question'] = self.df['Question'].str.replace('24点', '计算24点')
+        self.df['Question'] = self.df['Question'].str.replace('计算计算24点', '计算24点')
+        print(self.df.to_string())
+        # # 获取所有列名称
+        # columns = self.df.columns
+        # # 打印列名称
+        # print("\n所有列名称：")
+        # for col in columns:
+        #     print(col)
+        # print(self.df['Question'].replace('计算24 点', '24点'))
 
 """
 测试代码

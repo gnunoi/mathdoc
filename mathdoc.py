@@ -51,7 +51,6 @@ class MathDoc(QWidget):
         self.set_list = []
         self.sets = set([])
         self.exam = Exam()
-        # self.exam.Dump(self.exam.setting)
         self.Register()
         self.authorization= Authorization()
         if os.name == "nt":
@@ -62,45 +61,6 @@ class MathDoc(QWidget):
         self.InitUI()
         # self.exam.Dump(self)
         self.SetWindowSize()
-
-    def UpdateQuestion(self):
-        if self.authorization.authorization == False:
-            QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
-            self.ExitApp()
-        self.exam.Generate()
-        self.tips_label.setText(self.exam.q.check_tips)
-        self.answer_tips_label.setText(self.exam.q.answer_tips)
-        self.question_label.setText(f"题目：{self.exam.q.question}")
-
-        total = self.exam.record.question_number - 1
-        correct_rate = self.exam.record.correct_number / total * 100 if total > 0 else 0
-        self.status_label.setText(
-            f"已答题：{total} 道 | 正确：{self.exam.record.correct_number} 道 | "
-            f"错误：{total - self.exam.record.correct_number} 道 | 正确率：{correct_rate:.1f}%"
-        )
-        self.answer_input.setFocus()
-
-    def SubmitAnswer(self):
-        self.exam.q.user_input = self.answer_input.text()
-        # print(self.exam.q.user_input)
-        self.exam.SubmitAnswer()
-        # self.exam.Dump(self.exam.q)
-        self.answer_input.clear()
-        if not self.exam.q.is_correct:
-            self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
-            # print(f'self.exam.q.answer_tips = {self.exam.q.answer_tips}')
-            if self.exam.q.answer_tips:
-                self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
-        else:
-            self.UpdateQuestion()
-
-    def Register(self):
-        while not self.exam.user.IsCompleted():
-            signup = SignupDialog(self.exam)
-            signup.exec()
-
-    def SetWindowSize(self):
-        self.setGeometry(0, 0, self.width, self.height)
 
     def InitUI(self):
         self.setWindowTitle(self.title)
@@ -298,9 +258,8 @@ class MathDoc(QWidget):
         self.setLayout(main_layout)
         self.answer_input.setObjectName("answer_input")
         if os.name == "posix":
-            self.apply_styles()
+            self.SetStyle()
         self.answer_input.setFont(self.big_font)
-        # 创建 QPalette 对象并设置颜色
         palette = QPalette()
         palette.setColor(QPalette.WindowText, QColor(0, 120, 215)) #0078D7
         self.tips_label.setPalette(palette)
@@ -323,21 +282,7 @@ class MathDoc(QWidget):
             self.sets |= s
         self.UpdateSettings()
 
-    def ChangeState(self):
-        type = self.exam.setting.type
-        # print(len(self.set_list))
-        if not type in range(0, len(self.set_list)):
-            print(f'无效的类型')
-            return False
-        for s in self.sets - self.set_list[type]:
-            s.setVisible(False)
-        for s in self.set_list[type]:
-            s.setVisible(True)
-
-        return True
-
-
-    def apply_styles(self):
+    def SetStyle(self):
         style = """
         QGroupBox {
             border: 2px solid #0078D7;
@@ -374,6 +319,17 @@ class MathDoc(QWidget):
         }
         """
         self.setStyleSheet(style)
+
+    def ChangeState(self):
+        type = self.exam.setting.type
+        if not type in range(0, len(self.set_list)):
+            print(f'无效的类型')
+            return False
+        for s in self.sets - self.set_list[type]:
+            s.setVisible(False)
+        for s in self.set_list[type]:
+            s.setVisible(True)
+        return True
 
     def UpdateSettings(self):
         self.exam.setting.min_24point = int(self.num_edit[0].text())
@@ -457,10 +413,46 @@ class MathDoc(QWidget):
                                             subtype = [self.exam.setting.factor_type],
                                             range = [self.exam.setting.min_composite,
                                                      self.exam.setting.max_composite])
-        # print(self.exam.setting.factor_type)
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_label.setText(self.exam.q.comments)
+
+    def UpdateQuestion(self):
+        if self.authorization.authorization == False:
+            QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
+            self.ExitApp()
+        self.exam.Generate()
+        self.tips_label.setText(self.exam.q.check_tips)
+        self.answer_tips_label.setText(self.exam.q.answer_tips)
+        self.question_label.setText(f"题目：{self.exam.q.question}")
+
+        total = self.exam.record.question_number - 1
+        correct_rate = self.exam.record.correct_number / total * 100 if total > 0 else 0
+        self.status_label.setText(
+            f"已答题：{total} 道 | 正确：{self.exam.record.correct_number} 道 | "
+            f"错误：{total - self.exam.record.correct_number} 道 | 正确率：{correct_rate:.1f}%"
+        )
+        self.answer_input.setFocus()
+
+    def SubmitAnswer(self):
+        self.exam.q.user_input = self.answer_input.text()
+        self.exam.SubmitAnswer()
+        self.answer_input.clear()
+        if not self.exam.q.is_correct:
+            self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
+            if self.exam.q.answer_tips:
+                self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
+        else:
+            self.UpdateQuestion()
+
+    def Register(self):
+        while not self.exam.user.IsCompleted():
+            signup = SignupDialog(self.exam)
+            signup.exec()
+
+    def SetWindowSize(self):
+        self.setGeometry(0, 0, self.width, self.height)
+
 
     def ExportWorkbook(self, type):
         self.exam.ExportRecords(type)
@@ -472,7 +464,6 @@ class MathDoc(QWidget):
         event.accept()
 
     def ExitApp(self):
-        # QMessageBox.information(self, '发送邮件', f'正在发送答题记录的邮件')
         self.exam.Exit()
         QApplication.quit()
 
@@ -632,35 +623,6 @@ class SignupDialog(QDialog):
         """
         self.setStyleSheet(style)
 
-
-"""
-类名称: LabelInput
-说明: 具有QLabel与QLineEdit的类
-
-成员变量：
-ql: QLabel对象
-qle: QLineEdit对象
-
-成员函数：
-Update(): 调用检查函数与更新函数
-"""
-class LabelInput:
-    def __init__(self, label_text = '', check_tips = '', func_update = None, func_check = None):
-        self.check_tips = check_tips
-        self.ql = QLabel(label_text)
-        self.qle = QLineEdit()
-        self.func_check = func_check
-        self.func_update = func_update
-        self.qle.editingFinished.connect(self.Update)
-
-    def Update(self):
-        label = self.ql.text()
-        input = self.qle.text()
-        if not self.func_check is None and not self.func_check(input):
-            QMessageBox.warning(label, f'{label}: {self.check_tips}')
-        else:
-            self.func_update()
-
 import ntplib
 class Authorization:
     def __init__(self):
@@ -679,15 +641,12 @@ class Authorization:
                 utc_time = datetime.fromtimestamp(response.tx_time)
                 tz_time = utc_time.astimezone()
                 local_date = tz_time.strftime("%Y-%m-%d")
-                local_time = tz_time.strftime("%Y-%m-%d %H:%M:%S")
-                # print(f'Date from network: {local_date}')
                 return local_date
             except Exception as e:
                 print(f"Error fetching NTP time: {e}")
         return None
 
     def GetNetTimeInThread(self, callback):
-        # print('GetNetTimeInThread()')
         def wrapper():
             callback(self.GetNetTime())
 

@@ -469,7 +469,7 @@ class Question24Point(QuestionRL):
         return None
 
     def Question(self):
-        self.question = f'24点: {self.numbers}'
+        self.question = f'计算24点: {self.numbers}'
         return self.question
 
     def Answer(self):
