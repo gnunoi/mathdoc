@@ -828,20 +828,18 @@ class Review:
     def __init__(self, db):
         self.db = db
         self.df = None
+        self.data = []
         self.table_name = 'Exam01'
 
     def Read(self):
         self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name};", self.db.connect)
         self.df['Question'] = self.df['Question'].str.replace('24点', '计算24点')
         self.df['Question'] = self.df['Question'].str.replace('计算计算24点', '计算24点')
-        print(self.df.to_string())
-        # # 获取所有列名称
-        # columns = self.df.columns
-        # # 打印列名称
-        # print("\n所有列名称：")
-        # for col in columns:
-        #     print(col)
-        # print(self.df['Question'].replace('计算24 点', '24点'))
+        # print(self.df.to_string())
+        # self.data = [tuple(row) for row in self.df.itertuples(index=False)] # 是否带索引列
+        self.data = [tuple(row.values) for _, row in self.df.iterrows()] # 另一种方法导出所有行的数据，忽略索引列
+        for row in self.data:
+            print(row)
 
 """
 测试代码
