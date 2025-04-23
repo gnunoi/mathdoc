@@ -107,8 +107,6 @@ class MathDoc(QWidget):
         main_layout = QVBoxLayout()
         control_panel = QHBoxLayout()
 
-        # self.exam.Dump(self.exam.q)
-        # 题型
         self.type_group = QGroupBox("题型")
         self.type_group.setFont(self.base_font)
         type_layout = QVBoxLayout()
