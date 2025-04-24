@@ -87,7 +87,7 @@ class Exam:
         print()
 
     def Exit(self):
-        # self.record.SaveRecords()
+        self.record.SaveRecords()
         self.SendDB()
         if len(self.record.data):
             self.wb.Save(self.record.data)
@@ -249,15 +249,13 @@ class Exam:
             self.user.Register(username = username, email = email, mobile = mobile, grade = grade)
 
     def Run(self):
-        self.review.Read()
-        return
         self.Register()
         print()
         type = 3
-        parms = [{'type': 0, 'subtype': [], 'range': [1, 10]},
+        parms = [{'type': 0, 'subtype': [0], 'range': [1, 10]},
                  {'type': 1, 'subtype': [2, 0], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
-                 {'type': 3, 'subtype': [], 'range': [6, 200]},
+                 {'type': 3, 'subtype': [0], 'range': [6, 200]},
                  ]
         self.UpdateSetting(parms[type]['type'], parms[type]['subtype'], parms[type]['range'])
         q = self.q
@@ -504,7 +502,7 @@ class Record:
                   "正确" if q.is_correct else "错误",
                   q.start_time.strftime("%Y-%m-%d %H:%M:%S"),
                   q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
-                  q.time_used, q.check_tips, q.answer_tips, q.solution)
+                  q.time_used, q.check_tips, q.answer_tips, q.solution, q.type, str(q.subtype))
         self.data.append(record)
         self.question_list.append(q.question)
 
@@ -512,8 +510,8 @@ class Record:
         db = self.db
         db.cursor.executemany(f'''
             INSERT INTO {self.table_name} (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
-            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution, Type, Subtype)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             self.data)
         db.connect.commit()
         self.Reorganize()
@@ -546,11 +544,12 @@ class Record:
         db = self.db
         db.cursor.execute(f'''
             INSERT INTO {self.table_name} (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
-            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution, Type, Subtype)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (self.question_number, q.question, str(q.user_answer), str(q.correct_answer), "正确" if q.is_correct else "错误",
-            q.start_time.strftime("%Y-%m-%d %H:%M:%S"), q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
-            q.time_used, q.check_tips, q.answer_tips, q.solution)
+             q.start_time.strftime("%Y-%m-%d %H:%M:%S"), q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
+             q.time_used, q.check_tips, q.answer_tips, q.solution,
+             q.type, str(q.subtype))
         )
         db.connect.commit()
 
@@ -721,7 +720,7 @@ class Workbook:
     def SaveRecords(self, data):
         row = 1
         for row_data in data:
-            self.Append(row, row_data[:-1])
+            self.Append(row, row_data[:-3])
             row += 1
 
     def Save(self, data):
@@ -834,17 +833,109 @@ class Review:
         self.df = None
         self.data = []
         self.table_name = 'Exam01'
+        self.CompleteTable()
 
     def Read(self):
+        pass
+
+    def CompleteTable(self):
+        self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name} LIMIT 1;", self.db.connect)
+        if not pd.isna(self.df.loc[0]['Type']) or not pd.isna(self.df.loc[0]['Subtype']):
+            print('Exam01数据表的记录类型、子类型完整')
+            return
         self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name};", self.db.connect)
         self.df['Question'] = self.df['Question'].str.replace('24点', '计算24点')
         self.df['Question'] = self.df['Question'].str.replace('计算计算24点', '计算24点')
+        for index, row in self.df.iterrows():
+            question = row['Question']
+            type, subtype = self.JudgeType(question)
+            self.df.at[index, 'Type'] = type
+            self.df.at[index, 'Subtype'] = str(subtype)
         # print(self.df.to_string())
         # self.data = [tuple(row) for row in self.df.itertuples(index=False)] # 是否带索引列
         self.data = [tuple(row.values) for _, row in self.df.iterrows()] # 另一种方法导出所有行的数据，忽略索引列
-        for row in self.data:
-            print(row)
+        # for row in self.data:
+        #     print(row)
+        # 将结果写回数据库
+        try:
+            self.db.connect.commit()  # 提交之前的事务
+            for index, row in self.df.iterrows():
+                update_sql = f"""
+                UPDATE {self.table_name}
+                SET Type = ?, Subtype = ?
+                WHERE ID = ?;
+                """
+                self.db.cursor.execute(update_sql, (row['Type'], row['Subtype'], row['ID']))
+            self.db.connect.commit()
+            print("数据更新成功")
+        except sqlite3.Error as e:
+            print(f"数据库错误：{e}")
+            self.db.connect.rollback()  # 回滚事务
+        finally:
+            # pass
+            # 重新从数据库读取数据以验证更新是否成功
+            self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name};", self.db.connect)
+            print(self.df.to_string())
 
+    def JudgeType(self, question):
+        type = 0
+        subtype = []
+        opr = 0
+        sum = []
+        pattern_qc = re.compile(r'^\d+ × \d+ = $')  # 匹配'数字 × 数字 = '格式的正则表达式
+        q = question.replace(' ', '').replace('=', '').replace('(-', '').replace(')', '')
+        q = q.replace('×', ' ').replace('÷', ' ').replace('/', ' ').replace('+', ' ').replace('-', ' ')
+        q = q.replace('  ', ' ')
+        numbers = q.split(' ')
+        # print(numbers)
+        if question.replace('(-', '').find('+') >= 0:
+            opr = 0
+            sum.append(opr)
+        if question.replace('(-', '').find('-') >= 0:
+            opr = 1
+            sum.append(opr)
+        if question.replace('(-', '').find('×') >= 0:
+            opr = 2
+            sum.append(opr)
+        if question.replace('(-', '').find('÷') >= 0:
+            opr = 3
+            sum.append(opr)
+        if question.replace('(-', '').find('/') >= 0:
+            opr = 3
+            sum.append(opr)
+        # print(f'{question}: sum = {sum}, len(sum) = {len(sum)}')
+        if question.startswith('计算24点'):
+            type = 0
+            subtype = [0]
+        elif question.startswith('质因数分解'):
+            type = 3
+            subtype = [0]
+        elif question.startswith('求最大公约数'):
+            type = 3
+            subtype = [1]
+        elif question.startswith('求最小公倍数'):
+            type = 3
+            subtype = [2]
+        elif pattern_qc.match(question):
+            type = 1
+            a = int(numbers[0])
+            b = int(numbers[1])
+            if a == b:
+                subtype = [0]
+            elif a // 10 == b // 10:
+                subtype=[2]
+            elif abs(a // 10 - b // 10) == 1 and ((a+b)/2 % 5 == 0 or (a+b)/2 % 10 == 0):
+                subtype=[1]
+            elif a % 2 == 0 and b % 5 == 0 or a % 5 == 0 and b % 2 == 0:
+                subtype = [4]
+            elif a % 10 in [7, 8, 9] and b % 10 in [1, 2, 3] or b % 10 in [7, 8, 9] and a % 10 in [1, 2, 3]:
+                subtype = [5]
+            elif a % 10 in [7, 8, 9] or b % 10 in [7, 8, 9]:
+                subtype = [3]
+        else:
+            type = 2
+            subtype = [len(numbers) - 2, opr if len(sum) == 1 else 4] # 项数
+        return type, subtype
 """
 测试代码
 """

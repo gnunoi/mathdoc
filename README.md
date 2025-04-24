@@ -109,3 +109,6 @@
 
 ## [Release V1.2.6](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.6)
 在质因数分节题目中，增加最大公约数、最小公倍数子题型
+
+## [Release V1.2.7](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.7)
+给教师邮箱做题记录；增加复习功能。
