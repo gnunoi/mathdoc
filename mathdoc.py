@@ -500,7 +500,7 @@ class SignupDialog(QDialog):
             {"label": "年级（数字1-12，必填）:", "value": self.grade},
             {"label": "手　　机（必填）:", "value": self.mobile},
             {"label": "本人邮箱（必填）:", "value": self.email},
-            {"label": "教师邮箱（选填）:", "value": self.mentor_email},
+            {"label": "教师/家长邮箱（选填）:", "value": self.mentor_email},
             {"label": "邮箱验证码（必填）:", "value": ''}
         ]
         # 创建输入框对象并添加到表单布局中

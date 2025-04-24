@@ -136,8 +136,6 @@ class Exam:
             threshold = time_used_list[threshold_index - 1][0] if time_used_list else 0
             db.cursor.execute(f"{query} WHERE TimeUsed >= {threshold} ORDER BY TimeUsed DESC")
         data = db.cursor.fetchall()
-        # for i in range(len(data)):
-        #     print(f'{i}: {data[i]}')
         wb = Workbook(filename = filename)
         wb.Save(data)
 
@@ -146,8 +144,10 @@ class Exam:
         print('答题记录发送邮件...')
         local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.mail.subject = f'{self.user.email}在{local_time}发来的作业'
-        self.mail.Send(receiver=self.user.email, attach=self.wb.fullpath)
-        self.mail.Send(attach=self.wb.fullpath)
+        self.mail.Send(attach=self.wb.fullpath) # 给服务器邮箱发送邮件
+        self.mail.Send(receiver=self.user.email, attach=self.wb.fullpath) # 给本人邮箱发送邮件
+        if not self.user.mentor_email is None and self.user.mentor_email.find('@'):
+            self.mail.Send(receiver=self.user.mentor_email, attach=self.wb.fullpath)  # 给本人邮箱发送邮件
         print('答题记录邮件发送完毕')
 
     def SendDB(self):
