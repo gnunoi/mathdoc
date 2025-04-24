@@ -840,6 +840,9 @@ class Review:
 
     def CompleteTable(self):
         self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name} LIMIT 1;", self.db.connect)
+        if self.df.empty: # 空表格
+            print(f'Exam01表格不存在或为空表')
+            return
         if not pd.isna(self.df.loc[0]['Type']) or not pd.isna(self.df.loc[0]['Subtype']):
             print('Exam01数据表的记录类型、子类型完整')
             return
