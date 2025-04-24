@@ -52,6 +52,7 @@ class MathDoc(QWidget):
         self.sets = set([])
         self.exam = Exam()
         self.Register()
+        # self.exam.review.CompleteTable() # 完善测试记录数据表格
         self.authorization= Authorization()
         if os.name == "nt":
             self.base_font = QFont("SimSun", 24)
@@ -510,6 +511,7 @@ class SignupDialog(QDialog):
             label.setFont(self.base_font)
             input = QLineEdit()
             input.setFont(self.base_font)
+            # input.returnPressed.connect(self.Register)
             if item["value"]:
                 input.setText(str(item["value"]))
                 input.setEnabled(False)
@@ -535,6 +537,9 @@ class SignupDialog(QDialog):
             btn.clicked.connect(button["func"])
             btn_layout.addStretch(1)
             btn_layout.addWidget(btn)
+            if button["text"] == "用户注册":
+                self.register_btn = btn  # 保存“用户注册”按钮的引用
+                btn.setDefault(True)  # 设置为默认按钮
         btn_layout.addStretch(1)
 
         # 组装主布局
