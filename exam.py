@@ -488,11 +488,15 @@ class Record:
             TimeUsed REAL,
             Tips TEXT,
             AnswerTips TEXT,
-            Solution TEXT
+            Solution TEXT,
+            Type INTEGER,
+            Subtype TEXT
         )
         ''')
         db.AddColumn(self.table_name, 'AnswerTips', 'TEXT')
         db.AddColumn(self.table_name, 'Solution', 'TEXT')
+        db.AddColumn(self.table_name, 'Type', 'INTEGER')
+        db.AddColumn(self.table_name, 'Subtype', 'TEXT')
         db.connect.commit()
 
     def Append(self, q):
