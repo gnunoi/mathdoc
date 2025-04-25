@@ -111,4 +111,7 @@
 在质因数分节题目中，增加最大公约数、最小公倍数子题型
 
 ## [Release V1.2.7](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.7)
-给教师邮箱发送做题记录；增加复习功能。
+给教师邮箱发送做题记录；给所有答题记录增加和完善题型和子题型字段。
+
+## [Release V1.2.8](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.8)
+增加家长账号，进入软件时选择账号；增加直播支持功能，在副屏幕上显示答题过程。
