@@ -232,7 +232,10 @@ class MathDoc(QWidget):
 
         # 操作按钮
         btn_layout = QHBoxLayout()
-        self.submit_btn = QPushButton("提交答案 (Enter)")
+        self.review_btn = QPushButton("复习")
+        self.review_btn.setFont(self.base_font)
+        # self.submit_btn.clicked.connect(self.SubmitAnswer)
+        self.submit_btn = QPushButton("提交答案")
         self.submit_btn.setFont(self.base_font)
         self.submit_btn.clicked.connect(self.SubmitAnswer)
         self.generate_error_btn = QPushButton("导出错题本")
@@ -247,13 +250,14 @@ class MathDoc(QWidget):
         self.exit_btn = QPushButton("退出程序")
         self.exit_btn.setFont(self.base_font)
         self.exit_btn.clicked.connect(self.ExitApp)
-        btn_layout.addStretch(1)
+        # btn_layout.addStretch(1)
         btn_layout.addWidget(self.submit_btn)
         btn_layout.addWidget(self.generate_error_btn)
         btn_layout.addWidget(self.generate_hard_btn)
         btn_layout.addWidget(self.generate_all_btn)
+        btn_layout.addWidget(self.review_btn)
         btn_layout.addWidget(self.exit_btn)
-        btn_layout.addStretch(1)
+        # btn_layout.addStretch(1)
         main_layout.addLayout(btn_layout)
 
         self.setLayout(main_layout)
@@ -299,7 +303,7 @@ class MathDoc(QWidget):
             font-size: 24px;
         }
         QPushButton {
-            min-width: 300px;
+            min-width: 200px;
             padding: 12px;
             font-size: 24px;
             background: #F0F0F0;
