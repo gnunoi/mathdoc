@@ -45,7 +45,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.04.24(V1.2.7)"
+        self.version = "2025.04.25(V1.2.8)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
         self.set_list = []
@@ -435,6 +435,7 @@ class MathDoc(QWidget):
             f"错误：{total - self.exam.record.correct_number} 道 | 正确率：{correct_rate:.1f}%"
         )
         self.answer_input.setFocus()
+        print(f'{self.exam.q.AnswerTips()}')
 
     def SubmitAnswer(self):
         self.exam.q.user_input = self.answer_input.text()
