@@ -506,13 +506,15 @@ class Record:
             AnswerTips TEXT,
             Solution TEXT,
             Type INTEGER,
-            Subtype TEXT
+            Subtype TEXT,
+            Input TEXT
         )
         ''')
         db.AddColumn(self.table_name, 'AnswerTips', 'TEXT')
         db.AddColumn(self.table_name, 'Solution', 'TEXT')
         db.AddColumn(self.table_name, 'Type', 'INTEGER')
         db.AddColumn(self.table_name, 'Subtype', 'TEXT')
+        db.AddColumn(self.table_name, 'Input', 'TEXT')
         db.connect.commit()
 
     def Append(self, q):
@@ -520,7 +522,9 @@ class Record:
                   "正确" if q.is_correct else "错误",
                   q.start_time.strftime("%Y-%m-%d %H:%M:%S"),
                   q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
-                  q.time_used, q.check_tips, q.answer_tips, q.solution, q.type, str(q.subtype))
+                  q.time_used, q.check_tips, q.answer_tips, q.solution,
+                  q.type, str(q.subtype),
+                  q.user_input)
         self.data.append(record)
         self.question_list.append(q.question)
 
@@ -528,8 +532,8 @@ class Record:
         db = self.db
         db.cursor.executemany(f'''
             INSERT INTO {self.table_name} (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
-            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution, Type, Subtype)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution, Type, Subtype, Input)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             self.data)
         db.connect.commit()
         self.Reorganize()
@@ -562,12 +566,13 @@ class Record:
         db = self.db
         db.cursor.execute(f'''
             INSERT INTO {self.table_name} (QuestionNumber, Question, UserAnswer, CorrectAnswer, IsCorrect, 
-            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution, Type, Subtype)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            StartTime, EndTime, TimeUsed, Tips, AnswerTips, Solution, Type, Subtype, Input)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (self.question_number, q.question, str(q.user_answer), str(q.correct_answer), "正确" if q.is_correct else "错误",
              q.start_time.strftime("%Y-%m-%d %H:%M:%S"), q.end_time.strftime("%Y-%m-%d %H:%M:%S"),
              q.time_used, q.check_tips, q.answer_tips, q.solution,
-             q.type, str(q.subtype))
+             q.type, str(q.subtype),
+             q.user_input)
         )
         db.connect.commit()
 
@@ -861,9 +866,9 @@ class Review:
         if self.df.empty: # 空表格
             print(f'Exam01表格不存在或为空表')
             return
-        if not pd.isna(self.df.loc[0]['Type']) or not pd.isna(self.df.loc[0]['Subtype']):
-            print('Exam01数据表的记录类型、子类型完整')
-            return
+        # if not pd.isna(self.df.loc[0]['Type']) or not pd.isna(self.df.loc[0]['Subtype']):
+        #     print('Exam01数据表的记录类型、子类型完整')
+        #     return
         self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name};", self.db.connect)
         self.df['Question'] = self.df['Question'].str.replace('24点', '计算24点')
         self.df['Question'] = self.df['Question'].str.replace('计算计算24点', '计算24点')

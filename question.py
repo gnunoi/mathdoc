@@ -349,6 +349,9 @@ class QuestionFactor(QuestionRL):
     def BeforeJudgeAnswer(self):
         subtype = self.subtype[0]
         self.user_answer = self.user_input.strip().replace('*', ' ')
+        self.user_answer = self.user_answer.replace(',', ' ')
+        self.user_answer = self.user_answer.replace('，', ' ')
+        self.user_answer = self.user_answer.replace(' ', '=')
         self.user_answer = self.user_answer.split('=')[-1]
         if subtype == 0:
             self.user_answer = self.user_answer.split()

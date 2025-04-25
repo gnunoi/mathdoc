@@ -383,7 +383,7 @@ class MathDoc(QWidget):
                 self.ChangeState()
                 if i == 0:
                     self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype = [],
+                                            subtype = [0],
                                             range = [self.exam.setting.min_24point,
                                                      self.exam.setting.max_24point])
                 elif i == 1:
