@@ -349,6 +349,24 @@ class User:
             self.expired_date = result[8]
         return result
 
+    def ReadAll(self):
+        db = self.db
+        db.cursor.execute('''SELECT ID, Username, Email, Mobile, Grade, 
+                                RegisterDate, IsVerified, MentorEmail,  ExpiredDate
+                                FROM Users WHERE IsVerified = 1''')
+        results = db.cursor.fetchone()
+        for result in  results:
+            self.userid = result[0]
+            self.username = result[1]
+            self.email = result[2]
+            self.mobile = result[3]
+            self.grade = result[4]
+            self.register_date = result[5]
+            self.is_verified = result[6]
+            self.mentor_email = result[7]
+            self.expired_date = result[8]
+        return results
+
     def Write(self):
         db = self.db
         try:
