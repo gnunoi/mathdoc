@@ -201,7 +201,7 @@ class Question():
             self.user_results.append(result)
             result = eval(self.ConvertToFraction(self.user_answer))
             self.user_results.append(result)
-            print(self.user_results)
+            # print(self.user_results)
         except:
             pass
         return True
@@ -369,7 +369,7 @@ class QuestionFactor(QuestionRL):
             return self.JudgeAnswerQFactor()
         else:
             self.is_correct = self.user_answer == self.correct_answer
-            print(self.is_correct)
+            # print(self.is_correct)
             return self.is_correct
 
     def JudgeAnswerQFactor(self):
