@@ -743,7 +743,7 @@ class Workbook:
     def SaveRecords(self, data):
         row = 1
         for row_data in data:
-            self.Append(row, row_data[:-3])
+            self.Append(row, row_data[:-4])
             row += 1
 
     def Save(self, data):
