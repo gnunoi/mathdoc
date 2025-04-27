@@ -901,7 +901,7 @@ class Review:
             # pass
             # 重新从数据库读取数据以验证更新是否成功
             self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name};", self.db.connect)
-            print(self.df.to_string())
+            # print(self.df.to_string())
 
     def JudgeType(self, question):
         type = 0
