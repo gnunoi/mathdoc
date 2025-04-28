@@ -1,3 +1,6 @@
+"""
+pip install ntplib pandas pyqt5 xlsxwriter
+"""
 import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
