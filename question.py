@@ -551,9 +551,26 @@ class QuestionLR(Question):
             print('无法生成题目')
             return None
 
+    def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
+        self.end_time = datetime.now()
+        self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
+        print(type(self.correct_answer))
+        print(type(self.user_answer))
+        for opr in ['+', '-', '*', '/', '=',]:
+            self.user_answer == self.user_answer.replace(opr, ' ')
+        self.user_answer = self.user_answer.split(' ')[-1]
+        if self.correct_answer == int(self.user_answer):
+            self.is_correct = True
+            return True
+        else:
+            self.is_correct = False
+            self.error_number += 1
+            return False
+
     def Answer(self):
         print(f'self.expression = {self.expression}')
-        self.correct_answer = eval(self.ConvertToFraction(self.expression))
+        self.correct_answer = int(eval(self.ConvertToFraction(self.expression)))
         return self.correct_answer
 
     def GenerateOppositeLists(self, lst):
