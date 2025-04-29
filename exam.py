@@ -429,6 +429,7 @@ class Setting:
             'max_coefficient': 5,
             'min_constant': -20,
             'max_constant': 20,
+            'type_equation': 0,
         }
         self.CreateTable()
         self.Read()

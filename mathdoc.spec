@@ -26,7 +26,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=False,
+    upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
@@ -36,4 +36,10 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=['favicon.ico'],
+)
+app = BUNDLE(
+    exe,
+    name='mathdoc.app',
+    icon='favicon.ico',
+    bundle_identifier=None,
 )

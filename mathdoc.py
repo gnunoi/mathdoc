@@ -159,6 +159,24 @@ class MathDoc(QWidget):
         self.operator_group.setLayout(operator_layout)
         control_panel.addWidget(self.operator_group, 1)
 
+        # 速算
+        self.equation_group = QGroupBox("方程类型")
+        self.equation_group.setFont(self.base_font)
+        equation_layout = QVBoxLayout()
+        self.equation_options = [
+            QRadioButton('一元一次方程'),  # 0
+            QRadioButton('二元一次方程组'),  # 1
+            QRadioButton('一元二次方程'),  # 2
+        ]
+        if not any(rb.isChecked() for rb in self.equation_options):
+            self.equation_options[self.exam.setting.type_equation].setChecked(True)
+        for rb in self.equation_options:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            equation_layout.addWidget(rb)
+        self.equation_group.setLayout(equation_layout)
+        control_panel.addWidget(self.equation_group, 1)
+
         # 数值范围
         self.range_group = QGroupBox("数值范围")
         self.range_group.setFont(self.base_font)
@@ -294,7 +312,7 @@ class MathDoc(QWidget):
             set([self.factor_group,
                  self.num_edit[8], self.num_edit[9],
                  self.num_label[8], self.num_label[9]]), # type = 3
-            set([self.term_group,
+            set([self.equation_group,
                  self.num_edit[10], self.num_edit[11], self.num_edit[12], self.num_edit[13],
                  self.num_label[10], self.num_label[11], self.num_label[12], self.num_label[13]]),  # type = 4
         ]
