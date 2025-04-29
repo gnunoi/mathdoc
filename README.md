@@ -115,3 +115,6 @@
 
 ## [Release V1.2.8](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.8)
 增加小数凑十法，调整乘法速算子题型顺序。
+
+## [Release V1.2.9](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.9)
+增加质因数分解用'*'连接质因数的功能。
