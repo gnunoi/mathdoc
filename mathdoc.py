@@ -79,6 +79,7 @@ class MathDoc(QWidget):
             QRadioButton('乘法速算'), # type = 1
             QRadioButton('四则运算'), # type = 2
             QRadioButton('质因数分解'), # type = 3
+            QRadioButton('解方程'),  # type = 4
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for rb in self.type_options:
@@ -172,6 +173,10 @@ class MathDoc(QWidget):
                   "乘除数最大值:",
                   "合数最小值:",
                   "合数最大值:",
+                  "系数最小值",
+                  "系数最大值",
+                  "常数最小值",
+                  "常数最大值",
                   ]
         range_numbers = [self.exam.setting.min_24point,
                          self.exam.setting.max_24point,
@@ -182,7 +187,11 @@ class MathDoc(QWidget):
                          self.exam.setting.min_divisor,
                          self.exam.setting.max_divisor,
                          self.exam.setting.min_composite,
-                         self.exam.setting.max_composite
+                         self.exam.setting.max_composite,
+                         self.exam.setting.min_coefficient,
+                         self.exam.setting.max_coefficient,
+                         self.exam.setting.min_constant,
+                         self.exam.setting.max_constant,
                          ]
         self.num_edit = [QLineEdit(str(n)) for n in range_numbers]
         self.num_label = [QLabel(labels[i], font=self.base_font) for i in range(len(labels))]
@@ -285,6 +294,9 @@ class MathDoc(QWidget):
             set([self.factor_group,
                  self.num_edit[8], self.num_edit[9],
                  self.num_label[8], self.num_label[9]]), # type = 3
+            set([self.term_group,
+                 self.num_edit[10], self.num_edit[11], self.num_edit[12], self.num_edit[13],
+                 self.num_label[10], self.num_label[11], self.num_label[12], self.num_label[13]]),  # type = 4
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -351,6 +363,10 @@ class MathDoc(QWidget):
         self.exam.setting.max_divisor = int(self.num_edit[7].text())
         self.exam.setting.min_composite = int(self.num_edit[8].text())
         self.exam.setting.max_composite = int(self.num_edit[9].text())
+        self.exam.setting.min_coefficient = int(self.num_edit[10].text())
+        self.exam.setting.max_coefficient = int(self.num_edit[11].text())
+        self.exam.setting.min_constant = int(self.num_edit[12].text())
+        self.exam.setting.max_constant = int(self.num_edit[13].text())
         if self.exam.setting.min_24point > self.exam.setting.max_24point:
             self.exam.setting.min_24point, self.exam.setting.max_24point = (self.exam.setting.max_24point, self.exam.setting.min_24point)
             self.num_edit[0].setText(str(self.exam.setting.min_24point))
@@ -379,8 +395,15 @@ class MathDoc(QWidget):
         if self.exam.setting.min_composite > self.exam.setting.max_composite:
             self.exam.setting.min_composite, self.exam.setting.max_composite = (self.exam.setting.max_composite, self.exam.setting.min_composite)
             self.num_edit[8].setText(str(self.exam.setting.min_composite))
-            self.num_edit[9].setText(str(self.exam.setting.min_composite))
-
+            self.num_edit[9].setText(str(self.exam.setting.max_composite))
+        if self.exam.setting.min_coefficient > self.exam.setting.max_coefficient:
+            self.exam.setting.min_coefficient, self.exam.setting.max_coefficient = (self.exam.setting.max_coefficient, self.exam.setting.min_coefficient)
+            self.num_edit[10].setText(str(self.exam.setting.min_coefficient))
+            self.num_edit[11].setText(str(self.exam.setting.max_coefficient))
+        if self.exam.setting.min_constant > self.exam.setting.max_constant:
+            self.exam.setting.min_constant, self.exam.setting.max_constant = (self.exam.setting.max_constant, self.exam.setting.min_constant)
+            self.num_edit[12].setText(str(self.exam.setting.min_constant))
+            self.num_edit[13].setText(str(self.exam.setting.max_constant))
         for i, rb in enumerate(self.type_options):
             if rb.isChecked():
                 self.exam.setting.type = i
@@ -422,6 +445,17 @@ class MathDoc(QWidget):
                                             subtype = [self.exam.setting.factor_type],
                                             range = [self.exam.setting.min_composite,
                                                      self.exam.setting.max_composite])
+                elif i == 4:
+                    # for i, rb in enumerate(self.factor_radios):
+                    #     if rb.isChecked():
+                    #         self.exam.setting.factor_type = i
+                    #         break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            # subtype = [self.exam.setting.factor_type],
+                                            range = [self.exam.setting.min_coefficient,
+                                                     self.exam.setting.max_coefficient,
+                                                     self.exam.setting.min_constant,
+                                                     self.exam.setting.max_constant])
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案

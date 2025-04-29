@@ -325,7 +325,6 @@ class QuestionFactor(QuestionRL):
 
     def GenerateGCD(self): # 最大公约数
         self.numbers = []
-        gcd = 1
         while True:
             a = self.GenerateComposite()
             b = self.GenerateComposite()
@@ -339,8 +338,6 @@ class QuestionFactor(QuestionRL):
 
 
     def GenerateQFactor(self):
-        min = self.range[0]
-        max = self.range[1]
         self.numbers = []
         self.numbers.append(self.GenerateComposite())
         self.correct_answer = sorted(self.PrimeFactors(self.numbers[0]))
@@ -864,3 +861,14 @@ class Question4AO(QuestionLR):
     def AnswerTips(self):
         self.answer_tips = f'正确答案：{self.question} {self.correct_answer}'
         return self.answer_tips
+
+class QuestionEquation(QuestionLR):
+    def __init__(self, subtype=[0, 0], range=[1, 5, 1, 20]):
+        super().__init__(type=1, subtype=subtype, range=range)
+        self.name = "解方程"
+        self.comments = "输入未知数的解，如：5，或者  x = 5"
+        self.Generate()
+
+    def Generate(self):
+        self.correct_answer = 3
+        self.question = '3x + 5 = 14'

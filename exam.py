@@ -175,6 +175,8 @@ class Exam:
             return Question4AO(subtype=self.subtype, range=self.range)
         elif self.type == 3: # 3: 质因数分解
             return QuestionFactor(subtype=self.subtype, range=self.range)
+        elif self.type == 4:  # 3: 解方程
+            return QuestionEquation(subtype=self.subtype, range=self.range)
         else:
             print(f'{self.type}: 无效的类型')
             return None
@@ -423,6 +425,10 @@ class Setting:
             'min_composite': 8,
             'max_composite': 100,
             'factor_type': 0,
+            'min_coefficient': -5,
+            'max_coefficient': 5,
+            'min_constant': -20,
+            'max_constant': 20,
         }
         self.CreateTable()
         self.Read()
