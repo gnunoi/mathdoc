@@ -48,7 +48,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.04.25(V1.2.8)"
+        self.version = "2025.04.28(V1.2.8)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
         self.set_list = []
@@ -93,13 +93,14 @@ class MathDoc(QWidget):
         self.qc_group.setFont(self.base_font)
         qc_layout = QVBoxLayout()
         self.qc_options = [
-            QRadioButton('平方数'),
-            QRadioButton('平方差法'),
-            QRadioButton('和十速算法'),
-            QRadioButton('大数凑十法'),
-            QRadioButton('逢五凑十法'),
-            QRadioButton('双向凑十法'),
-            QRadioButton('综合练习'),
+            QRadioButton('和十速算法'),  # 0
+            QRadioButton('逢五凑十法'),  # 1
+            QRadioButton('平方差法'),  # 2
+            QRadioButton('平方数'), # 3
+            QRadioButton('小数凑十法'),  # 4
+            QRadioButton('大数凑十法'), # 5
+            QRadioButton('双向凑十法'), # 6
+            QRadioButton('综合练习'), # 7
         ]
         if not any(rb.isChecked() for rb in self.qc_options):
             self.qc_options[self.exam.setting.type_qc].setChecked(True)

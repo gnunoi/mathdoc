@@ -348,16 +348,17 @@ class QuestionFactor(QuestionRL):
 
     def BeforeJudgeAnswer(self):
         subtype = self.subtype[0]
-        self.user_answer = self.user_input.strip().replace('*', ' ')
-        self.user_answer = self.user_answer.replace(',', ' ')
-        self.user_answer = self.user_answer.replace('，', ' ')
-        self.user_answer = self.user_answer.replace(' ', '=')
-        self.user_answer = self.user_answer.split('=')[-1]
         if subtype == 0:
+            self.user_answer = self.user_input.strip().replace('*', ' ')
             self.user_answer = self.user_answer.split()
             for i in range(len(self.user_answer)):
                 self.user_answer[i] = int(self.user_answer[i])
         else:
+            self.user_answer = self.user_input.strip().replace('*', ' ')
+            self.user_answer = self.user_answer.replace(',', ' ')
+            self.user_answer = self.user_answer.replace('，', ' ')
+            self.user_answer = self.user_answer.replace(' ', '=')
+            self.user_answer = self.user_answer.split('=')[-1]
             self.user_answer = int(self.user_answer)
 
     def JudgeAnswer(self):
@@ -551,6 +552,7 @@ class QuestionLR(Question):
             return None
 
     def Answer(self):
+        print(f'self.expression = {self.expression}')
         self.correct_answer = eval(self.ConvertToFraction(self.expression))
         return self.correct_answer
 
@@ -629,27 +631,15 @@ class QuestionQC(QuestionLR):
         min_val = self.range[0]
         max_val = self.range[1]
 
-        if subtype < 0 or subtype > 6:
+        if subtype < 0 or subtype > 7:
             print(f"不支持的子类型: {subtype}")
             return False
 
-        if subtype == 6:
+        if subtype == 7:
             subtype = self.RandInt(0, 5)
             self.subtype2 = [subtype]
             # print(f'subtpe = {subtype}')
-
-        if subtype == 0:  # 平方数
-            number = self.RandInt(min_val, max_val)
-            self.numbers.append(number)
-            self.operators.append('*')
-            self.numbers.append(number)
-        elif subtype == 1:  # 平方差法
-            n1 = self.RandInt(int(min_val / 5), int(max_val / 5)) * 5
-            n2 = self.RandInt(1, 5)
-            self.numbers.append(n1 + n2)
-            self.operators.append('*')
-            self.numbers.append(n1 - n2)
-        elif subtype == 2:  # 和十速算法
+        if subtype == 0:  # 和十速算法
             n1 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
             n2 = self.RandInt(1, 9)
             a = n1 + n2
@@ -660,24 +650,63 @@ class QuestionQC(QuestionLR):
             self.numbers.append(a)
             self.operators.append('*')
             self.numbers.append(b)
-        elif subtype == 3:  # 大数凑十法
+        elif subtype == 1:  # 逢五凑十法
+            n1 = self.RandInt(int(min_val / 5), int(max_val / 5)) * 5
+            if n1 % 10 == 0:
+                n1 += 5
+            if n1 >= max_val:
+                n1 -= 10
+            n2 = self.RandInt(int(min_val / 2), int(max_val / 2)) * 2
+            self.numbers.append(n1)
+            self.operators.append('*')
+            self.numbers.append(n2)
+        elif subtype == 2:  # 平方差法
+            n1 = self.RandInt(int(min_val / 5), int(max_val / 5)) * 5
+            n2 = self.RandInt(1, 5)
+            self.numbers.append(n1 + n2)
+            self.operators.append('*')
+            self.numbers.append(n1 - n2)
+        elif subtype == 3:  # 平方数
+            n = self.RandInt(min_val, max_val)
+            self.numbers.append(n)
+            self.operators.append('*')
+            self.numbers.append(n)
+        elif subtype == 4:  # 小数凑十法
             n1 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
             n2 = self.RandInt(1, 3)
-            num1 = n1 - n2 if n1 - n2 >= min_val else n1 + 10 - n2
+            if n1 + n2 < min_val:
+                n1 + n2 + 10
+            elif n1 + n2 > max_val:
+                num1 = n1 + n2 - 10
+            else:
+                num1 = n1 + n2
             n3 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
-            n4 = self.RandInt(1, 3)
-            num2 = n3 + n4 if n3 + n4 <= max_val else n3 - 10 + n4
+            n4 = self.RandInt(1, 9)
+            num2 = n3 + n4 if n3 + n4 <= max_val else n3 + n4 - 10
             self.numbers.append(num1)
             self.operators.append('*')
             self.numbers.append(num2)
-        elif subtype == 4:  # 逢五凑十法
-            n1 = self.RandInt(int(min_val / 5), int(max_val / 5)) * 5
-            num1 = n1 if n1 % 10 != 0 else n1 + 5 if n1 + 5 <= max_val else n1 - 5
-            n2 = self.RandInt(int(min_val / 2), int(max_val / 2)) * 2
+        elif subtype == 5:  # 大数凑十法
+            n1 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
+            n2 = self.RandInt(7, 9)
+            if n1 + n2 < min_val:
+                num1 = n1 + n2 + 10
+            elif n1 + n2 > max_val:
+                num1 = n1 + n2 - 10
+            else:
+                num1 = n1 + n2
+            n3 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
+            n4 = self.RandInt(1, 9)
+            if n3 + n4 < min_val:
+                num2 = n3 + n4 + 10
+            elif n3 + n4 > max_val:
+                num2 = n3 + n4 - 10
+            else:
+                num2 = n3 + n4
             self.numbers.append(num1)
             self.operators.append('*')
-            self.numbers.append(n2)
-        elif subtype == 5:  # 双向凑十法
+            self.numbers.append(num2)
+        elif subtype == 6:  # 双向凑十法
             n1 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
             num1 = n1 + self.RandInt(8, 9)
             n2 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
@@ -690,7 +719,37 @@ class QuestionQC(QuestionLR):
 
     def AnswerTips(self):
         tips = ''
-        if self.subtype[0] == 0 or self.subtype2[0] == 0: # 平方数
+        if self.subtype[0] == 0 or self.subtype2[0] == 0: # 和十速算法
+            m = self.numbers[0]
+            n = self.numbers[1]
+            a = int(m/10)
+            b = m % 10
+            c = 10 -b
+            tips += f'{a} × ({a} + 1) = {a} × {a+1} = {a*(a+1)}；{b} × {c} = {b*c}；{m} × {n} = {m*n}'
+        if self.subtype[0] == 1 or self.subtype2[0] == 1:  # 逢五凑十法
+            m = self.numbers[0]
+            n = self.numbers[1]
+            if n % 10 == 5:
+                m, n = n, m
+            print(m, n)
+            if m % 25 == 0 and n % 4 == 0:
+                a = int(m / 25)
+                b = 25
+                c = 4
+                d = int(n / 4)
+            else:
+                a = int(m / 5)
+                b = 5
+                c = 2
+                d = int(n / 2)
+            tips += f'{m} × {n} = {m} × {c} × {d} = {m * c} × {d} = {m * n}'
+        if self.subtype[0] == 2 or self.subtype2[0] == 2:  # 平方差法
+            m = self.numbers[0]
+            n = self.numbers[1]
+            a = int((m + n) / 2)
+            b = abs(a - self.numbers[0])
+            tips += f'{m} × {n} = ({a} + {b})({a} - {b}) = {a} × {a} - {b} × {b} = {a * a} - {b * b} = {a * a - b * b}'
+        if self.subtype[0] == 3 or self.subtype2[0] == 3: # 平方数
             m = self.numbers[0]
             n = self.numbers[1]
             r = m % 10
@@ -701,40 +760,22 @@ class QuestionQC(QuestionLR):
             a = m + c
             b = m - c
             tips += f'{m} × {n} = ({m} + {c}) × ({m} - {c}) + {c} × {c} = {a} × {b} + {c} × {c} = {a*b} + {c*c} = {a*b+c*c}'
-        if self.subtype[0] == 1 or self.subtype2[0] == 1: # 平方差法
+        if self.subtype[0] == 4 or self.subtype2[0] == 4:  # 小数凑十法
             m = self.numbers[0]
             n = self.numbers[1]
-            a = int((m + n)/2)
-            b = abs(a - self.numbers[0])
-            tips += f'{m} × {n} = ({a} + {b})({a} - {b}) = {a} × {a} - {b} × {b} = {a*a} - {b*b} = {a*a-b*b}'
-        if self.subtype[0] == 2 or self.subtype2[0] == 2: # 和十速算法
+            if m % 10 > n % 10:
+                m, n = n, m
+            r = m % 10
+            tips += f'{m} × {n} = ({m-r} + {r}) × {n} = {m-r} × {n} + {r} × {n} = {(m-r) * n} + {r * n} = {m * n}'
+        if self.subtype[0] == 5 or self.subtype2[0] == 5: # 大数凑十法
             m = self.numbers[0]
             n = self.numbers[1]
-            a = int(m/10)
-            b = m % 10
-            c = 10 -b
-            tips += f'{a} × ({a} + 1) = {a} × {a+1} = {a*(a+1)}；{b} × {c} = {b*c}；{m} × {n} = {m*n}'
-        if self.subtype[0] == 3 or self.subtype2[0] == 3: # 大数凑十法
-            m = self.numbers[0]
-            n = self.numbers[1]
+            if m % 10 < n % 10:
+                m, n = n, m
             r = m % 10
             c = 10 - r
             tips += f'{m} × {n} = ({m+c} - {c}) × {n} = {m+c} × {n} - {c} × {n} = {(m+c)*n} - {c*n} = {m*n}'
-        if self.subtype[0] == 4 or self.subtype2[0] == 4: # 逢五凑十法
-            m = self.numbers[0]
-            n = self.numbers[1]
-            if m % 25 == 0 and n % 4 == 0:
-                a = int(m / 25)
-                b = 25
-                c = 4
-                d = int(n /4)
-            else:
-                a = int(m /5)
-                b = 5
-                c = 2
-                d = int(n / 2)
-            tips += f'{m} × {n} = {a} × {b} × {c} × {d} = {a} × {d} × {b*c} = {a * d} × {b*c} = {m * n}'
-        if self.subtype[0] == 5 or self.subtype2[0] == 5: # 双向凑十法
+        if self.subtype[0] == 6 or self.subtype2[0] == 6: # 双向凑十法
             m = self.numbers[0]
             n = self.numbers[1]
             b = 10 - m % 10
