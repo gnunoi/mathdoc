@@ -55,7 +55,6 @@ class MathDoc(QWidget):
         self.sets = set([])
         self.exam = Exam()
         self.Register()
-        # self.exam.review.CompleteTable() # 完善测试记录数据表格
         self.authorization= Authorization()
         if os.name == "nt":
             self.base_font = QFont("SimSun", 24)
@@ -178,49 +177,49 @@ class MathDoc(QWidget):
         control_panel.addWidget(self.equation_group, 1)
 
         # 数值范围
-        self.range_group = QGroupBox("数值范围")
-        self.range_group.setFont(self.base_font)
-        range_layout = QFormLayout()
-        labels = ["24点最小值:",
-                  "24点最大值:",
-                  "乘数最小值:",
-                  "乘数最大值:",
-                  "加减数最小值:",
-                  "加减数最大值:",
-                  "乘除数最小值:",
-                  "乘除数最大值:",
-                  "合数最小值:",
-                  "合数最大值:",
-                  "系数最小值",
-                  "系数最大值",
-                  "常数最小值",
-                  "常数最大值",
+        self.range_groups = []
+        self.num_edit = []
+        self.num_label = []
+        widget_lists = [[{'label' : '24点最小值:', 'number' : 'min_24point'},
+                   {'label' : '24点最大值:', 'number' : 'max_24point'}],
+                  [{'label' : '乘数最小值:', 'number' : 'min_qc'},
+                   {'label' : '乘数最大值:', 'number' : 'max_qc'}],
+                  [{'label' : '加减数最小值:', 'number' : 'min_addend'},
+                   {'label' : '加减数最大值:', 'number' : 'max_addend'},
+                   {'label' : '乘除数最小值:', 'number' : 'min_divisor'},
+                   {'label' : '乘除数最大值:', 'number' : 'max_divisor'}],
+                  [{'label' : '合数最小值:', 'number' : 'min_composite'},
+                   {'label' : '合数最大值:', 'number' : 'max_composite'}],
+                  [{'label' : '系数最小值:', 'number': 'min_coefficient'},
+                   {'label' : '系数最大值:', 'number': 'max_coefficient'},
+                   {'label' : '常数最小值:', 'number': 'min_constant'},
+                   {'label' : '常数最大值:', 'number': 'max_constant'}],
                   ]
-        range_numbers = [self.exam.setting.min_24point,
-                         self.exam.setting.max_24point,
-                         self.exam.setting.min_qc,
-                         self.exam.setting.max_qc,
-                         self.exam.setting.min_addend,
-                         self.exam.setting.max_addend,
-                         self.exam.setting.min_divisor,
-                         self.exam.setting.max_divisor,
-                         self.exam.setting.min_composite,
-                         self.exam.setting.max_composite,
-                         self.exam.setting.min_coefficient,
-                         self.exam.setting.max_coefficient,
-                         self.exam.setting.min_constant,
-                         self.exam.setting.max_constant,
-                         ]
-        self.num_edit = [QLineEdit(str(n)) for n in range_numbers]
-        self.num_label = [QLabel(labels[i], font=self.base_font) for i in range(len(labels))]
-        for i in range(len(labels)):
-            self.num_edit[i].setFont(self.base_font)
-            self.num_edit[i].setFixedWidth(360)
-            self.num_edit[i].setAlignment(Qt.AlignCenter)
-            range_layout.addRow(self.num_label[i], self.num_edit[i])
-            self.num_edit[i].editingFinished.connect(self.UpdateSettings)
-        self.range_group.setLayout(range_layout)
-        control_panel.addWidget(self.range_group, 2)
+        for wl in widget_lists:
+            range_group = QGroupBox("数值范围")
+            range_group.setFont(self.base_font)
+            range_layout = QFormLayout()
+            num_edit_list = []
+            num_label_list = []
+            for w in wl:
+                number = getattr(self.exam.setting, w['number'])
+                print(w['label'], number)
+                num_edit = QLineEdit(str(number))
+                num_label = QLabel(w['label'], font=self.base_font)
+                num_edit.setFont(self.base_font)
+                num_edit.setFixedWidth(360)
+                num_edit.setAlignment(Qt.AlignCenter)
+                range_layout.addRow(num_label, num_edit)
+                num_edit.editingFinished.connect(self.UpdateSettings)
+                num_edit_list.append(num_edit)
+                num_label_list.append(num_label)
+            print(num_edit_list)
+            print(num_label_list)
+            self.num_edit.append(num_edit_list)
+            self.num_label.append(num_label_list)
+            range_group.setLayout(range_layout)
+            control_panel.addWidget(range_group, 2)
+            self.range_groups.append(range_group)
         main_layout.addLayout(control_panel)
 
         # 题目显示
@@ -243,7 +242,6 @@ class MathDoc(QWidget):
         self.answer_label.setText(self.exam.q.comments)
         main_layout.addWidget(self.answer_input, 1)
         main_layout.addWidget(self.answer_label, 1)
-
 
         # 提示栏
         self.tips_label = QLabel()
@@ -302,19 +300,11 @@ class MathDoc(QWidget):
         self.answer_tips_label.setPalette(palette)
 
         self.set_list = [
-            set([self.num_edit[0], self.num_edit[1],
-                 self.num_label[0], self.num_label[1]]), # type = 0
-            set([self.qc_group, self.num_edit[2], self.num_edit[3],
-                 self.num_label[2], self.num_label[3]]), # type = 1
-            set([self.term_group, self.operator_group,
-                 self.num_edit[4], self.num_edit[5], self.num_edit[6], self.num_edit[7],
-                 self.num_label[4], self.num_label[5], self.num_label[6], self.num_label[7]]), # type = 2
-            set([self.factor_group,
-                 self.num_edit[8], self.num_edit[9],
-                 self.num_label[8], self.num_label[9]]), # type = 3
-            set([self.equation_group,
-                 self.num_edit[10], self.num_edit[11], self.num_edit[12], self.num_edit[13],
-                 self.num_label[10], self.num_label[11], self.num_label[12], self.num_label[13]]),  # type = 4
+            set([self.range_groups[0]]), # type = 0
+            set([self.qc_group, self.range_groups[1]]), # type = 1
+            set([self.term_group, self.operator_group,self.range_groups[2]]), # type = 2
+            set([self.factor_group, self.range_groups[3]]), # type = 3
+            set([self.equation_group, self.range_groups[4]]),  # type = 4
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -365,63 +355,65 @@ class MathDoc(QWidget):
             print(f'无效的类型')
             return False
         for s in self.sets - self.set_list[type]:
+            print(f'需要隐藏的集合：{s}')
             s.setVisible(False)
         for s in self.set_list[type]:
+            print(f'需要显示的集合：{s}')
             s.setVisible(True)
         return True
 
     def UpdateSettings(self):
-        self.exam.setting.min_24point = int(self.num_edit[0].text())
-        self.exam.setting.max_24point = int(self.num_edit[1].text())
-        self.exam.setting.min_qc = int(self.num_edit[2].text())
-        self.exam.setting.max_qc = int(self.num_edit[3].text())
-        self.exam.setting.min_addend = int(self.num_edit[4].text())
-        self.exam.setting.max_addend = int(self.num_edit[5].text())
-        self.exam.setting.min_divisor = int(self.num_edit[6].text())
-        self.exam.setting.max_divisor = int(self.num_edit[7].text())
-        self.exam.setting.min_composite = int(self.num_edit[8].text())
-        self.exam.setting.max_composite = int(self.num_edit[9].text())
-        self.exam.setting.min_coefficient = int(self.num_edit[10].text())
-        self.exam.setting.max_coefficient = int(self.num_edit[11].text())
-        self.exam.setting.min_constant = int(self.num_edit[12].text())
-        self.exam.setting.max_constant = int(self.num_edit[13].text())
+        self.exam.setting.min_24point = int(self.num_edit[0][0].text())
+        self.exam.setting.max_24point = int(self.num_edit[0][1].text())
+        self.exam.setting.min_qc = int(self.num_edit[1][0].text())
+        self.exam.setting.max_qc = int(self.num_edit[1][1].text())
+        self.exam.setting.min_addend = int(self.num_edit[2][0].text())
+        self.exam.setting.max_addend = int(self.num_edit[2][1].text())
+        self.exam.setting.min_divisor = int(self.num_edit[2][2].text())
+        self.exam.setting.max_divisor = int(self.num_edit[2][3].text())
+        self.exam.setting.min_composite = int(self.num_edit[3][0].text())
+        self.exam.setting.max_composite = int(self.num_edit[3][1].text())
+        self.exam.setting.min_coefficient = int(self.num_edit[4][0].text())
+        self.exam.setting.max_coefficient = int(self.num_edit[4][1].text())
+        self.exam.setting.min_constant = int(self.num_edit[4][2].text())
+        self.exam.setting.max_constant = int(self.num_edit[4][3].text())
         if self.exam.setting.min_24point > self.exam.setting.max_24point:
             self.exam.setting.min_24point, self.exam.setting.max_24point = (self.exam.setting.max_24point, self.exam.setting.min_24point)
-            self.num_edit[0].setText(str(self.exam.setting.min_24point))
-            self.num_edit[1].setText(str(self.exam.setting.max_24point))
+            self.num_edit[0][0].setText(str(self.exam.setting.min_24point))
+            self.num_edit[0][1].setText(str(self.exam.setting.max_24point))
         if not self.exam.setting.min_24point in range(1, 4):
             self.exam.setting.min_24point = 3
-            self.num_edit[0].setText(str(self.exam.setting.min_24point))
+            self.num_edit[0][0].setText(str(self.exam.setting.min_24point))
         if not self.exam.setting.max_24point in range(8, 14):
             self.exam.setting.max_24point = 8
-            self.num_edit[1].setText(str(self.exam.setting.max_24point))
+            self.num_edit[0][1].setText(str(self.exam.setting.max_24point))
         if self.exam.setting.min_qc > self.exam.setting.max_qc:
             self.exam.setting.min_qc, self.exam.setting.max_qc = (self.exam.setting.max_qc, self.exam.setting.min_qc)
-            self.num_edit[2].setText(str(self.exam.setting.min_qc))
-            self.num_edit[3].setText(str(self.exam.setting.max_qc))
+            self.num_edit[1][0].setText(str(self.exam.setting.min_qc))
+            self.num_edit[1][1].setText(str(self.exam.setting.max_qc))
         if self.exam.setting.max_qc - self.exam.setting.min_qc < 10:
             self.exam.setting.max_24point = self.exam.setting.min_qc + 10
-            self.num_edit[3].setText(str(self.exam.setting.max_qc))
+            self.num_edit[1][1].setText(str(self.exam.setting.max_qc))
         if self.exam.setting.min_addend > self.exam.setting.max_addend:
             self.exam.setting.min_addend, self.exam.setting.max_addend = (self.exam.setting.max_addend, self.exam.setting.min_addend)
-            self.num_edit[4].setText(str(self.exam.setting.min_addend))
-            self.num_edit[5].setText(str(self.exam.setting.max_addend))
+            self.num_edit[2][0].setText(str(self.exam.setting.min_addend))
+            self.num_edit[1][1].setText(str(self.exam.setting.max_addend))
         if self.exam.setting.min_divisor > self.exam.setting.max_divisor:
             self.exam.setting.min_divisor, self.exam.setting.max_divisor = (self.exam.setting.max_divisor, self.exam.setting.min_divisor)
-            self.num_edit[6].setText(str(self.exam.setting.min_divisor))
-            self.num_edit[7].setText(str(self.exam.setting.max_divisor))
+            self.num_edit[2][2].setText(str(self.exam.setting.min_divisor))
+            self.num_edit[2][3].setText(str(self.exam.setting.max_divisor))
         if self.exam.setting.min_composite > self.exam.setting.max_composite:
             self.exam.setting.min_composite, self.exam.setting.max_composite = (self.exam.setting.max_composite, self.exam.setting.min_composite)
-            self.num_edit[8].setText(str(self.exam.setting.min_composite))
-            self.num_edit[9].setText(str(self.exam.setting.max_composite))
+            self.num_edit[3][0].setText(str(self.exam.setting.min_composite))
+            self.num_edit[3][1].setText(str(self.exam.setting.max_composite))
         if self.exam.setting.min_coefficient > self.exam.setting.max_coefficient:
             self.exam.setting.min_coefficient, self.exam.setting.max_coefficient = (self.exam.setting.max_coefficient, self.exam.setting.min_coefficient)
-            self.num_edit[10].setText(str(self.exam.setting.min_coefficient))
-            self.num_edit[11].setText(str(self.exam.setting.max_coefficient))
+            self.num_edit[4][0].setText(str(self.exam.setting.min_coefficient))
+            self.num_edit[4][1].setText(str(self.exam.setting.max_coefficient))
         if self.exam.setting.min_constant > self.exam.setting.max_constant:
             self.exam.setting.min_constant, self.exam.setting.max_constant = (self.exam.setting.max_constant, self.exam.setting.min_constant)
-            self.num_edit[12].setText(str(self.exam.setting.min_constant))
-            self.num_edit[13].setText(str(self.exam.setting.max_constant))
+            self.num_edit[4][2].setText(str(self.exam.setting.min_constant))
+            self.num_edit[4][3].setText(str(self.exam.setting.max_constant))
         for i, rb in enumerate(self.type_options):
             if rb.isChecked():
                 self.exam.setting.type = i
