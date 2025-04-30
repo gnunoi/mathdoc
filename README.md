@@ -121,3 +121,6 @@
 
 ## [Release V1.2.10](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.10)
 防止用户重新输入一遍题目而非输入计算后的正确答案。
+
+## [Release V1.2.11](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.11)
+解方程界面完成
