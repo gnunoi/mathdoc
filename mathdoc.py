@@ -203,7 +203,6 @@ class MathDoc(QWidget):
             num_label_list = []
             for w in wl:
                 number = getattr(self.exam.setting, w['number'])
-                print(w['label'], number)
                 num_edit = QLineEdit(str(number))
                 num_label = QLabel(w['label'], font=self.base_font)
                 num_edit.setFont(self.base_font)
@@ -213,8 +212,6 @@ class MathDoc(QWidget):
                 num_edit.editingFinished.connect(self.UpdateSettings)
                 num_edit_list.append(num_edit)
                 num_label_list.append(num_label)
-            print(num_edit_list)
-            print(num_label_list)
             self.num_edit.append(num_edit_list)
             self.num_label.append(num_label_list)
             range_group.setLayout(range_layout)
@@ -355,10 +352,8 @@ class MathDoc(QWidget):
             print(f'无效的类型')
             return False
         for s in self.sets - self.set_list[type]:
-            print(f'需要隐藏的集合：{s}')
             s.setVisible(False)
         for s in self.set_list[type]:
-            print(f'需要显示的集合：{s}')
             s.setVisible(True)
         return True
 
