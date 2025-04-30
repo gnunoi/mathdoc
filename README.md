@@ -119,8 +119,6 @@
 ## [Release V1.2.9](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.9)
 增加质因数分解用'*'连接质因数的功能。
 
-## [Release V1.2.10](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.10)
+## [Release V1.3.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.0)
 防止用户重新输入一遍题目而非输入计算后的正确答案。
-
-## [Release V1.2.11](https://github.com/gnunoi/mathdoc/releases/tag/V1.2.11)
-解方程界面完成
+解方程界面完成。
