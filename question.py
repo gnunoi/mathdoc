@@ -4,6 +4,7 @@ import re
 from fractions import Fraction
 from datetime import datetime
 from itertools import combinations
+import sympy as sp
 
 """
 类名称: Question
@@ -49,7 +50,7 @@ ClassName(): 返回类的名称
 SuperName(): 返回父类的名称
 
 
-ConvertToFraction(): 将表达式中的数字替换为分数，确保计算严格准确
+Fraction(): 将表达式中的数字替换为分数，确保计算严格准确
 ProcessUserInput(): 处理用户输入，将中文符号替换为英文符号，删除空白符
 CheckUserInput(): 检查用户输入的表达式是否包含了全部数字
 ProcessCalculation(): 显示完整的计算步骤
@@ -171,7 +172,7 @@ class Question():
             self.error_number += 1
             return False
 
-    def ConvertToFraction(self, expression):
+    def Fraction(self, expression):
         # 使用正则表达式匹配表达式中的数字（包括整数、浮点数和科学计数法）
         pattern = r'(?<!\w)(-?\d+\.?\d*|\.\d+)([eE][-+]?\d+)?(?!\w)'
 
@@ -199,7 +200,7 @@ class Question():
         try:
             result = eval(self.user_answer)
             self.user_results.append(result)
-            result = eval(self.ConvertToFraction(self.user_answer))
+            result = eval(self.Fraction(self.user_answer))
             self.user_results.append(result)
             # print(self.user_results)
         except:
@@ -464,7 +465,7 @@ class Question24Point(QuestionRL):
                 ]
                 for expr in expressions:
                     try:
-                        converted_expr = self.ConvertToFraction(expr)
+                        converted_expr = self.Fraction(expr)
                         if eval(expr) == 24 or eval(converted_expr) == 24:
                             return expr
                     except:
@@ -567,7 +568,7 @@ class QuestionLR(Question):
 
     def Answer(self):
         print(f'self.expression = {self.expression}')
-        self.correct_answer = int(eval(self.ConvertToFraction(self.expression)))
+        self.correct_answer = int(eval(self.Fraction(self.expression)))
         return self.correct_answer
 
     def GenerateOppositeLists(self, lst):
@@ -599,7 +600,7 @@ class QuestionLR(Question):
                 expr = ''
                 for i in range(len(self.numbers)):
                     expr += f'{self.numbers[i]} {self.operators[i]} ' if i < len(self.operators) else f'{self.numbers[i]}'
-                if eval(self.ConvertToFraction(expr)) == self.user_answer:
+                if eval(self.Fraction(expr)) == self.user_answer:
                     return True
         except:
             print('判断正负号的计算过程出错')
@@ -608,7 +609,7 @@ class QuestionLR(Question):
         # print(self.user_answer)
         tips = ''
         if type(self.user_answer) == str:
-            self.user_answer = eval(self.ConvertToFraction(self.user_answer))
+            self.user_answer = eval(self.Fraction(self.user_answer))
         user_answer = abs(self.user_answer)
         correct_answer = abs(self.correct_answer)
         if self.IsSignError():
@@ -873,16 +874,84 @@ class QuestionEquation(QuestionLR):
         super().BeforeGenerate()
 
     def Generate(self):
-        # self.BeforeGenerate()
-        self.correct_answer = 3
-        self.question = '3x + 5 = 14'
+        self.BeforeGenerate()
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        a = self.RandInt(min1, max1)
+        b = self.RandInt(min2, max2)
+        c = random.choice([0, self.RandInt(min1, max1)])
+        d = random.choice([0, self.RandInt(min2, max2)])
+        while a == 0:
+            a = self.RandInt(min1, max1)
+        while b == 0:
+            b = self.RandInt(min2, max2)
+        while c == a:
+            c = self.RandInt(min1, max1)
+        self.numbers = [a, b, c, d]
+        x = sp.symbols('x')
+        equation = sp.Eq(a * x + b, c * x + d)
+        self.correct_answer = sp.solve(equation, x)
+        stra = f'{a}'
+        strb = f'{b}' if b >= 0 else f'({b})'
+        strc = f'{c}' if c >= 0 else f'({c})'
+        strd = f'{d}' if d >= 0 else f'({d})'
+        if a == 1:
+            term1 = 'x'
+        elif a == -1:
+            term1 = '-x'
+        else:
+            term1 = f'{a}x'
+        term2 = f'+ {strb}'
+        if c == 1:
+            term3 = 'x'
+        elif c == -1:
+            term3 = '-x'
+        else:
+            term3 = f'{c}x'
+        term4 = f'+ {strd}'
+        print(a, b, c, d)
+        if c == 0 and d == 0:
+            term3 = '0'
+            term4 = ''
+        elif c == 0:
+            term3 = ''
+            term4 = f'{strd}'
+        elif d == 0:
+            term4 = ''
+
+        self.question = term1 + term2 + ' = ' + term3 + term4
+        print(self.question)
+        print(self.correct_answer)
         self.AfterGenerate()
 
     def AfterGenerate(self):
         super().AfterGenerate()
 
+    def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
+        self.end_time = datetime.now()
+        self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
+        for opr in ['+', '-', '*', '/', '=',]:
+            self.user_answer == self.user_answer.replace(opr, ' ')
+        self.user_answer = self.user_answer.split(' ')[-1]
+        print(self.correct_answer[0])
+        print(self.user_answer)
+
+        if self.Fraction(str(self.correct_answer[0])) == self.Fraction(self.user_answer):
+            self.is_correct = True
+            return True
+        else:
+            self.is_correct = False
+            self.error_number += 1
+            return False
+
     def CheckTips(self):
         pass
 
     def AnswerTips(self):
-        pass
+        a = self.numbers[0]
+        b = self.numbers[1]
+        c = self.numbers[2]
+        d = self.numbers[3]

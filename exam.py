@@ -61,7 +61,7 @@ SubmitAnswer(): 提交答案
 UpdateSetting(): 更新成员变量的函数
 """
 class Exam:
-    def __init__(self, type=0, subtype=[0, 0], range=[1, 10]):
+    def __init__(self, type=0, subtype=[0, 0], range=[1, 10, 1, 10]):
         self.type = type
         self.subtype = subtype
         self.range = range
@@ -166,7 +166,7 @@ class Exam:
         self.q = self.CreateQuestion()
 
     def CreateQuestion(self):
-        # print(self.type, self.subtype, self.range)
+        print(self.type, self.subtype, self.range)
         if self.type == 0: # 0: 计算24点
             return Question24Point(subtype=self.subtype, range=self.range)
         elif self.type == 1: # 1: 乘法速算
@@ -175,7 +175,7 @@ class Exam:
             return Question4AO(subtype=self.subtype, range=self.range)
         elif self.type == 3: # 3: 质因数分解
             return QuestionFactor(subtype=self.subtype, range=self.range)
-        elif self.type == 4:  # 3: 解方程
+        elif self.type == 4:  # 4: 解方程
             return QuestionEquation(subtype=self.subtype, range=self.range)
         else:
             print(f'{self.type}: 无效的类型')
@@ -195,8 +195,6 @@ class Exam:
                 print(f'答题提示：{q.answer_tips}')
             print(f'答题结束时间：{q.end_time}, 答题用时：{q.time_used}秒')
             self.record.Append(q)
-            if q.error_number >= 3:
-                self.Generate()
         else: # 回答正确
             # 所有QuestionLR的题目：self.type == 1 or self.type == 2
             if 'QuestionLR' in q.SuperName():
@@ -224,7 +222,7 @@ class Exam:
         q = self.q
         ql = self.record.question_list
         q.Generate()
-
+        print(f'q.question: {q.question}')
         count = 0
         for count in range(1000):
             count += 1
@@ -253,11 +251,12 @@ class Exam:
     def Run(self):
         self.Register()
         print()
-        type = 3
+        type = 1
         parms = [{'type': 0, 'subtype': [0], 'range': [1, 10]},
-                 {'type': 1, 'subtype': [2, 0], 'range': [10, 50]},
+                 {'type': 1, 'subtype': [0, 0], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
                  {'type': 3, 'subtype': [0], 'range': [6, 200]},
+                 {'type': 4, 'subtype': [0], 'range': [1, 5, 1, 20]},
                  ]
         self.UpdateSetting(parms[type]['type'], parms[type]['subtype'], parms[type]['range'])
         q = self.q
@@ -283,8 +282,11 @@ class Exam:
                 self.ExportRecords(2)
                 continue
             self.SubmitAnswer()
-            if self.q.is_correct:
+            if q.is_correct:
                 self.Generate()  # 生成下一题
+            else:
+                if q.error_number >= 3:
+                    self.Generate()
             print()
         self.Exit() # 处理程序退出的收尾工作，如保存数据，发送邮件。
 

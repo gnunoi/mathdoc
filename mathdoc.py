@@ -471,9 +471,10 @@ class MathDoc(QWidget):
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
         self.exam.Generate()
+        print(f'self.exam.q.question: {self.exam.q.question}')
         self.tips_label.setText(self.exam.q.check_tips)
         self.answer_tips_label.setText(self.exam.q.answer_tips)
-        self.question_label.setText(f"题目：{self.exam.q.question}")
+        self.question_label.setText(f"{self.exam.q.question}")
 
         total = self.exam.record.question_number - 1
         correct_rate = self.exam.record.correct_number / total * 100 if total > 0 else 0
@@ -492,6 +493,8 @@ class MathDoc(QWidget):
             self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
             if self.exam.q.answer_tips:
                 self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
+            if self.exam.q.error_number >= 3:
+                self.UpdateQuestion()
         else:
             self.UpdateQuestion()
 
