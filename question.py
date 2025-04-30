@@ -5,6 +5,7 @@ from fractions import Fraction
 from datetime import datetime
 from itertools import combinations
 import sympy as sp
+import ast
 
 """
 类名称: Question
@@ -874,7 +875,13 @@ class QuestionEquation(QuestionLR):
         super().BeforeGenerate()
 
     def Generate(self):
+        subtype = self.subtype[0]
         self.BeforeGenerate()
+        if subtype == 0:
+            self.Generate1v1d()
+        self.AfterGenerate()
+
+    def Generate1v1d(self):
         min1 = self.range[0]
         max1 = self.range[1]
         min2 = self.range[2]
@@ -893,9 +900,7 @@ class QuestionEquation(QuestionLR):
         x = sp.symbols('x')
         equation = sp.Eq(a * x + b, c * x + d)
         self.correct_answer = sp.solve(equation, x)
-        stra = f'{a}'
         strb = f'{b}' if b >= 0 else f'({b})'
-        strc = f'{c}' if c >= 0 else f'({c})'
         strd = f'{d}' if d >= 0 else f'({d})'
         if a == 1:
             term1 = 'x'
@@ -911,7 +916,6 @@ class QuestionEquation(QuestionLR):
         else:
             term3 = f'{c}x'
         term4 = f'+ {strd}'
-        print(a, b, c, d)
         if c == 0 and d == 0:
             term3 = '0'
             term4 = ''
@@ -922,9 +926,6 @@ class QuestionEquation(QuestionLR):
             term4 = ''
 
         self.question = term1 + term2 + ' = ' + term3 + term4
-        print(self.question)
-        print(self.correct_answer)
-        self.AfterGenerate()
 
     def AfterGenerate(self):
         super().AfterGenerate()
@@ -933,13 +934,17 @@ class QuestionEquation(QuestionLR):
         self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
-        for opr in ['+', '-', '*', '/', '=',]:
-            self.user_answer == self.user_answer.replace(opr, ' ')
-        self.user_answer = self.user_answer.split(' ')[-1]
-        print(self.correct_answer[0])
-        print(self.user_answer)
+        subtype = self.subtype[0]
+        if subtype == 0:
+            return self.JudgeAnswer1v1d()
 
-        if self.Fraction(str(self.correct_answer[0])) == self.Fraction(self.user_answer):
+    def JudgeAnswer1v1d(self):
+        self.user_answer = re.sub(r"\s+", "", self.user_answer) # 删除空白符
+        for opr in [',', '，', '＝']:
+            self.user_answer == self.user_answer.replace(opr, '=')
+        print(self.user_answer)
+        self.user_answer = self.user_answer.split('=')[-1]
+        if float(self.correct_answer[0]) == float(eval(self.user_answer)):
             self.is_correct = True
             return True
         else:
@@ -955,3 +960,13 @@ class QuestionEquation(QuestionLR):
         b = self.numbers[1]
         c = self.numbers[2]
         d = self.numbers[3]
+        if a > c:
+            e = a - c
+            f = d - b
+        elif a < c:
+            e = c - a
+            f = b - d
+        else:
+            err = '方程系数不能为0'
+            print(err)
+        self.answer_tips = f'{e}x = {f}, x = {f} / {e} = {self.correct_answer[0]}'

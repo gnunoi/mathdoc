@@ -166,7 +166,7 @@ class Exam:
         self.q = self.CreateQuestion()
 
     def CreateQuestion(self):
-        print(self.type, self.subtype, self.range)
+        # print(self.type, self.subtype, self.range)
         if self.type == 0: # 0: 计算24点
             return Question24Point(subtype=self.subtype, range=self.range)
         elif self.type == 1: # 1: 乘法速算
@@ -222,7 +222,6 @@ class Exam:
         q = self.q
         ql = self.record.question_list
         q.Generate()
-        print(f'q.question: {q.question}')
         count = 0
         for count in range(1000):
             count += 1
@@ -407,7 +406,6 @@ class User:
         if self.register_date is None or self.register_date == '': return False
         return True
 
-import ast
 class Setting:
     def __init__(self, db):
         self.db = db

@@ -471,7 +471,6 @@ class MathDoc(QWidget):
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
         self.exam.Generate()
-        print(f'self.exam.q.question: {self.exam.q.question}')
         self.tips_label.setText(self.exam.q.check_tips)
         self.answer_tips_label.setText(self.exam.q.answer_tips)
         self.question_label.setText(f"{self.exam.q.question}")
@@ -483,7 +482,7 @@ class MathDoc(QWidget):
             f"错误：{total - self.exam.record.correct_number} 道 | 正确率：{correct_rate:.1f}%"
         )
         self.answer_input.setFocus()
-        print(f'{self.exam.q.AnswerTips()}')
+        # print(f'{self.exam.q.AnswerTips()}')
 
     def SubmitAnswer(self):
         self.exam.q.user_input = self.answer_input.text()
