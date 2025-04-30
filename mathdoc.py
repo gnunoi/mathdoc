@@ -464,10 +464,10 @@ class MathDoc(QWidget):
                                             range = [self.exam.setting.min_composite,
                                                      self.exam.setting.max_composite])
                 elif i == 4:
-                    # for i, rb in enumerate(self.factor_radios):
-                    #     if rb.isChecked():
-                    #         self.exam.setting.factor_type = i
-                    #         break
+                    for i, rb in enumerate(self.equation_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_equation = i
+                            break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             # subtype = [self.exam.setting.factor_type],
                                             range = [self.exam.setting.min_coefficient,

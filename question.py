@@ -869,6 +869,20 @@ class QuestionEquation(QuestionLR):
         self.comments = "输入未知数的解，如：5，或者  x = 5"
         self.Generate()
 
+    def BeforeGenerate(self):
+        super().BeforeGenerate()
+
     def Generate(self):
+        # self.BeforeGenerate()
         self.correct_answer = 3
         self.question = '3x + 5 = 14'
+        self.AfterGenerate()
+
+    def AfterGenerate(self):
+        super().AfterGenerate()
+
+    def CheckTips(self):
+        pass
+
+    def AnswerTips(self):
+        pass
