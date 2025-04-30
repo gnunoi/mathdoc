@@ -874,11 +874,16 @@ class QuestionEquation(QuestionLR):
     def BeforeGenerate(self):
         super().BeforeGenerate()
 
+    def AfterGenerate(self):
+        super().AfterGenerate()
+
     def Generate(self):
         subtype = self.subtype[0]
         self.BeforeGenerate()
         if subtype == 0:
             self.Generate1v1d()
+        if subtype == 1:
+            self.Generate2v1d()
         self.AfterGenerate()
 
     def Generate1v1d(self):
@@ -924,11 +929,53 @@ class QuestionEquation(QuestionLR):
             term4 = f'{d}'
         elif d == 0:
             term4 = ''
-
         self.question = term1 + term2 + ' = ' + term3 + term4
 
-    def AfterGenerate(self):
-        super().AfterGenerate()
+    def Generate2v1d(self):
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a1 = self.RandInt(min1, max1)
+            b1 = self.RandInt(min1, max1)
+            c1 = self.RandInt(min2, max2)
+            a2 = self.RandInt(min1, max1)
+            b2 = self.RandInt(min1, max1)
+            c2 = self.RandInt(min2, max2)
+            while a1 == 0:
+                a1 = self.RandInt(min1, max1)
+            while b1 == 0:
+                b1 = self.RandInt(min1, max1)
+            while c1 == 0:
+                c1 = self.RandInt(min2, max2)
+            while a2 == 0:
+                a2 = self.RandInt(min1, max1)
+            while b2 == 0:
+                b2 = self.RandInt(min1, max1)
+            while c2 == 0:
+                c2 = self.RandInt(min2, max2)
+            self.numbers = [a1, b1, c1, a2, b2, c2]
+            x, y = sp.symbols('x y')
+            eq1 = sp.Eq(a1 * x + b1 * y, c1)
+            eq2 = sp.Eq(a2 * x + b2 * y, c2)
+            try:
+                solutions = sp.solve((eq1, eq2), (x, y), dict = True)
+                if not solutions:
+                    print('方程组无解')
+                elif len(solutions) > 1:
+                    print('方程组有无数多个解')
+                else:
+                    self.question = f'{a1}x + {b1}y = {c1}\n{a2}x + {b2}y = {c2}'
+                    solution = solutions[0]
+                    self.correct_answer = [solution[x], solution[y]]
+                    print(self.question)
+                    print(f"x = {solution[x]}")
+                    print(f"y = {solution[y]}")
+
+                    break
+            except:
+                pass
 
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
@@ -937,6 +984,8 @@ class QuestionEquation(QuestionLR):
         subtype = self.subtype[0]
         if subtype == 0:
             return self.JudgeAnswer1v1d()
+        elif subtype == 1:
+            return self.JudgeAnswer2v1d()
 
     def JudgeAnswer1v1d(self):
         self.user_answer = re.sub(r"\s+", "", self.user_answer) # 删除空白符
@@ -952,10 +1001,54 @@ class QuestionEquation(QuestionLR):
             self.error_number += 1
             return False
 
+    def JudgeAnswer2v1d(self):
+        """解析用户输入的解，支持多种格式"""
+        print(self.user_input)
+        self.user_answer = self.user_input.replace(" ", "").strip()
+        print(self.user_answer)
+
+        # 模式1：符号表达式（如 x=1,y=2）
+        pattern = r"([xy])=(\d+\.?\d*)"
+        matches = re.findall(pattern, self.user_answer)
+        print(matches)
+        if len(matches) == 2:
+            solution_dict = {var: float(val) for var, val in matches}
+            if 'x' not in solution_dict or 'y' not in solution_dict:
+                raise ValueError("必须包含x和y的解")
+            user_answer = solution_dict
+            print(user_answer)
+            self.user_answer = [user_answer['x'], user_answer['y']]
+            print(self.user_answer)
+
+        # # 模式2：隐式数值（如 1,2 或 1.5,3.14）
+        # try:
+        #     values = list(map(float, re.split(r'[,\s]+', self.user_answer)))
+        #     if len(values) == 2:
+        #         self.user_answer = {'x': values[0], 'y': values[1]}
+        # except ValueError:
+        #     pass
+        #
+        # # 模式3：单变量赋值（如 x=1 或 y=2）
+        # if "x=" in self.user_answer:
+        #     x_val = re.search(r"x=(\d+\.?\d*)", self.user_answer).group(1)
+        #     self.user_answer = {'x': float(x_val), 'y': None}
+        # elif "y=" in self.user_answer:
+        #     y_val = re.search(r"y=(\d+\.?\d*)", self.user_answer).group(1)
+        #     self.user_answer = {'x': None, 'y': float(y_val)}
+
+        print(f'self.user_answer = {self.user_answer}')
+
     def CheckTips(self):
         pass
 
     def AnswerTips(self):
+        subtype = self.subtype[0]
+        if subtype == 0:
+            self.AnswerTips1v1d()
+        elif subtype == 1:
+            self.AnswerTips2v1d()
+
+    def AnswerTips1v1d(self):
         a = self.numbers[0]
         b = self.numbers[1]
         c = self.numbers[2]
@@ -970,3 +1063,6 @@ class QuestionEquation(QuestionLR):
             err = '方程系数不能为0'
             print(err)
         self.answer_tips = f'{e}x = {f}, x = {f} / {e} = {self.correct_answer[0]}'
+
+    def AnswerTips2v1d(self):
+        pass

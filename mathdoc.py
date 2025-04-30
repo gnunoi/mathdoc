@@ -456,7 +456,7 @@ class MathDoc(QWidget):
                             self.exam.setting.type_equation = i
                             break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            # subtype = [self.exam.setting.factor_type],
+                                            subtype = [self.exam.setting.type_equation],
                                             range = [self.exam.setting.min_coefficient,
                                                      self.exam.setting.max_coefficient,
                                                      self.exam.setting.min_constant,
