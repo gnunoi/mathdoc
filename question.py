@@ -917,7 +917,7 @@ class QuestionEquation(QuestionLR):
             term4 = ''
         elif c == 0:
             term3 = ''
-            term4 = f'{strd}'
+            term4 = f'{d}'
         elif d == 0:
             term4 = ''
 
