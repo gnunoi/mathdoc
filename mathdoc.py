@@ -474,6 +474,7 @@ class MathDoc(QWidget):
         self.tips_label.setText(self.exam.q.check_tips)
         self.answer_tips_label.setText(self.exam.q.answer_tips)
         self.question_label.setText(f"{self.exam.q.question}")
+        self.answer_label.setText(self.exam.q.comments)
 
         total = self.exam.record.question_number - 1
         correct_rate = self.exam.record.correct_number / total * 100 if total > 0 else 0
@@ -482,7 +483,6 @@ class MathDoc(QWidget):
             f"错误：{total - self.exam.record.correct_number} 道 | 正确率：{correct_rate:.1f}%"
         )
         self.answer_input.setFocus()
-        # print(f'{self.exam.q.AnswerTips()}')
 
     def SubmitAnswer(self):
         self.exam.q.user_input = self.answer_input.text()

@@ -868,7 +868,9 @@ class QuestionEquation(QuestionLR):
     def __init__(self, subtype=[0, 0], range=[1, 5, 1, 20]):
         super().__init__(type=1, subtype=subtype, range=range)
         self.name = "解方程"
-        self.comments = "输入未知数的解，如：5，或者  x = 5"
+        self.comments = "输入未知数x的解，如：5，或者  x = 5"
+        if self.subtype[0] == 1:
+            self.comments = "输入未知数x和与的解，可以包括推导过程。如：2x = 2, x = 1, 3y = 6, y = 2 "
         self.Generate()
 
     def BeforeGenerate(self):
@@ -972,7 +974,6 @@ class QuestionEquation(QuestionLR):
                     print(self.question)
                     print(f"x = {solution[x]}")
                     print(f"y = {solution[y]}")
-
                     break
             except:
                 pass
@@ -1002,26 +1003,30 @@ class QuestionEquation(QuestionLR):
             return False
 
     def JudgeAnswer2v1d(self):
-        """解析用户输入的解，支持多种格式"""
-        print(self.user_input)
-        self.user_answer = self.user_input.replace(" ", "").strip()
-        print(self.user_answer)
+        # 提取用户输入中最后的x和y的值
+        pattern = r'(x[^=]*=)([^,]+)|([^=]*y=)([^,]+)'
+        matches = re.findall(pattern, self.user_input.replace(" ", ""))
 
-        # 模式1：符号表达式（如 x=1,y=2）
-        pattern = r"([xy])=(\d+\.?\d*)"
-        matches = re.findall(pattern, self.user_answer)
-        print(matches)
-        if len(matches) == 2:
-            solution_dict = {var: val for var, val in matches}
-            if 'x' not in solution_dict or 'y' not in solution_dict:
-                raise ValueError("必须包含x和y的解")
-            user_answer = solution_dict
-            print(user_answer)
-            self.user_answer = [user_answer['x'], user_answer['y']]
-            print(self.user_answer)
+        x_val = None
+        y_val = None
 
-        print(f'self.user_answer = {self.user_answer}')
-        print(self.correct_answer)
+        for match in matches:
+            if match[0]:  # 匹配x=...的情况
+                x_val = match[1].strip().split('=')[-1]
+            elif match[2]:  # 匹配y=...的情况
+                y_val = match[3].strip().split('=')[-1]
+        x_val = sp.Rational(x_val)
+        y_val = sp.Rational(y_val)
+        # print(x_val, y_val)
+        # print(type(x_val))
+        # print(self.correct_answer)
+        # print(type(self.correct_answer[0]))
+        # 检查是否成功提取了x和y的值
+        if self.correct_answer == [x_val, y_val]:
+            self.is_correct = True
+        else:
+            self.is_correct = False
+        return self.is_correct
 
     def CheckTips(self):
         pass
