@@ -1012,7 +1012,7 @@ class QuestionEquation(QuestionLR):
         matches = re.findall(pattern, self.user_answer)
         print(matches)
         if len(matches) == 2:
-            solution_dict = {var: float(val) for var, val in matches}
+            solution_dict = {var: val for var, val in matches}
             if 'x' not in solution_dict or 'y' not in solution_dict:
                 raise ValueError("必须包含x和y的解")
             user_answer = solution_dict
@@ -1020,23 +1020,8 @@ class QuestionEquation(QuestionLR):
             self.user_answer = [user_answer['x'], user_answer['y']]
             print(self.user_answer)
 
-        # # 模式2：隐式数值（如 1,2 或 1.5,3.14）
-        # try:
-        #     values = list(map(float, re.split(r'[,\s]+', self.user_answer)))
-        #     if len(values) == 2:
-        #         self.user_answer = {'x': values[0], 'y': values[1]}
-        # except ValueError:
-        #     pass
-        #
-        # # 模式3：单变量赋值（如 x=1 或 y=2）
-        # if "x=" in self.user_answer:
-        #     x_val = re.search(r"x=(\d+\.?\d*)", self.user_answer).group(1)
-        #     self.user_answer = {'x': float(x_val), 'y': None}
-        # elif "y=" in self.user_answer:
-        #     y_val = re.search(r"y=(\d+\.?\d*)", self.user_answer).group(1)
-        #     self.user_answer = {'x': None, 'y': float(y_val)}
-
         print(f'self.user_answer = {self.user_answer}')
+        print(self.correct_answer)
 
     def CheckTips(self):
         pass
