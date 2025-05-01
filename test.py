@@ -1,49 +1,73 @@
-from sympy import symbols, Eq, solve
-from random import randint, choice
-
-x = symbols('x')
+import random
+import sympy as sp
 
 
-def generate_equation():
-    # 生成随机的一元一次方程参数
-    a = randint(1, 10)
-    b = randint(1, 10)
-    c = randint(1, 10)
-    d = randint(1, 10)
+def generate_quadratic_equation():
+    # 生成一元二次方程的系数
+    a = random.randint(1, 5)
+    b = random.randint(-10, 10)
+    c = random.randint(-10, 10)
 
-    # 确保方程有整数解
-    if a == 0:
-        a = 1
-    if c == 0:
-        c = 1
+    # 确保方程有实数解（判别式非负）
+    discriminant = b ** 2 - 4 * a * c
+    if discriminant < 0:
+        # 如果判别式为负，重新生成系数以确保有实数解
+        b = random.randint(1, 10)  # 确保b不为0
+        # 确保判别式非负
+        discriminant = b ** 2 - 4 * a * c
+        if discriminant < 0:
+            # 如果仍然为负，调整c以确保判别式非负
+            c = b ** 2 // (4 * a) - 1
+    return a, b, c
 
-    # 构建方程
-    equation = Eq(a * x + b, c * x + d)
-    return equation, solve(equation, x)[0]
+
+def solve_quadratic_equation(a, b, c):
+    x = sp.symbols('x')
+    equation = a * x ** 2 + b * x + c
+    solutions = sp.solve(equation, x)
+    # 格式化为浮点数列表
+    # solutions = [round(float(sol), 2) for sol in solutions]
+    print(solutions)
+    return sorted(solutions)
 
 
 def main():
     while True:
-        equation, correct_answer = generate_equation()
-        print("\n新方程已生成:")
-        print(f"{equation}")
+        # 生成新问题
+        a, b, c = generate_quadratic_equation()
+        solutions = solve_quadratic_equation(a, b, c)
 
-        user_input = input("请输入解法（或输入'退出'结束程序）: ").strip()
+        # 显示方程
+        print(f"\n解这个一元二次方程: {a}x² + {b}x + {c} = 0")
+        print("输入你的答案，用逗号分隔多个答案，保留两位小数，例如：2.00, 3.00")
 
-        if user_input.lower() in ['退出', 'exit']:
-            print("感谢使用方程求解器！再见！")
-            break
+        # 获取用户输入
+        user_input = input("你的答案：")
 
+        # 解析用户输入
         try:
-            # 判断用户的答案是否正确
-            if str(user_input) == str(correct_answer):
-                print("恭喜！您的答案正确！")
-            else:
-                print(f"很遗憾，您的答案有误。正确解是 x = {correct_answer}")
+            user_solutions = [round(float(num.strip()), 2) for num in user_input.split(',')]
+            user_solutions = sorted(user_solutions)
+        except ValueError:
+            print("输入格式错误，请使用逗号分隔的数字")
+            user_solutions = []
 
-        except Exception as e:
-            print(f"输入解析错误: {e}")
-            print("请输入正确的方程格式，例如: 3x + 5 = 7x - 1")
+        # 判断答案是否正确
+        if user_solutions == solutions:
+            print("正确！")
+        else:
+            print(f"错误，正确答案是：{', '.join(map(str, solutions))}")
+
+        # 询问是否继续
+        while True:
+            continue_input = input("是否继续（是/否）？").strip().lower()
+            if continue_input in ['是', 'y', 'yes']:
+                break
+            elif continue_input in ['否', 'n', 'no']:
+                print("感谢使用！")
+                return
+            else:
+                print("无效输入，请回答是或否")
 
 
 if __name__ == "__main__":

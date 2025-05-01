@@ -868,9 +868,12 @@ class QuestionEquation(QuestionLR):
     def __init__(self, subtype=[0, 0], range=[1, 5, 1, 20]):
         super().__init__(type=1, subtype=subtype, range=range)
         self.name = "解方程"
-        self.comments = "输入未知数x的解，如：5，或者  x = 5"
-        if self.subtype[0] == 1:
-            self.comments = "输入未知数x和与的解，可以包括推导过程。如：2x = 2, x = 1, 3y = 6, y = 2 "
+        if self.subtype[0] == 0:
+            self.comments = "输入未知数x的解，如：5，或者  x = 5"
+        elif self.subtype[0] == 1:
+            self.comments = "输入未知数x和y的解，可以包括推导过程。如：2x = 2, x = 1, 3y = -1, y = -1/3 "
+        elif self.subtype[0] == 2:
+            self.comments = "输入未知数x的解，可以包括推导过程。如：delta = 4 * 4 - 4 * 2 = 8, x1 = -2 - sqrt(2), x2 = -2 + sqrt(2)"
         self.Generate()
 
     def BeforeGenerate(self):
@@ -886,6 +889,8 @@ class QuestionEquation(QuestionLR):
             self.Generate1v1d()
         if subtype == 1:
             self.Generate2v1d()
+        if subtype == 2:
+            self.Generate1v2d()
         self.AfterGenerate()
 
     def Generate1v1d(self):
@@ -978,6 +983,57 @@ class QuestionEquation(QuestionLR):
             except:
                 pass
 
+    def Generate1v2d(self):
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min1, max1)
+            b = self.RandInt(min1, max1)
+            c = self.RandInt(min2, max2)
+            while a == 0:
+                a = self.RandInt(min1, max1)
+            b = self.RandInt(min1, max1)
+            c = self.RandInt(min2, max2)
+            if b * b - 4 * a * c < 0:
+                continue
+            self.numbers = [a, b, c]
+            x = sp.symbols('x')
+            eq = sp.Eq(a * x ** 2 + b * x + c, 0)
+
+            solutions = sorted(sp.solve(eq, x))
+            if not solutions:
+                print('方程组无解')
+                continue
+            if a == 1:
+                stra = 'x²'
+            elif a == -1:
+                stra = '-x²'
+            else:
+                stra = f'{a}x²'
+            if b == 0:
+                strb = ''
+            elif b == 1:
+                strb = ' + x'
+            elif b == -1:
+                strb = ' - x'
+            elif b < 0:
+                strb = f' - {-b}x'
+            else:
+                strb = f' + {b}x'
+            if c == 0:
+                strc = ''
+            elif c > 0:
+                strc = f' + {c}'
+            else:
+                strc = f' - {-c}'
+            self.question = f'{stra}{strb}{strc} = 0'
+            self.correct_answer = solutions
+            print(self.question)
+            print(f"x = {solutions}")
+            break
+
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
@@ -987,6 +1043,8 @@ class QuestionEquation(QuestionLR):
             return self.JudgeAnswer1v1d()
         elif subtype == 1:
             return self.JudgeAnswer2v1d()
+        elif subtype == 2:
+            return self.JudgeAnswer1v2d()
 
     def JudgeAnswer1v1d(self):
         self.user_answer = re.sub(r"\s+", "", self.user_answer) # 删除空白符
@@ -1003,6 +1061,7 @@ class QuestionEquation(QuestionLR):
             return False
 
     def JudgeAnswer2v1d(self):
+        from sympy import sqrt
         # 提取用户输入中最后的x和y的值
         pattern = r'(x[^=]*=)([^,]+)|([^=]*y=)([^,]+)'
         matches = re.findall(pattern, self.user_input.replace(" ", ""))
@@ -1017,15 +1076,49 @@ class QuestionEquation(QuestionLR):
                 y_val = match[3].strip().split('=')[-1]
         x_val = sp.Rational(x_val)
         y_val = sp.Rational(y_val)
-        # print(x_val, y_val)
-        # print(type(x_val))
-        # print(self.correct_answer)
-        # print(type(self.correct_answer[0]))
         # 检查是否成功提取了x和y的值
         if self.correct_answer == [x_val, y_val]:
             self.is_correct = True
         else:
             self.is_correct = False
+        return self.is_correct
+
+    def JudgeAnswer1v2d(self):
+        user_input = self.user_input.strip()
+        print(user_input)
+        numbers = []
+
+        # 尝试匹配带x1=和x2=的格式（允许逗号后有空格）
+        # 正则表达式模式
+        pattern = r'(x1|x2)\s*=\s*(.*?)(?=,|$)'
+
+        # 查找所有匹配项
+        matches = re.findall(pattern, user_input)
+        print(matches)
+        if matches:
+            # 提取x1和x2后的内容
+            result = {match[0]: match[1].strip() for match in matches}
+            print(result)
+            numbers = [result['x1'], result['x2']]
+            print(numbers)
+        else:
+            # 处理直接输入两个数字的情况（逗号或空格分隔）
+            parts = re.split(r'[,\s]+', user_input)
+            parts = [p for p in parts if p]  # 去除空字符串
+            numbers = parts
+        print(numbers)
+        if len(self.correct_answer) != len(numbers):
+            self.is_correct = False
+            return self.is_correct
+        correct_answer = [str(answer).strip() for answer in self.correct_answer]
+        print(correct_answer)
+        print(numbers)
+        user_answer = [str(answer).strip() for answer in numbers]
+        print(user_answer)
+        self.is_correct = True
+        for answer in user_answer:
+            if not answer in correct_answer:
+                self.is_correct = True
         return self.is_correct
 
     def CheckTips(self):
