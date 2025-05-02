@@ -9,9 +9,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QDialog)
 from PyQt5.QtGui import (QFont, QPalette, QColor)
 from PyQt5.QtCore import Qt
-
 from exam import *
-
 
 def GetScreenSize():
     screen = QDesktopWidget().screenGeometry()
@@ -41,7 +39,6 @@ InitUI(): UI初始化
 UpdateQuestion(): 更新试题
 SubmitAnswer(): 提交答案
 SetWindowSize(): 设置窗口大小
-
 """
 class MathDoc(QWidget):
     def __init__(self):
