@@ -1143,27 +1143,20 @@ class QuestionEquation(QuestionLR):
         if matches:
             # 提取x1和x2后的内容
             result = {match[0]: match[1].strip() for match in matches}
-            print(result)
+            # print(result)
             numbers = [result['x1'], result['x2']]
-            print(numbers)
         else:
             # 处理直接输入两个数字的情况（逗号或空格分隔）
-            parts = re.split(r'[,\s]+', user_input)
-            parts = [p for p in parts if p]  # 去除空字符串
+            parts = re.split(r'[,，]+', user_input)
             numbers = parts
-        print(numbers)
         if len(self.correct_answer) != len(numbers):
             self.is_correct = False
             return self.is_correct
-        correct_answer = [str(answer).strip() for answer in self.correct_answer]
-        print(correct_answer)
-        print(numbers)
-        user_answer = [str(answer).strip() for answer in numbers]
-        print(user_answer)
+        user_answer = [sp.sympify(answer) for answer in numbers]
         self.is_correct = True
         for answer in user_answer:
-            if not answer in correct_answer:
-                self.is_correct = True
+            if not answer in self.correct_answer:
+                self.is_correct = False
         return self.is_correct
 
     def CheckTips(self):
