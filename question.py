@@ -912,22 +912,26 @@ class QuestionEquation(QuestionLR):
         x = sp.symbols('x')
         equation = sp.Eq(a * x + b, c * x + d)
         self.correct_answer = sp.solve(equation, x)
-        strb = f'{b}' if b >= 0 else f'({b})'
-        strd = f'{d}' if d >= 0 else f'({d})'
         if a == 1:
             term1 = 'x'
         elif a == -1:
             term1 = '-x'
         else:
             term1 = f'{a}x'
-        term2 = f'+ {strb}'
+        if b > 0:
+            term2 = f' + {b}'
+        elif b < 0:
+            term2 = f' - {-b}'
         if c == 1:
             term3 = 'x'
         elif c == -1:
             term3 = '-x'
         else:
             term3 = f'{c}x'
-        term4 = f'+ {strd}'
+        if d > 0:
+            term4 = f' + {d}'
+        elif d < 0:
+            term4 = f' - {-d}'
         if c == 0 and d == 0:
             term3 = '0'
             term4 = ''
@@ -973,7 +977,23 @@ class QuestionEquation(QuestionLR):
                 elif len(solutions) > 1:
                     print('方程组有无数多个解')
                 else:
-                    self.question = f'{a1}x + {b1}y = {c1}\n{a2}x + {b2}y = {c2}'
+                    if a1 == 1:
+                        term1 = 'x'
+                    else:
+                        term1 = f'{a1}x'
+                    if a2 == 1:
+                        term4 = 'x'
+                    else:
+                        term4 = f'{a2}x'
+                    if b1 == 1:
+                        term2 = '+ y'
+                    else:
+                        term2 = f'+ {b1}y'
+                    if b2 == 1:
+                        term5 = '+ y'
+                    else:
+                        term5 = f'+ {b2}y'
+                    self.question = f'{term1} {term2} = {c1}\n{term4} {term5} = {c2}'
                     solution = solutions[0]
                     self.correct_answer = [solution[x], solution[y]]
                     print(self.question)
