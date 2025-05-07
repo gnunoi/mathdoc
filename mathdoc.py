@@ -486,6 +486,8 @@ class MathDoc(QWidget):
         self.exam.SubmitAnswer()
         self.answer_input.clear()
         if not self.exam.q.is_correct:
+            if self.exam.type == 4 and self.exam.subtype[0] == 1: # 二元一次方程
+                self.exam.q.user_input = f'x = {self.exam.q.user_answer[0]}, y = {self.exam.q.user_answer[1]}'
             self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
             if self.exam.q.answer_tips:
                 self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')

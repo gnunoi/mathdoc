@@ -1117,11 +1117,12 @@ class QuestionEquation(QuestionLR):
         # 检查是否成功提取了x和y的值
         if x_val is None or y_val is None:
             x_val, y_val = self.get_two_numbers()
-            print(x_val, y_val)
+            # print(x_val, y_val)
         if self.correct_answer == [x_val, y_val]:
             self.is_correct = True
         else:
             self.is_correct = False
+            self.user_answer = [x_val, y_val]
         return self.is_correct
 
     def JudgeAnswer1v2d(self):
