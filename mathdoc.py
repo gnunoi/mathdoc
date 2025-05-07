@@ -45,7 +45,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.05.07(V1.3.1)"
+        self.version = "2025.05.07(V1.3.3)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
         self.set_list = []
