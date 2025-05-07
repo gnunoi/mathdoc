@@ -764,7 +764,10 @@ class QuestionQC(QuestionLR):
             n = self.numbers[1]
             a = int((m + n) / 2)
             b = abs(a - self.numbers[0])
-            tips += f'{m} × {n} = ({a} - {b})({a} + {b}) = {a} × {a} - {b} × {b} = {a * a} - {b * b} = {a * a - b * b}'
+            if m % 10 == 0 and n % 10 == 0:
+                tips += f'{m // 10} × {n // 10} = {m*n//100}，{m} × {n} = {m*n//100} × 100 = {m*n}'
+            else:
+                tips += f'{m} × {n} = ({a} - {b})({a} + {b}) = {a} × {a} - {b} × {b} = {a * a} - {b * b} = {a * a - b * b}'
         if self.subtype[0] == 3 or self.subtype2[0] == 3: # 平方数
             m = self.numbers[0]
             n = self.numbers[1]
@@ -871,7 +874,7 @@ class QuestionEquation(QuestionLR):
         if self.subtype[0] == 0:
             self.comments = "输入未知数x的解，如：5，或者  x = 5"
         elif self.subtype[0] == 1:
-            self.comments = "输入未知数x和y的解，可以包括推导过程。如：2x = 2, x = 1, 3y = -1, y = -1/3 "
+            self.comments = "输入未知数x和y的解，可以包括推导过程。如：2x = 2, x = 1, 3y = -1, y = -1/3 或：1, -1/3"
         elif self.subtype[0] == 2:
             self.comments = "输入未知数x的解，可以包括推导过程。如：delta = 4 * 4 - 4 * 2 = 8, x1 = -2 - sqrt(2), x2 = -2 + sqrt(2)"
         self.Generate()

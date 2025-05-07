@@ -125,3 +125,6 @@
 
 ## [Release V1.3.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.1)
 实现解方程的功能，包括一元一次方程、二元一次方程组、一元二次方程。
+
+## [Release V1.3.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.2)
+完善平方差速算法错误的答题提示。
