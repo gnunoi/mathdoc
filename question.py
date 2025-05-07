@@ -1080,7 +1080,7 @@ class QuestionEquation(QuestionLR):
             self.error_number += 1
             return False
 
-    def get_two_numbers(self):
+    def Get2Numbers(self):
         user_input = self.user_input.replace(',', ' ').replace('  ', ' ')
         print(user_input)
         # 尝试将输入分割为两个部分
@@ -1116,7 +1116,7 @@ class QuestionEquation(QuestionLR):
             self.is_correct = False
         # 检查是否成功提取了x和y的值
         if x_val is None or y_val is None:
-            x_val, y_val = self.get_two_numbers()
+            x_val, y_val = self.Get2Numbers()
             # print(x_val, y_val)
         if self.correct_answer == [x_val, y_val]:
             self.is_correct = True
