@@ -1080,6 +1080,21 @@ class QuestionEquation(QuestionLR):
             self.error_number += 1
             return False
 
+    def get_two_numbers(self):
+        user_input = self.user_input.replace(',', ' ').replace('  ', ' ')
+        print(user_input)
+        # 尝试将输入分割为两个部分
+        parts = user_input.split()
+        if len(parts) != 2:
+            # 如果不是两个部分，检查是否可能包含逗号分隔
+            if ',' in user_input:
+                parts = user_input.split(',')
+            else:
+                print("输入格式错误，请输入两个数！")
+        x_val = sp.Rational(parts[0])
+        y_val = sp.Rational(parts[1])
+        return x_val, y_val
+
     def JudgeAnswer2v1d(self):
         from sympy import sqrt
         # 提取用户输入中最后的x和y的值
@@ -1088,15 +1103,21 @@ class QuestionEquation(QuestionLR):
 
         x_val = None
         y_val = None
-
         for match in matches:
             if match[0]:  # 匹配x=...的情况
                 x_val = match[1].strip().split('=')[-1]
             elif match[2]:  # 匹配y=...的情况
                 y_val = match[3].strip().split('=')[-1]
-        x_val = sp.Rational(x_val)
-        y_val = sp.Rational(y_val)
+        try:
+            x_val = sp.Rational(x_val)
+            y_val = sp.Rational(y_val)
+        except:
+            print(f'x_val={x_val}, y_val={y_val}')
+            self.is_correct = False
         # 检查是否成功提取了x和y的值
+        if x_val is None or y_val is None:
+            x_val, y_val = self.get_two_numbers()
+            print(x_val, y_val)
         if self.correct_answer == [x_val, y_val]:
             self.is_correct = True
         else:
