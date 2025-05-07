@@ -128,3 +128,6 @@
 
 ## [Release V1.3.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.2)
 完善平方差速算法错误的答题提示。
+
+## [Release V1.3.3](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.3)
+完善一元二次方程用户输入答案的判断。
