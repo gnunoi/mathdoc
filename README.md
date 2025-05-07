@@ -123,5 +123,5 @@
 防止用户重新输入一遍题目而非输入计算后的正确答案。
 解方程界面完成。
 
-## [Release V1.3.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.0)
+## [Release V1.3.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.1)
 实现解方程的功能，包括一元一次方程、二元一次方程组、一元二次方程。
