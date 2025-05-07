@@ -764,7 +764,7 @@ class QuestionQC(QuestionLR):
             n = self.numbers[1]
             a = int((m + n) / 2)
             b = abs(a - self.numbers[0])
-            tips += f'{m} × {n} = ({a} + {b})({a} - {b}) = {a} × {a} - {b} × {b} = {a * a} - {b * b} = {a * a - b * b}'
+            tips += f'{m} × {n} = ({a} - {b})({a} + {b}) = {a} × {a} - {b} × {b} = {a * a} - {b * b} = {a * a - b * b}'
         if self.subtype[0] == 3 or self.subtype2[0] == 3: # 平方数
             m = self.numbers[0]
             n = self.numbers[1]
