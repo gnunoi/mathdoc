@@ -6,6 +6,7 @@ from datetime import datetime
 from itertools import combinations
 import sympy as sp
 import ast
+import math
 
 """
 类名称: Question
@@ -1006,10 +1007,7 @@ class QuestionEquation(QuestionLR):
                 pass
 
     def Generate1v2d(self):
-        min1 = self.range[0]
-        max1 = self.range[1]
-        min2 = self.range[2]
-        max2 = self.range[3]
+        [min1, max1, min2, max2] = self.range
         while True:
             a = self.RandInt(min1, max1)
             b = self.RandInt(min1, max1)
@@ -1018,6 +1016,11 @@ class QuestionEquation(QuestionLR):
                 a = self.RandInt(min1, max1)
             b = self.RandInt(min1, max1)
             c = self.RandInt(min2, max2)
+            gcd = math.gcd(a, b, c)
+            if gcd != 1:
+                a = a // gcd
+                b = b // gcd
+                c = c // gcd
             if b * b - 4 * a * c < 0:
                 continue
             self.numbers = [a, b, c]
@@ -1061,12 +1064,16 @@ class QuestionEquation(QuestionLR):
         self.end_time = datetime.now()
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
         subtype = self.subtype[0]
-        if subtype == 0:
-            return self.JudgeAnswer1v1d()
-        elif subtype == 1:
-            return self.JudgeAnswer2v1d()
-        elif subtype == 2:
-            return self.JudgeAnswer1v2d()
+        try:
+            if subtype == 0:
+                return self.JudgeAnswer1v1d()
+            elif subtype == 1:
+                return self.JudgeAnswer2v1d()
+            elif subtype == 2:
+                return self.JudgeAnswer1v2d()
+        except:
+            self.is_correct = False
+            return False
 
     def JudgeAnswer1v1d(self):
         self.user_answer = re.sub(r"\s+", "", self.user_answer) # 删除空白符
@@ -1212,7 +1219,29 @@ class QuestionEquation(QuestionLR):
             self.check_tips += f'{conj}(2)左式 = {d2}, (2)右式 = {c2}, {d2} ≠ {c2}'
 
     def CheckTips1v2d(self):
-        pass
+        [a, b, c] = self.numbers
+        # print(a, b, c)
+        if len(self.user_answer) == 2:
+            [x1, x2] = self.user_answer
+        elif len(self.user_answer) == 1:
+            x1 = self.user_answer[0]
+            x2 = x1
+        else:
+            return
+        x1 = sp.sympify(x1)
+        x2 = sp.sympify(x2)
+        d1 = x1 + x2
+        e1 = x1 * x2
+        d2 = Fraction(-b, a)
+        e2 = Fraction(c, a)
+        # print(d2, e2)
+        self.check_tips = ''
+        conj = ''
+        if d1 != d2:
+            self.check_tips += f'x1 + x2 ≠ {d2}'
+            conj = ', '
+        if e1 != e2:
+            self.check_tips += f'{conj}x1⋅x2 ≠ {e2}'
 
     def AnswerTips(self):
         try:
@@ -1221,6 +1250,8 @@ class QuestionEquation(QuestionLR):
                 self.AnswerTips1v1d()
             elif subtype == 1:
                 self.AnswerTips2v1d()
+            elif subtype == 2:
+                self.AnswerTips1v2d()
         except:
             pass
 
@@ -1257,3 +1288,17 @@ class QuestionEquation(QuestionLR):
         self.answer_tips = f'{str1} - {str2}得到：{str3} = {c1 * lcm // b1 - c2 * lcm // b2}'
         self.answer_tips += f'⇒ x = {self.correct_answer[0]}, y = {self.correct_answer[1]}'
         print(self.answer_tips)
+
+    def AnswerTips1v2d(self):
+        [a, b, c] = self.numbers
+        # print(a, b, c)
+        delta = b * b - 4 * a * c
+        r1 = Fraction(-b, 2 * a)
+        r2 = sp.sympify(sp.sqrt(delta) / (2 * a))
+        print(type(r1+r2), type(r1-r2))
+        if r2 == 0:
+            self.answer_tips = f'delta = 0, x1 = x2 = {r1}'
+        else:
+            self.answer_tips = f'delta = {delta}, x1 = {r1 + r2}, x2 = {r1 - r2}'
+
+
