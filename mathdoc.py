@@ -45,7 +45,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.05.07(V1.3.3)"
+        self.version = "2025.05.08(V1.3.4)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.width, self.height = GetScreenSize()
         self.set_list = []
@@ -486,8 +486,6 @@ class MathDoc(QWidget):
         self.exam.SubmitAnswer()
         self.answer_input.clear()
         if not self.exam.q.is_correct:
-            if self.exam.type == 4 and self.exam.subtype[0] == 1: # 二元一次方程
-                self.exam.q.user_input = f'x = {self.exam.q.user_answer[0]}, y = {self.exam.q.user_answer[1]}'
             self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
             if self.exam.q.answer_tips:
                 self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')

@@ -104,6 +104,14 @@ class Question():
         else:
             return random.randint(a, b)
 
+    def GCD(self, a, b):
+        while b:
+            a, b = b, a % b
+        return a
+
+    def LCM(self, a, b):
+        return a * b // self.GCD(a, b)
+
     def BeforeGenerate(self):
         """
         以下变量不能重新初始化
@@ -274,16 +282,7 @@ class QuestionFactor(QuestionRL):
         # 如果剩余的n是质数
         if num > 1:
             factors.append(num)
-
         return factors
-
-    def GCD(self, a, b):
-        while b:
-            a, b = b, a % b
-        return a
-
-    def LCM(self, a, b):
-        return a * b // self.GCD(a, b)
 
     def Generate(self):
         """生成一个10到1000之间的随机数，保证有至少3个质因数"""
@@ -1027,7 +1026,7 @@ class QuestionEquation(QuestionLR):
 
             solutions = sorted(sp.solve(eq, x))
             if not solutions:
-                print('方程组无解')
+                print('方程无解')
                 continue
             if a == 1:
                 stra = 'x²'
@@ -1075,10 +1074,15 @@ class QuestionEquation(QuestionLR):
             self.user_answer == self.user_answer.replace(opr, '=')
         print(self.user_answer)
         self.user_answer = self.user_answer.split('=')[-1]
-        if float(self.correct_answer[0]) == float(eval(self.user_answer)):
-            self.is_correct = True
-            return True
-        else:
+        try:
+            if sp.Rational(self.correct_answer[0]) == sp.Rational(self.user_answer):
+                self.is_correct = True
+                return True
+            else:
+                self.is_correct = False
+                self.error_number += 1
+                return False
+        except:
             self.is_correct = False
             self.error_number += 1
             return False
@@ -1094,9 +1098,15 @@ class QuestionEquation(QuestionLR):
                 parts = user_input.split(',')
             else:
                 print("输入格式错误，请输入两个数！")
-        x_val = sp.Rational(parts[0])
-        y_val = sp.Rational(parts[1])
-        return x_val, y_val
+        if len(parts) == 2:
+            x_val = sp.Rational(parts[0])
+            y_val = sp.Rational(parts[1])
+            return x_val, y_val
+        elif len(parts) == 1:
+            x_val = sp.Rational(parts[0])
+            return x_val, None
+        elif len(parts) == 0:
+            return None, None
 
     def JudgeAnswer2v1d(self):
         from sympy import sqrt
@@ -1126,6 +1136,7 @@ class QuestionEquation(QuestionLR):
         else:
             self.is_correct = False
             self.user_answer = [x_val, y_val]
+            self.user_input = f'x = {self.user_answer[0]}, y = {self.user_answer[1]}'
         return self.is_correct
 
     def JudgeAnswer1v2d(self):
@@ -1152,28 +1163,69 @@ class QuestionEquation(QuestionLR):
         if len(self.correct_answer) != len(numbers):
             self.is_correct = False
             return self.is_correct
-        user_answer = [sp.sympify(answer) for answer in numbers]
+        self.user_answer = [sp.sympify(answer) for answer in numbers]
         self.is_correct = True
-        for answer in user_answer:
+        for answer in self.user_answer:
             if not answer in self.correct_answer:
                 self.is_correct = False
+
+        i = 1
+        self.user_input = ''
+        for answer in self.user_answer:
+            prefix = '' if i == 1 else ', '
+            self.user_input += f'{prefix}x{i} = {answer}'
+            i += 1
         return self.is_correct
 
     def CheckTips(self):
+        try:
+            if self.subtype[0] == 0:
+                self.CheckTips1v1d()
+            elif self.subtype[0] == 1:
+                self.CheckTips2v1d()
+            elif self.subtype[0] == 2:
+                self.CheckTips1v2d()
+            pass
+        except:
+            self.check_tips = '无效的答案'
+
+    def CheckTips1v1d(self):
+        x = sp.Rational(self.user_answer)
+        a, b, c, d = tuple(self.numbers)
+        self.check_tips = f''
+        e = a * x + b
+        f = c * x + d
+        self.check_tips += f'左式 = {e}, 右式 = {f}, {e} ≠ {f}'
+
+    def CheckTips2v1d(self):
+        x = sp.Rational(self.user_answer[0])
+        y = sp.Rational(self.user_answer[1])
+        a1, b1, c1, a2, b2, c2 = tuple(self.numbers)
+        self.check_tips = f''
+        d1 = a1 * x + b1 * y
+        d2 = a2 * x + b2 * y
+        conj = ''
+        if d1 != c1:
+            self.check_tips += f'(1)左式 = {d1}, (1)右式 = {c1}, {d1} ≠ {c1}'
+            conj = ', '
+        if d2 != c2:
+            self.check_tips += f'{conj}(2)左式 = {d2}, (2)右式 = {c2}, {d2} ≠ {c2}'
+
+    def CheckTips1v2d(self):
         pass
 
     def AnswerTips(self):
-        subtype = self.subtype[0]
-        if subtype == 0:
-            self.AnswerTips1v1d()
-        elif subtype == 1:
-            self.AnswerTips2v1d()
+        try:
+            subtype = self.subtype[0]
+            if subtype == 0:
+                self.AnswerTips1v1d()
+            elif subtype == 1:
+                self.AnswerTips2v1d()
+        except:
+            pass
 
     def AnswerTips1v1d(self):
-        a = self.numbers[0]
-        b = self.numbers[1]
-        c = self.numbers[2]
-        d = self.numbers[3]
+        a, b, c, d = tuple(self.numbers)
         if a > c:
             e = a - c
             f = d - b
@@ -1183,7 +1235,25 @@ class QuestionEquation(QuestionLR):
         else:
             err = '方程系数不能为0'
             print(err)
-        self.answer_tips = f'{e}x = {f}, x = {f} / {e} = {self.correct_answer[0]}'
+        if e == 1:
+            self.answer_tips = f'x = {f}'
+        else:
+            self.answer_tips = f'{e}x = {f} ⇒ x = {f} ÷ {e} = {self.correct_answer[0]}'
 
     def AnswerTips2v1d(self):
-        pass
+        x = sp.Rational(self.user_answer[0])
+        y = sp.Rational(self.user_answer[1])
+        a1, b1, c1, a2, b2, c2 = tuple(self.numbers)
+        lcm = self.LCM(b1, b2)
+        str1 = f'(1)式' if b1 == lcm else f'(1)式 × {lcm//b1}'
+        str2 = f'(2)式' if b2 == lcm else f'(2)式 × {lcm//b2}'
+        d1 = a1 * lcm // b1 - a2 * lcm // b2
+        if d1 == 1:
+            str3 = 'x'
+        elif d1 == -1:
+            str3 = '-x'
+        else:
+            str3 = f'{d1}x'
+        self.answer_tips = f'{str1} - {str2}得到：{str3} = {c1 * lcm // b1 - c2 * lcm // b2}'
+        self.answer_tips += f'⇒ x = {self.correct_answer[0]}, y = {self.correct_answer[1]}'
+        print(self.answer_tips)

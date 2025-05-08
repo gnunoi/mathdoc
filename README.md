@@ -131,3 +131,6 @@
 
 ## [Release V1.3.3](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.3)
 完善一元二次方程用户输入答案的判断。
+
+## [Release V1.3.4](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.4)
+完善一元二次方程用户输入答案的判断。
