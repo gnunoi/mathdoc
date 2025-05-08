@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
                              QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
                              QDialog)
-from PyQt5.QtGui import (QFont, QPalette, QColor)
+from PyQt5.QtGui import (QGuiApplication, QFont, QPalette, QColor)
 from PyQt5.QtCore import Qt
 from exam import *
 
@@ -40,6 +40,51 @@ UpdateQuestion(): 更新试题
 SubmitAnswer(): 提交答案
 SetWindowSize(): 设置窗口大小
 """
+class SecondScreenWindow(QWidget):
+    def __init__(self, main_window):
+        super().__init__()
+        self.main_window = main_window
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle("提词器")
+
+        # 获取屏幕信息
+        screens = QApplication.instance().screens()
+        if len(screens) >= 2:
+            # 获取第二个屏幕的几何信息
+            screen_geometry = screens[1].geometry()
+            # 设置窗口在第二个屏幕的位置和大小
+            self.setGeometry(screen_geometry)
+        else:
+            print("第二屏幕未检测到")
+            return  # 如果没有检测到第二屏幕，则直接返回，不创建控件
+
+        # 创建主布局
+        main_layout = QVBoxLayout()
+
+        # 创建题目显示标签控件
+        self.question_label = QLabel("题目显示区域", self)
+        self.question_label.setFont(QFont("Arial", 60))
+        self.question_label.setAlignment(Qt.AlignCenter)
+        self.question_label.setStyleSheet("QLabel { background-color: #F0F0F0; }")
+        main_layout.addWidget(self.question_label)
+
+        # 创建答案显示标签控件
+        self.answer_label = QLabel("答案显示区域", self)
+        self.answer_label.setFont(QFont("Arial", 60))
+        self.answer_label.setAlignment(Qt.AlignCenter)
+        self.answer_label.setStyleSheet("QLabel { background-color: #F0F0F0; }")
+        main_layout.addWidget(self.answer_label)
+
+        # 设置窗口布局
+        self.setLayout(main_layout)
+
+    def update_content(self):
+        if hasattr(self.main_window, 'exam') and hasattr(self.main_window.exam, 'q'):
+            self.question_label.setText(self.main_window.exam.q.question)
+            self.answer_label.setText("正确答案：" + self.main_window.exam.q.answer_tips)
+
 class MathDoc(QWidget):
     def __init__(self):
         super().__init__()
@@ -59,8 +104,11 @@ class MathDoc(QWidget):
             self.base_font = QFont("Pingfang SC", 24)
         self.big_font = QFont("Arial", 32)
         self.InitUI()
+        self.second_screen_window = SecondScreenWindow(self)
+        self.second_screen_window.show()
         # self.exam.Dump(self)
         self.SetWindowSize()
+
 
     def InitUI(self):
         self.setWindowTitle(self.title)
