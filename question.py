@@ -1211,9 +1211,9 @@ class QuestionEquation(QuestionLR):
         self.check_tips = f''
         d1 = a1 * x + b1 * y
         d2 = a2 * x + b2 * y
-        conj = ''
+        conj = '\n'
         if d1 != c1:
-            self.check_tips += f'(1)左式 = {d1}, (1)右式 = {c1}, {d1} ≠ {c1}'
+            self.check_tips += f'{conj}(1)左式 = {d1}, (1)右式 = {c1}, {d1} ≠ {c1}'
             conj = ', '
         if d2 != c2:
             self.check_tips += f'{conj}(2)左式 = {d2}, (2)右式 = {c2}, {d2} ≠ {c2}'
