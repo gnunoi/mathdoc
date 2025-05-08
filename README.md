@@ -134,3 +134,6 @@
 
 ## [Release V1.3.4](https://github.com/gnunoi/mathdoc/releases/tag/V1.3.4)
 完善一元二次方程用户输入答案的判断。完善解方程的检查提示与答题提示。
+
+## [Release V1.4.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.4.0)
+增加第二屏幕作为提词器。
