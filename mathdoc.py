@@ -7,9 +7,13 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
                              QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
                              QDialog)
-from PyQt5.QtGui import (QGuiApplication, QFont, QPalette, QColor)
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import (QFont, QPalette, QColor, QScreen)
+from PyQt5.QtCore import (Qt, QRect)
 from exam import *
+
+def GetScreenSize():
+    screen = QDesktopWidget().screenGeometry()
+    return screen.width(), screen.height()
 
 """
 类名称：MathDoc
@@ -56,7 +60,8 @@ class MathDoc(QWidget):
         self.screen_geometry = QDesktopWidget().screenGeometry()
         self.setGeometry(self.screen_geometry)
         self.prompter = TelePrompter(self)
-        self.prompter.showMaximized()
+        if self.prompter.second_screen:
+            self.prompter.showMaximized()
         self.InitUI()
 
     def InitUI(self):
@@ -720,6 +725,7 @@ class TelePrompter(QWidget):
     def __init__(self, main_window):
         super().__init__()
         self.main_window = main_window
+        self.second_screen = None
         self.InitUI()
 
     def InitUI(self):
@@ -730,6 +736,8 @@ class TelePrompter(QWidget):
         if len(screens) >= 2:
             # 获取第二个屏幕的几何信息
             screen_geometry = screens[1].geometry()
+            self.second_screen = screens[1]
+            print(self.second_screen)
         else:
             print("第二屏幕未检测到")
             screen_geometry = screens[0].geometry()
