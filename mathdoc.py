@@ -779,5 +779,5 @@ if __name__ == '__main__':
     local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     app = QApplication(sys.argv)
     window = MathDoc()
-    window.showFullScreen()
+    window.showMaximized()
     sys.exit(app.exec())
