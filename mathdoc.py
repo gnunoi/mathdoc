@@ -36,63 +36,12 @@ UpdateQuestion(): 更新试题
 SubmitAnswer(): 提交答案
 SetWindowSize(): 设置窗口大小
 """
-class TelePrompter(QWidget):
-    def __init__(self, main_window):
-        super().__init__()
-        self.main_window = main_window
-        self.InitUI()
-
-    def InitUI(self):
-        self.setWindowTitle("提词器")
-
-        # 获取屏幕信息
-        screens = QApplication.instance().screens()
-        if len(screens) >= 2:
-            # 获取第二个屏幕的几何信息
-            screen_geometry = screens[1].geometry()
-        else:
-            print("第二屏幕未检测到")
-            screen_geometry = screens[0].geometry()
-        # 设置窗口在第屏幕的位置和大小
-        self.setGeometry(screen_geometry)
-        # 创建主布局
-        main_layout = QVBoxLayout()
-
-        # 创建题目显示标签控件
-        self.question_label = QLabel("题目显示区域", self)
-        self.question_label.setFont(QFont("Arial", 60))
-        self.question_label.setAlignment(Qt.AlignCenter)
-        self.question_label.setStyleSheet("QLabel { background-color: #F0F0F0; }")
-        main_layout.addWidget(self.question_label)
-
-        # 创建题目显示标签控件
-        self.check_label = QLabel("题目显示区域", self)
-        self.check_label.setFont(QFont("Arial", 60))
-        self.check_label.setAlignment(Qt.AlignCenter)
-        self.check_label.setStyleSheet("QLabel { background-color: #F0F0F0; color: #C03020;}")
-        main_layout.addWidget(self.check_label)
-        
-        # 创建答案显示标签控件
-        self.answer_label = QLabel("答案显示区域", self)
-        self.answer_label.setFont(QFont("Arial", 60))
-        self.answer_label.setAlignment(Qt.AlignCenter)
-        self.answer_label.setStyleSheet("QLabel { background-color: #F0F0F0; color: #0078D7;}")
-        main_layout.addWidget(self.answer_label)
-
-        # 设置窗口布局
-        self.setLayout(main_layout)
-
-    def Update(self, question, check_tips, answer_tips):
-        self.question_label.setText(f'题目：{question}')
-        self.check_label.setText(f'检查提示：\n{check_tips}')
-        self.answer_label.setText(f'答题提示：\n{answer_tips}')
-
 class MathDoc(QWidget):
     def __init__(self):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.05.08(V1.3.4)"
+        self.version = "2025.05.09(V1.4.0)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.set_list = []
         self.sets = set([])
@@ -107,7 +56,7 @@ class MathDoc(QWidget):
         self.screen_geometry = QDesktopWidget().screenGeometry()
         self.setGeometry(self.screen_geometry)
         self.prompter = TelePrompter(self)
-        self.prompter.showFullScreen()
+        self.prompter.showMaximized()
         self.InitUI()
 
     def InitUI(self):
@@ -766,6 +715,57 @@ class Authorization:
         else:
             self.authorization = True
 
+
+class TelePrompter(QWidget):
+    def __init__(self, main_window):
+        super().__init__()
+        self.main_window = main_window
+        self.InitUI()
+
+    def InitUI(self):
+        self.setWindowTitle("提词器")
+
+        # 获取屏幕信息
+        screens = QApplication.instance().screens()
+        if len(screens) >= 2:
+            # 获取第二个屏幕的几何信息
+            screen_geometry = screens[1].geometry()
+        else:
+            print("第二屏幕未检测到")
+            screen_geometry = screens[0].geometry()
+        # 设置窗口在第屏幕的位置和大小
+        self.setGeometry(screen_geometry)
+        # 创建主布局
+        main_layout = QVBoxLayout()
+
+        # 创建题目显示标签控件
+        self.question_label = QLabel("题目", self)
+        self.question_label.setFont(QFont("Arial", 60))
+        self.question_label.setAlignment(Qt.AlignCenter)
+        self.question_label.setStyleSheet("QLabel { background-color: #F0F0F0; }")
+        main_layout.addWidget(self.question_label)
+
+        # 创建题目显示标签控件
+        self.check_label = QLabel("检查提示", self)
+        self.check_label.setFont(QFont("Arial", 60))
+        self.check_label.setAlignment(Qt.AlignCenter)
+        self.check_label.setStyleSheet("QLabel { background-color: #F0F0F0; color: #C03020;}")
+        main_layout.addWidget(self.check_label)
+
+        # 创建答案显示标签控件
+        self.answer_label = QLabel("答案提示", self)
+        self.answer_label.setFont(QFont("Arial", 60))
+        self.answer_label.setAlignment(Qt.AlignCenter)
+        self.answer_label.setStyleSheet("QLabel { background-color: #F0F0F0; color: #0078D7;}")
+        main_layout.addWidget(self.answer_label)
+
+        # 设置窗口布局
+        self.setLayout(main_layout)
+
+    def Update(self, question, check_tips, answer_tips):
+        self.question_label.setText(f'题目：{question}')
+        self.check_label.setText(f'检查提示：\n{check_tips}')
+        self.answer_label.setText(f'答题提示：\n{answer_tips}')
 
 if __name__ == '__main__':
     local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
