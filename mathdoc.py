@@ -11,10 +11,6 @@ from PyQt5.QtGui import (QGuiApplication, QFont, QPalette, QColor)
 from PyQt5.QtCore import Qt
 from exam import *
 
-def GetScreenSize():
-    screen = QDesktopWidget().screenGeometry()
-    return screen.width(), screen.height()
-
 """
 类名称：MathDoc
 说明：数字博士App的UI
@@ -40,13 +36,13 @@ UpdateQuestion(): 更新试题
 SubmitAnswer(): 提交答案
 SetWindowSize(): 设置窗口大小
 """
-class SecondScreenWindow(QWidget):
+class TelePrompter(QWidget):
     def __init__(self, main_window):
         super().__init__()
         self.main_window = main_window
-        self.init_ui()
+        self.InitUI()
 
-    def init_ui(self):
+    def InitUI(self):
         self.setWindowTitle("提词器")
 
         # 获取屏幕信息
@@ -54,12 +50,11 @@ class SecondScreenWindow(QWidget):
         if len(screens) >= 2:
             # 获取第二个屏幕的几何信息
             screen_geometry = screens[1].geometry()
-            # 设置窗口在第二个屏幕的位置和大小
-            self.setGeometry(screen_geometry)
         else:
             print("第二屏幕未检测到")
-            return  # 如果没有检测到第二屏幕，则直接返回，不创建控件
-
+            screen_geometry = screens[0].geometry()
+        # 设置窗口在第屏幕的位置和大小
+        self.setGeometry(screen_geometry)
         # 创建主布局
         main_layout = QVBoxLayout()
 
@@ -70,20 +65,27 @@ class SecondScreenWindow(QWidget):
         self.question_label.setStyleSheet("QLabel { background-color: #F0F0F0; }")
         main_layout.addWidget(self.question_label)
 
+        # 创建题目显示标签控件
+        self.check_label = QLabel("题目显示区域", self)
+        self.check_label.setFont(QFont("Arial", 60))
+        self.check_label.setAlignment(Qt.AlignCenter)
+        self.check_label.setStyleSheet("QLabel { background-color: #F0F0F0; color: #C03020;}")
+        main_layout.addWidget(self.check_label)
+        
         # 创建答案显示标签控件
         self.answer_label = QLabel("答案显示区域", self)
         self.answer_label.setFont(QFont("Arial", 60))
         self.answer_label.setAlignment(Qt.AlignCenter)
-        self.answer_label.setStyleSheet("QLabel { background-color: #F0F0F0; }")
+        self.answer_label.setStyleSheet("QLabel { background-color: #F0F0F0; color: #0078D7;}")
         main_layout.addWidget(self.answer_label)
 
         # 设置窗口布局
         self.setLayout(main_layout)
 
-    def update_content(self):
-        if hasattr(self.main_window, 'exam') and hasattr(self.main_window.exam, 'q'):
-            self.question_label.setText(self.main_window.exam.q.question)
-            self.answer_label.setText("正确答案：" + self.main_window.exam.q.answer_tips)
+    def Update(self, question, check_tips, answer_tips):
+        self.question_label.setText(f'题目：{question}')
+        self.check_label.setText(f'检查提示：\n{check_tips}')
+        self.answer_label.setText(f'答题提示：\n{answer_tips}')
 
 class MathDoc(QWidget):
     def __init__(self):
@@ -92,7 +94,6 @@ class MathDoc(QWidget):
         self.author = "致慧星空工作室出品"
         self.version = "2025.05.08(V1.3.4)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
-        self.width, self.height = GetScreenSize()
         self.set_list = []
         self.sets = set([])
         self.exam = Exam()
@@ -103,15 +104,15 @@ class MathDoc(QWidget):
         else:
             self.base_font = QFont("Pingfang SC", 24)
         self.big_font = QFont("Arial", 32)
+        self.screen_geometry = QDesktopWidget().screenGeometry()
+        self.setGeometry(self.screen_geometry)
+        self.prompter = TelePrompter(self)
+        self.prompter.showFullScreen()
         self.InitUI()
-        self.second_screen_window = SecondScreenWindow(self)
-        self.second_screen_window.show()
-        # self.exam.Dump(self)
-        self.SetWindowSize()
-
 
     def InitUI(self):
         self.setWindowTitle(self.title)
+
         main_layout = QVBoxLayout()
         control_panel = QHBoxLayout()
 
@@ -286,12 +287,12 @@ class MathDoc(QWidget):
         main_layout.addWidget(self.answer_label, 1)
 
         # 提示栏
-        self.tips_label = QLabel()
-        self.tips_label.setFont(self.big_font)
-        self.tips_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.tips_label, 1)
+        self.check_tips_label = QLabel()
+        self.check_tips_label.setFont(self.base_font)
+        self.check_tips_label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.check_tips_label, 1)
         self.answer_tips_label = QLabel()
-        self.answer_tips_label.setFont(self.big_font)
+        self.answer_tips_label.setFont(self.base_font)
         self.answer_tips_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.answer_tips_label, 1)
 
@@ -338,7 +339,7 @@ class MathDoc(QWidget):
         self.answer_input.setFont(self.big_font)
         palette = QPalette()
         palette.setColor(QPalette.WindowText, QColor(0, 120, 215)) #0078D7
-        self.tips_label.setPalette(palette)
+        self.check_tips_label.setPalette(palette)
         self.answer_tips_label.setPalette(palette)
 
         self.set_list = [
@@ -516,7 +517,7 @@ class MathDoc(QWidget):
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
         self.exam.Generate()
-        self.tips_label.setText(self.exam.q.check_tips)
+        self.check_tips_label.setText(self.exam.q.check_tips)
         self.answer_tips_label.setText(self.exam.q.answer_tips)
         self.question_label.setText(f"{self.exam.q.question}")
         self.answer_label.setText(self.exam.q.comments)
@@ -528,17 +529,20 @@ class MathDoc(QWidget):
             f"错误：{total - self.exam.record.correct_number} 道 | 正确率：{correct_rate:.1f}%"
         )
         self.answer_input.setFocus()
+        self.exam.q.AnswerTips()
+        self.prompter.Update(self.exam.q.question, self.exam.q.check_tips, self.exam.q.answer_tips)
 
     def SubmitAnswer(self):
         self.exam.q.user_input = self.answer_input.text()
         self.exam.SubmitAnswer()
         self.answer_input.clear()
         if not self.exam.q.is_correct:
-            self.tips_label.setText(f'用户答案：{self.exam.q.user_input}；检查提示：{self.exam.q.check_tips}')
+            self.check_tips_label.setText(f'检查提示：{self.exam.q.check_tips}')
             if self.exam.q.answer_tips:
                 self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
             if self.exam.q.error_number >= 3:
                 self.UpdateQuestion()
+            self.prompter.Update(self.exam.q.question, self.exam.q.check_tips, self.exam.q.answer_tips)
         else:
             self.UpdateQuestion()
 
@@ -767,5 +771,5 @@ if __name__ == '__main__':
     local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     app = QApplication(sys.argv)
     window = MathDoc()
-    window.showMaximized()
+    window.showFullScreen()
     sys.exit(app.exec())
