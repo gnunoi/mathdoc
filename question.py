@@ -1,4 +1,5 @@
 import random
+import secrets
 import itertools
 import re
 from fractions import Fraction
@@ -7,6 +8,7 @@ from itertools import combinations
 import sympy as sp
 import ast
 import math
+import time
 
 """
 类名称: Question
@@ -84,6 +86,7 @@ class Question():
         self.user_input = ''
         self.user_answer = ''
         self.user_results = []
+        self.try_numbers = 1000
 
     def ClassName(self):
         return self.__class__.__name__
@@ -100,10 +103,13 @@ class Question():
         print()
 
     def RandInt(self, a, b):
+        seed = int(time.time() * 1000000)
         if a > b:
-            return random.randint(b, a)
+            secrets_rand = secrets.randbelow(a - b + 1) + b
         else:
-            return random.randint(a, b)
+            secrets_rand = secrets.randbelow(b - a + 1) + a
+        random_number = (seed + secrets_rand) % (b - a + 1) + a
+        return random_number
 
     def GCD(self, a, b):
         while b:
@@ -950,7 +956,9 @@ class QuestionEquation(QuestionLR):
         max1 = self.range[1]
         min2 = self.range[2]
         max2 = self.range[3]
-        while True:
+        try_numbers = 0
+        while try_numbers < self.try_numbers:
+            try_numbers += 1
             a1 = self.RandInt(min1, max1)
             b1 = self.RandInt(min1, max1)
             c1 = self.RandInt(min2, max2)
@@ -1004,14 +1012,18 @@ class QuestionEquation(QuestionLR):
                     print(f"y = {solution[y]}")
                     break
             except:
-                pass
+                self.range[0] -= 1
+                self.range[1] += 1
+                self.range[2] -= 1
+                self.range[3] += 1
 
     def Generate1v2d(self):
         [min1, max1, min2, max2] = self.range
-        while True:
+        print(self.range)
+        try_numbers = 0
+        while try_numbers < self.try_numbers:
+            try_numbers += 1
             a = self.RandInt(min1, max1)
-            b = self.RandInt(min1, max1)
-            c = self.RandInt(min2, max2)
             while a == 0:
                 a = self.RandInt(min1, max1)
             b = self.RandInt(min1, max1)
@@ -1021,9 +1033,11 @@ class QuestionEquation(QuestionLR):
                 a = a // gcd
                 b = b // gcd
                 c = c // gcd
+            print(f'{try_numbers}: a = {a}, b = {b}, c = {c}')
             if b * b - 4 * a * c < 0:
                 continue
             self.numbers = [a, b, c]
+            print(self.numbers)
             x = sp.symbols('x')
             eq = sp.Eq(a * x ** 2 + b * x + c, 0)
 
@@ -1058,6 +1072,11 @@ class QuestionEquation(QuestionLR):
             print(self.question)
             print(f"x = {solutions}")
             break
+        else:
+            self.range[0] -= 1
+            self.range[1] += 1
+            self.range[2] -= 1
+            self.range[3] += 1
 
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
