@@ -139,4 +139,4 @@
 增加第二屏幕作为提词器。
 
 ## [Release V1.4.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.4.1)
-修正没有记录答题错误的统计。
+修正错题统计错误的BUG。
