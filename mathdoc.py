@@ -471,8 +471,8 @@ class MathDoc(QWidget):
             QMessageBox.warning(None, "提醒", "软件超过使用期，请联系软件作者")
             self.ExitApp()
         self.exam.Generate()
-        self.check_tips_label.setText(self.exam.q.check_tips)
-        self.answer_tips_label.setText(self.exam.q.answer_tips)
+        self.check_tips_label.setText('')
+        self.answer_tips_label.setText('')
         self.question_label.setText(f"{self.exam.q.question}")
         self.answer_label.setText(self.exam.q.comments)
 
@@ -491,10 +491,11 @@ class MathDoc(QWidget):
         self.exam.SubmitAnswer()
         self.answer_input.clear()
         if not self.exam.q.is_correct:
-            self.check_tips_label.setText(f'检查提示：{self.exam.q.check_tips}')
+            self.check_tips_label.setText(f'用户答案：{self.exam.q.user_answer}，检查提示：{self.exam.q.check_tips}')
             if self.exam.q.answer_tips:
                 self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
             if self.exam.q.error_number >= 3:
+                self.exam.record.question_number += 1
                 self.UpdateQuestion()
             self.prompter.Update(self.exam.q.question, self.exam.q.check_tips, self.exam.q.answer_tips)
         else:

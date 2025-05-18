@@ -419,11 +419,13 @@ class QuestionFactor(QuestionRL):
             if not self.IsPrime(answer):
                 l.append(answer)
         if len(l) > 0:
-            err = f'{l}中的数不是质数；'
+            err = ', '.join(map(str, l))
+            err += '不是质数'
+
         ret = eval(expr)
         if not ret == self.numbers[0]:
             err += f'{expr} = {ret} != {self.numbers[0]}'
-        self.check_tips = f'错误：质因数分解不完整。{err}'
+        self.check_tips = err
 
 
     def AnswerTips(self):
