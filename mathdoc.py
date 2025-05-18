@@ -496,6 +496,7 @@ class MathDoc(QWidget):
                 self.answer_tips_label.setText(f'答题提示：{self.exam.q.answer_tips}')
             if self.exam.q.error_number >= 3:
                 self.exam.record.question_number += 1
+                self.exam.q.error_number = 0
                 self.UpdateQuestion()
             self.prompter.Update(self.exam.q.question, self.exam.q.check_tips, self.exam.q.answer_tips)
         else:

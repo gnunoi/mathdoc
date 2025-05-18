@@ -424,7 +424,10 @@ class QuestionFactor(QuestionRL):
 
         ret = eval(expr)
         if not ret == self.numbers[0]:
-            err += f'{expr} = {ret} != {self.numbers[0]}'
+            if err:
+                err += f'，{expr} ≠ {self.numbers[0]}'
+            else:
+                err = f'{expr} ≠ {self.numbers[0]}'
         self.check_tips = err
 
 
@@ -622,13 +625,13 @@ class QuestionLR(Question):
         user_answer = abs(self.user_answer)
         correct_answer = abs(self.correct_answer)
         if self.IsSignError():
-            tips += '1. 正负号'
+            tips += '检查正负号'
         elif user_answer % 10 != correct_answer % 10:
-            tips += '2. 个位数'
+            tips += '检查个位数'
         elif len(str(user_answer)) != len(str(correct_answer)):
-            tips += '3. 总位数'
+            tips += '检查总位数'
         elif user_answer // 10 != correct_answer // 10:
-            tips += '4. 进借位'
+            tips += '检查进借位'
         self.check_tips = f'{tips}'
         return self.check_tips
 

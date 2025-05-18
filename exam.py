@@ -183,6 +183,7 @@ class Exam:
 
     def SubmitAnswer(self):
         q = self.q
+        print(q.type)
         if not q.ProcessUserInput():
             print('无效输入，继续做题')
             return
