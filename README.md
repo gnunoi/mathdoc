@@ -140,3 +140,6 @@
 
 ## [Release V1.4.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.4.1)
 修正错题统计错误的BUG。
+
+## [Release V1.4.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.4.2)
+修正质因数分解形如"72 = 2 * 2 * 2 * 3"的答案退出的BUG。

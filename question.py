@@ -152,6 +152,7 @@ class Question():
 
     def AfterGenerate(self):
         self.start_time = datetime.now()
+        self.error_number = 0
         pass
 
     def Question(self):
@@ -295,6 +296,7 @@ class QuestionFactor(QuestionRL):
         """生成一个10到1000之间的随机数，保证有至少3个质因数"""
         # print(f'self.subtype = {self.subtype}')
         subtype = self.subtype[0]
+        self.error_number = 0
         # print(f'subtype = {subtype}')
         if subtype == 0: # 质因数分解
             self.comments = "分解质因数（用空格或*分隔质因数），如：72，输入：2 2 2 3 3 或：72 = 2 * 2 * 2 * 3 * 3"
@@ -354,8 +356,9 @@ class QuestionFactor(QuestionRL):
     def BeforeJudgeAnswer(self):
         subtype = self.subtype[0]
         if subtype == 0:
-            self.user_answer = self.user_input.strip().replace('*', ' ')
+            self.user_answer = self.user_answer.strip().replace('*', ' ')
             self.user_answer = self.user_answer.split()
+            print(self.user_answer)
             for i in range(len(self.user_answer)):
                 self.user_answer[i] = int(self.user_answer[i])
         else:

@@ -805,6 +805,7 @@ class Mail():
             except Exception as e:
                 print(f"附件读取错误: {e}")
                 return False
+        server = None
         try:
             # 创建SMTP会话
             server = smtplib.SMTP_SSL(self.server, self.port)  # 使用SSL加密
@@ -815,7 +816,8 @@ class Mail():
             print(f"邮件发送失败: {e}")
             return False
         finally:
-            server.quit()
+            if server:
+                server.quit()
 
     def SendDB(self):
         try:
@@ -848,6 +850,7 @@ class Mail():
 
     def TestCode(self):
         # 测试
+        m = Mail()
         str = m.Authority
         hex = m.Encode(str)
         print("原始字符串:", str)
