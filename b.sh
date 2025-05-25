@@ -12,7 +12,7 @@ fi
 
 # 使用 pyinstaller 打包 mathdoc.py
 echo "使用 pyinstaller 打包 mathdoc.py..."
-pyinstaller --onefile -i favicon.icns --noupx -w --name mathdoc mathdoc.py
+pyinstaller --onefile -i favicon.icns -w --name mathdoc mathdoc.py
 
 # 检查 pyinstaller 是否成功
 if [ $? -eq 0 ]; then

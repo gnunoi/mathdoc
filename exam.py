@@ -312,6 +312,7 @@ class User:
 
         self.CreateTable()
         self.Read()
+        print(self.username)
 
     def CreateTable(self):
         db = self.db
