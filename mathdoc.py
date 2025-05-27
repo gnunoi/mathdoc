@@ -79,6 +79,7 @@ class MathDoc(QWidget):
             QRadioButton('四则运算'), # type = 2
             QRadioButton('质因数分解'), # type = 3
             QRadioButton('解方程'),  # type = 4
+            QRadioButton('单位换算'),  # type = 5
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for rb in self.type_options:
@@ -111,7 +112,7 @@ class MathDoc(QWidget):
         self.qc_group.setLayout(qc_layout)
         control_panel.addWidget(self.qc_group, 1)
 
-        # 算术项数
+        # 质因数分解题型
         self.factor_group = QGroupBox("质因数题型")
         self.factor_group.setFont(self.base_font)
         factor_layout = QVBoxLayout()
@@ -158,7 +159,7 @@ class MathDoc(QWidget):
         self.operator_group.setLayout(operator_layout)
         control_panel.addWidget(self.operator_group, 1)
 
-        # 速算
+        # 方程题型
         self.equation_group = QGroupBox("方程类型")
         self.equation_group.setFont(self.base_font)
         equation_layout = QVBoxLayout()
@@ -175,6 +176,26 @@ class MathDoc(QWidget):
             equation_layout.addWidget(rb)
         self.equation_group.setLayout(equation_layout)
         control_panel.addWidget(self.equation_group, 1)
+
+        # 单位换算题型
+        self.conversion_group = QGroupBox("单位换算题型")
+        self.conversion_group.setFont(self.base_font)
+        conversion_layout = QVBoxLayout()
+        self.conversion_options = [
+            QRadioButton('长度换算'),  # 0
+            QRadioButton('面积换算'),  # 1
+            QRadioButton('体积换算'),  # 2
+            QRadioButton('质量换算'),  # 3
+            QRadioButton('时间换算'),  # 4
+        ]
+        if not any(rb.isChecked() for rb in self.conversion_options):
+            self.conversion_options[self.exam.setting.type_conversion].setChecked(True)
+        for rb in self.conversion_options:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            conversion_layout.addWidget(rb)
+        self.conversion_group.setLayout(conversion_layout)
+        control_panel.addWidget(self.conversion_group, 1)
 
         # 数值范围
         self.range_groups = []
@@ -298,10 +319,11 @@ class MathDoc(QWidget):
 
         self.set_list = [
             set([self.range_groups[0]]), # type = 0
-            set([self.qc_group, self.range_groups[1]]), # type = 1
-            set([self.term_group, self.operator_group,self.range_groups[2]]), # type = 2
-            set([self.factor_group, self.range_groups[3]]), # type = 3
-            set([self.equation_group, self.range_groups[4]]),  # type = 4
+            set([self.qc_group, self.range_groups[1]]), # type = 1 # 24点题型
+            set([self.term_group, self.operator_group,self.range_groups[2]]), # type = 2 # 速算题型
+            set([self.factor_group, self.range_groups[3]]), # type = 3 # 质因数分解题型
+            set([self.equation_group, self.range_groups[4]]),  # type = 4 # 解方程题型
+            set([self.conversion_group]),  # type = 5 # 单位换算题型
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -461,6 +483,13 @@ class MathDoc(QWidget):
                                                      self.exam.setting.max_coefficient,
                                                      self.exam.setting.min_constant,
                                                      self.exam.setting.max_constant])
+                elif i == 5 :
+                    for i, rb in enumerate(self.conversion_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_conversion = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_conversion])
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案

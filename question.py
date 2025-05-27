@@ -10,6 +10,8 @@ import ast
 import math
 import time
 
+from PyQt5.QtWidgets import QVBoxLayout
+
 """
 类名称: Question
 说明：各种题目的基础类
@@ -136,7 +138,7 @@ class Question():
         self.error_number = 0
         self.expression = ''
         self.is_correct = False
-        # self.name = ''
+        self.name = ''
         self.numbers = []
         self.operators = []
         self.question = ''
@@ -882,7 +884,7 @@ class Question4AO(QuestionLR):
         return self.answer_tips
 
 class QuestionEquation(QuestionLR):
-    def __init__(self, subtype=[0, 0], range=[1, 5, 1, 20]):
+    def __init__(self, subtype=[0], range=[1, 5, 1, 20]):
         super().__init__(type=1, subtype=subtype, range=range)
         self.name = "解方程"
         if self.subtype[0] == 0:
@@ -1328,4 +1330,22 @@ class QuestionEquation(QuestionLR):
         else:
             self.answer_tips = f'delta = {delta}, x1 = {r1 + r2}, x2 = {r1 - r2}'
 
+class QuestionConversion(QuestionLR):
+    def __init__(self, subtype=[0]):
+        super().__init__(type=5, subtype=subtype, range=range)
+        self.name = "单位换算"
+        if self.subtype[0] == 0:
+            self.comments = "长度换算："
+        elif self.subtype[0] == 1:
+            self.comments = "面积换算："
+        elif self.subtype[0] == 2:
+            self.comments = "体积换算："
+        elif self.subtype[0] == 3:
+            self.comments = "质量换算："
+        elif self.subtype[0] == 4:
+            self.comments = "时间换算："
+        self.Generate()
 
+    def Generate(self):
+        self.BeforeGenerate()
+        print(f'self.question: {self.question}')
