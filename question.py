@@ -1427,14 +1427,14 @@ class QuestionConversion(QuestionLR):
             small_rate = self.rates[sub_type][small_unit]
             print(small_unit, big_unit, small_rate, big_rate)
             if small_unit == big_unit:
-                # print('small_unit == big_unit')
                 continue
             elif big_rate < small_rate or big_rate > small_rate * 1e6:
-                # print(big_rate, small_rate)
-                # print('big_rate < small_rate or big_rate > small_rate * 1e6')
                 continue
             else:
                 break
+        rate = big_rate / small_rate
+        if self.subtype[0] == 4 and rate > 1000:  # 时间换算题型
+            big_num = random.choice([1,2,3,5,10])
         small_num = big_num *  big_rate / small_rate
         if small_num  == int(small_num):
             small_num = int(small_num)
@@ -1468,7 +1468,7 @@ class QuestionConversion(QuestionLR):
             self.small_num = f'{small_num: ,.0f}'.replace(',', ' ')
         else:
             self.small_num = f'{small_num: ,.1f}'.replace(',', ' ')
-        self.rate = str(f'{self.big_rate / self.small_rate : ,.0f}').replace(',', ' ')
+        self.rate = str(f'{big_rate / small_rate : ,.0f}').replace(',', ' ')
         self.AfterGenerate()
 
     def JudgeAnswer(self):
