@@ -45,7 +45,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.05.21(V1.4.2)"
+        self.version = "2025.05.29(V1.5.0)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.set_list = []
         self.sets = set([])
@@ -776,7 +776,7 @@ class TelePrompter(QWidget):
         self.setGeometry(screen_geometry)
         # 创建主布局
         main_layout = QVBoxLayout()
-
+        print(screen_geometry)
         # 创建题目显示标签控件
         self.question_label = QLabel("题目", self)
         self.question_label.setFont(QFont("Arial", 60))

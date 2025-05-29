@@ -6,11 +6,8 @@ from fractions import Fraction
 from datetime import datetime
 from itertools import combinations
 import sympy as sp
-import ast
 import math
 import time
-
-from PyQt5.QtWidgets import QVBoxLayout
 
 """
 类名称: Question
@@ -155,7 +152,6 @@ class Question():
     def AfterGenerate(self):
         self.start_time = datetime.now()
         self.error_number = 0
-        pass
 
     def Question(self):
         pass
@@ -178,6 +174,8 @@ class Question():
         self.answer_tips = ''
         self.solution = ''
         self.is_correct = False
+        self.end_time = datetime.now()
+        self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
 
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
@@ -1332,8 +1330,78 @@ class QuestionEquation(QuestionLR):
 
 class QuestionConversion(QuestionLR):
     def __init__(self, subtype=[0]):
-        super().__init__(type=5, subtype=subtype, range=range)
         self.name = "单位换算"
+        # 定义长度单位之间的换算关系（基数为米）
+        self.length_rates = {
+            "千米": 1e12,
+            "米": 1e9,
+            "分米": 1e8,
+            "厘米": 1e7,
+            "毫米": 1e6,
+            "微米": 1e3,
+            "纳米": 1,
+        }
+        self.area_rates = {
+            "平方千米": 1e6,
+            "公顷": 1e4,
+            "亩": Fraction(2000,3),
+            "平方米": 1,
+            "平方分米": 1e-2,
+            "平方厘米": 1e-4,
+            "平方毫米": 1e-6,
+            "平方微米": 1e-12,
+            "平方纳米": 1e-18,
+        }
+        self.volume_rates = {
+            "立方千米": 1e9,
+            "立方米": 1,
+            "立方分米": 1e-3,
+            "升": 1e-3,
+            "立方厘米": 1e-6,
+            "毫升": 1e-6,
+            "立方毫米": 1e-9,
+            "立方微米": 1e-18,
+            "立方纳米": 1e-27,
+        }
+        self.mass_rates = {
+            "吨": 1e6,
+            "千克": 1e3,
+            "克": 1,
+            "毫克": 1e-3,
+            "微克": 1e-6,
+            "纳克": 1e-9,
+        }
+        self.time_rates = {
+            "天": 86400,
+            "时": 3600,
+            "分": 60,
+            "秒": 1,
+            "毫秒": 1e-3,
+            "微秒": 1e-6,
+            "纳秒": 1e-9,
+        }
+        self.rates = [
+            self.length_rates,
+            self.area_rates,
+            self.volume_rates,
+            self.mass_rates,
+            self.time_rates,
+        ]
+        self.length_units = list(self.length_rates.keys())
+        self.area_units = list(self.area_rates.keys())
+        self.volume_units = list(self.volume_rates.keys())
+        self.mass_units = list(self.mass_rates.keys())
+        self.time_units = list(self.time_rates.keys())
+        self.units = [
+            self.length_units,
+            self.area_units,
+            self.volume_units,
+            self.mass_units,
+            self.time_units,
+        ]
+        # print(self.length_units)
+        super().__init__(type=5, subtype=subtype)
+
         if self.subtype[0] == 0:
             self.comments = "长度换算："
         elif self.subtype[0] == 1:
@@ -1347,5 +1415,80 @@ class QuestionConversion(QuestionLR):
         self.Generate()
 
     def Generate(self):
+        sub_type = self.subtype[0]
         self.BeforeGenerate()
-        print(f'self.question: {self.question}')
+        while True:
+            big_num = self.RandInt(1, 100) / 10
+            if big_num == int(big_num):
+                big_num = int(big_num)
+            big_unit = random.choice(self.units[sub_type])
+            small_unit = random.choice(self.units[sub_type])
+            big_rate = self.rates[sub_type][big_unit]
+            small_rate = self.rates[sub_type][small_unit]
+            print(small_unit, big_unit, small_rate, big_rate)
+            if small_unit == big_unit:
+                # print('small_unit == big_unit')
+                continue
+            elif big_rate < small_rate or big_rate > small_rate * 1e6:
+                # print(big_rate, small_rate)
+                # print('big_rate < small_rate or big_rate > small_rate * 1e6')
+                continue
+            else:
+                break
+        small_num = big_num *  big_rate / small_rate
+        if small_num  == int(small_num):
+            small_num = int(small_num)
+        if self.RandInt(0, 1) == 0: # 大单位换算为小单位
+            self.direction = 1
+            if int(big_num) == big_num:
+                self.question = f'{int(big_num)}{big_unit} = (        ){small_unit}'
+            else:
+                self.question = f'{float(big_num):.1f}{big_unit} = (        ){small_unit}'
+            if small_num == int(small_num):
+                self.correct_answer = int(small_num)
+            else:
+                self.correct_answer = small_num
+        else: # 小单位换算为大单位
+            self.direction = -1
+
+            if abs(small_num - int(small_num)) < 1e-3:
+                str_small_num = f'{small_num: ,.0f}'.replace(',', ' ')
+                self.question = f'{str_small_num}{small_unit} = (        ){big_unit}'
+            else:
+                str_small_num = f'{small_num: ,.1f}'.replace(',', ' ')
+                self.question = f'{str_small_num}{small_unit} = (        ){big_unit}'
+            self.correct_answer = big_num
+        print(f'{self.question} : {self.correct_answer}')
+        self.big_unit = big_unit
+        self.small_unit = small_unit
+        self.big_rate = big_rate
+        self.small_rate = small_rate
+        self.big_num = big_num
+        if small_num == int(small_num):
+            self.small_num = f'{small_num: ,.0f}'.replace(',', ' ')
+        else:
+            self.small_num = f'{small_num: ,.1f}'.replace(',', ' ')
+        self.rate = str(f'{self.big_rate / self.small_rate : ,.0f}').replace(',', ' ')
+        self.AfterGenerate()
+
+    def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
+        user_answer = float(self.user_answer)
+        print(user_answer)
+        print(self.correct_answer)
+        if abs(user_answer - self.correct_answer) < 1e-3 :
+            self.is_correct = True
+        else:
+            self.is_correct = False
+        return self.is_correct
+
+    def CheckTips(self):
+        self.check_tips = f'1{self.big_unit} = {self.rate}{self.small_unit}'
+        pass
+
+    def AnswerTips(self):
+        if self.direction > 0:
+            self.answer_tips = f'{self.big_num} × {self.rate} = {self.small_num}'
+        else:
+            self.answer_tips = f'{self.small_num} ÷ {self.rate} = {self.big_num}'
+        pass

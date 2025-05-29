@@ -226,11 +226,11 @@ class Exam:
         ql = self.record.question_list
         q.Generate()
         count = 0
-        for count in range(1000):
+        for count in range(100):
             count += 1
             # print(count)
             if q.question in ql:
-                # print(f'{[q.question]} 存在于 {ql} 中')
+                print(f'{[q.question]} 存在于 {ql} 中')
                 q.Generate()
             else:
                 # print(f'{[q.question]} 不存在于 {ql} 中')
