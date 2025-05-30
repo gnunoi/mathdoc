@@ -355,19 +355,22 @@ class QuestionFactor(QuestionRL):
 
     def BeforeJudgeAnswer(self):
         subtype = self.subtype[0]
-        if subtype == 0:
-            self.user_answer = self.user_answer.strip().replace('*', ' ')
-            self.user_answer = self.user_answer.split()
-            print(self.user_answer)
-            for i in range(len(self.user_answer)):
-                self.user_answer[i] = int(self.user_answer[i])
-        else:
-            self.user_answer = self.user_input.strip().replace('*', ' ')
-            self.user_answer = self.user_answer.replace(',', ' ')
-            self.user_answer = self.user_answer.replace('，', ' ')
-            self.user_answer = self.user_answer.replace(' ', '=')
-            self.user_answer = self.user_answer.split('=')[-1]
-            self.user_answer = int(self.user_answer)
+        try:
+            if subtype == 0:
+                self.user_answer = self.user_answer.strip().replace('*', ' ')
+                self.user_answer = self.user_answer.split()
+                print(self.user_answer)
+                for i in range(len(self.user_answer)):
+                    self.user_answer[i] = int(self.user_answer[i])
+            else:
+                self.user_answer = self.user_input.strip().replace('*', ' ')
+                self.user_answer = self.user_answer.replace(',', ' ')
+                self.user_answer = self.user_answer.replace('，', ' ')
+                self.user_answer = self.user_answer.replace(' ', '=')
+                self.user_answer = self.user_answer.split('=')[-1]
+                self.user_answer = int(self.user_answer)
+        except:
+            print(f'{self.user_answer}含有无效信息')
 
     def JudgeAnswer(self):
         # print(f'JudgeAnswer() in QuestionFactor')
@@ -418,20 +421,23 @@ class QuestionFactor(QuestionRL):
         expr = ' * '.join(map(str, self.user_answer))
         l = []
         err = ''
-        for answer in self.user_answer:
-            if not self.IsPrime(answer):
-                l.append(answer)
-        if len(l) > 0:
-            err = ', '.join(map(str, l))
-            err += '不是质数'
+        try:
+            for answer in self.user_answer:
+                if not self.IsPrime(answer):
+                    l.append(answer)
+            if len(l) > 0:
+                err = ', '.join(map(str, l))
+                err += '不是质数'
 
-        ret = eval(expr)
-        if not ret == self.numbers[0]:
-            if err:
-                err += f'，{expr} ≠ {self.numbers[0]}'
-            else:
-                err = f'{expr} ≠ {self.numbers[0]}'
-        self.check_tips = err
+            ret = eval(expr)
+            if not ret == self.numbers[0]:
+                if err:
+                    err += f'，{expr} ≠ {self.numbers[0]}'
+                else:
+                    err = f'{expr} ≠ {self.numbers[0]}'
+            self.check_tips = err
+        except:
+            self.check_tips = f'{self.user_answer}含有无效信息'
 
 
     def AnswerTips(self):
@@ -573,10 +579,15 @@ class QuestionLR(Question):
         for opr in ['+', '-', '*', '/', '=',]:
             self.user_answer == self.user_answer.replace(opr, ' ')
         self.user_answer = self.user_answer.split(' ')[-1]
-        if self.correct_answer == int(self.user_answer):
-            self.is_correct = True
-            return True
-        else:
+        try:
+            if self.correct_answer == int(self.user_answer):
+                self.is_correct = True
+                return True
+            else:
+                self.is_correct = False
+                self.error_number += 1
+                return False
+        except:
             self.is_correct = False
             self.error_number += 1
             return False
@@ -623,19 +634,22 @@ class QuestionLR(Question):
     def CheckTips(self):
         # print(self.user_answer)
         tips = ''
-        if type(self.user_answer) == str:
-            self.user_answer = eval(self.Fraction(self.user_answer))
-        user_answer = abs(self.user_answer)
-        correct_answer = abs(self.correct_answer)
-        if self.IsSignError():
-            tips += '检查正负号'
-        elif user_answer % 10 != correct_answer % 10:
-            tips += '检查个位数'
-        elif len(str(user_answer)) != len(str(correct_answer)):
-            tips += '检查总位数'
-        elif user_answer // 10 != correct_answer // 10:
-            tips += '检查进借位'
-        self.check_tips = f'{tips}'
+        try:
+            if type(self.user_answer) == str:
+                self.user_answer = eval(self.Fraction(self.user_answer))
+            user_answer = abs(self.user_answer)
+            correct_answer = abs(self.correct_answer)
+            if self.IsSignError():
+                tips += '检查正负号'
+            elif user_answer % 10 != correct_answer % 10:
+                tips += '检查个位数'
+            elif len(str(user_answer)) != len(str(correct_answer)):
+                tips += '检查总位数'
+            elif user_answer // 10 != correct_answer // 10:
+                tips += '检查进借位'
+            self.check_tips = f'{tips}'
+        except:
+            self.check_tips = f'{self.user_answer}含有无效信息'
         return self.check_tips
 
     def AnswerTips(self):
@@ -1472,12 +1486,15 @@ class QuestionConversion(QuestionLR):
 
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
-        user_answer = float(self.user_answer.strip().replace(' ', ''))
-        print(user_answer)
-        print(self.correct_answer)
-        if abs(user_answer - self.correct_answer) < 1e-3 :
-            self.is_correct = True
-        else:
+        try:
+            user_answer = float(self.user_answer.strip().replace(' ', ''))
+            print(user_answer)
+            print(self.correct_answer)
+            if abs(user_answer - self.correct_answer) < 1e-3 :
+                self.is_correct = True
+            else:
+                self.is_correct = False
+        except:
             self.is_correct = False
         return self.is_correct
 

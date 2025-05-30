@@ -1,4 +1,7 @@
 # MathDoc Application
+## [Release V1.5.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.5.2)
+完善各种题型输入答案方式的保护。
+
 ## [Release V1.5.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.5.1)
 完善单位换算题型的提示以及答案输入方式。
 

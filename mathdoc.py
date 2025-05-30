@@ -45,7 +45,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.05.30(V1.5.1)"
+        self.version = "2025.05.30(V1.5.2)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.set_list = []
         self.sets = set([])
