@@ -177,7 +177,9 @@ class Exam:
             return QuestionFactor(subtype=self.subtype, range=self.range)
         elif self.type == 4:  # 4: 解方程
             return QuestionEquation(subtype=self.subtype, range=self.range)
-        elif self.type == 5:  # 4: 单位换算
+        elif self.type == 5:  # 5: 单位换算
+            return QuestionConversion(subtype=self.subtype)
+        elif self.type == 6:  # 6: 乘幂运算
             return QuestionConversion(subtype=self.subtype)
         else:
             print(f'{self.type}: 无效的类型')
@@ -436,6 +438,7 @@ class Setting:
             'max_constant': 20,
             'type_equation': 0,
             'type_conversion': 0,
+            'type_power': 0,
         }
         self.CreateTable()
         self.Read()

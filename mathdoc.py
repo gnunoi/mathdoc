@@ -45,7 +45,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.05.30(V1.5.2)"
+        self.version = "2025.05.31(V1.6.0)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.set_list = []
         self.sets = set([])
@@ -80,6 +80,7 @@ class MathDoc(QWidget):
             QRadioButton('质因数分解'), # type = 3
             QRadioButton('解方程'),  # type = 4
             QRadioButton('单位换算'),  # type = 5
+            QRadioButton('乘幂运算'),  # type = 6
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for rb in self.type_options:
@@ -196,6 +197,27 @@ class MathDoc(QWidget):
             conversion_layout.addWidget(rb)
         self.conversion_group.setLayout(conversion_layout)
         control_panel.addWidget(self.conversion_group, 1)
+
+        # 乘幂运算题型
+        self.power_group = QGroupBox("乘幂运算题型")
+        self.power_group.setFont(self.base_font)
+        power_layout = QVBoxLayout()
+        self.power_options = [
+            QRadioButton('乘幂求值'),  # 0
+            QRadioButton('乘幂加法'),  # 1
+            QRadioButton('乘幂减法'),  # 2
+            QRadioButton('乘幂乘法'),  # 3
+            QRadioButton('乘幂除法'),  # 4
+            QRadioButton('乘幂的乘幂'),  # 5
+        ]
+        if not any(rb.isChecked() for rb in self.power_options):
+            self.power_options[self.exam.setting.type_power].setChecked(True)
+        for rb in self.power_options:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            power_layout.addWidget(rb)
+        self.power_group.setLayout(power_layout)
+        control_panel.addWidget(self.power_group, 1)
 
         # 数值范围
         self.range_groups = []
@@ -324,6 +346,7 @@ class MathDoc(QWidget):
             set([self.factor_group, self.range_groups[3]]), # type = 3 # 质因数分解题型
             set([self.equation_group, self.range_groups[4]]),  # type = 4 # 解方程题型
             set([self.conversion_group]),  # type = 5 # 单位换算题型
+            set([self.power_group]),  # type = 6 # 乘幂运算题型
         ]
         self.sets = set([])
         for s in self.set_list:

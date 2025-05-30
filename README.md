@@ -1,4 +1,7 @@
 # MathDoc Application
+## [Release V1.6.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.6.0)
+增加乘幂运算题型。
+
 ## [Release V1.5.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.5.2)
 完善各种题型输入答案方式的保护。
 
