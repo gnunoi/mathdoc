@@ -253,12 +253,13 @@ class Exam:
     def Run(self):
         self.Register()
         print()
-        type = 1
+        type = 5
         parms = [{'type': 0, 'subtype': [0], 'range': [1, 10]},
                  {'type': 1, 'subtype': [0, 0], 'range': [10, 50]},
                  {'type': 2, 'subtype': [1, 4], 'range': [-50, 50, 2, 10]},
                  {'type': 3, 'subtype': [0], 'range': [6, 200]},
                  {'type': 4, 'subtype': [0], 'range': [1, 5, 1, 20]},
+                 {'type': 5, 'subtype': [0], 'range': [1, 5, 1, 20]},
                  ]
         self.UpdateSetting(parms[type]['type'], parms[type]['subtype'], parms[type]['range'])
         q = self.q

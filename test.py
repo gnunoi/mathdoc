@@ -6,8 +6,6 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import numpy as np
-
 
 class LaTeXImageGenerator(QWidget):
     def __init__(self):
