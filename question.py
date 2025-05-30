@@ -1403,15 +1403,15 @@ class QuestionConversion(QuestionLR):
         super().__init__(type=5, subtype=subtype)
 
         if self.subtype[0] == 0:
-            self.comments = "长度换算："
+            self.comments = "长度换算：1米 = (    )毫米，输入答案：1000，或1 000，或 = 1 000"
         elif self.subtype[0] == 1:
-            self.comments = "面积换算："
+            self.comments = "面积换算：1平方米 = (    )平方厘米，输入答案：10000，或10 000，或 = 10 000"
         elif self.subtype[0] == 2:
-            self.comments = "体积换算："
+            self.comments = "体积换算：1升 = (    )毫升，输入答案：1000，或1 000，或 = 1 000"
         elif self.subtype[0] == 3:
-            self.comments = "质量换算："
+            self.comments = "质量换算：1吨 = (    )千克，输入答案：1000，或1 000，或 = 1 000"
         elif self.subtype[0] == 4:
-            self.comments = "时间换算："
+            self.comments = "时间换算：1天 = (    )秒，输入答案：86400，或86 400，或 = 86 400"
         self.Generate()
 
     def Generate(self):
@@ -1444,13 +1444,12 @@ class QuestionConversion(QuestionLR):
                 self.question = f'{int(big_num)}{big_unit} = (        ){small_unit}'
             else:
                 self.question = f'{float(big_num):.1f}{big_unit} = (        ){small_unit}'
-            if small_num == int(small_num):
+            if abs(small_num - int(small_num)) < 1e-3:
                 self.correct_answer = int(small_num)
             else:
                 self.correct_answer = small_num
         else: # 小单位换算为大单位
             self.direction = -1
-
             if abs(small_num - int(small_num)) < 1e-3:
                 str_small_num = f'{small_num: ,.0f}'.replace(',', ' ')
                 self.question = f'{str_small_num}{small_unit} = (        ){big_unit}'
@@ -1473,7 +1472,7 @@ class QuestionConversion(QuestionLR):
 
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
-        user_answer = float(self.user_answer)
+        user_answer = float(self.user_answer.strip().replace(' ', ''))
         print(user_answer)
         print(self.correct_answer)
         if abs(user_answer - self.correct_answer) < 1e-3 :

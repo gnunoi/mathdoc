@@ -146,3 +146,6 @@
 
 ## [Release V1.5.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.5.0)
 增加单位换算题型。
+
+## [Release V1.5.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.5.1)
+完善单位换算题型的提示以及答案输入方式。
