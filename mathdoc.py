@@ -55,8 +55,8 @@ class MathDoc(QWidget):
         self.screen_geometry = self.primary_screen.geometry()
         self.ppi = self.screen_geometry.width() / self.physical_size.width() * 25.4
         self.setGeometry(self.screen_geometry)
-        print(self.physical_size.width())
-        print(self.screen_geometry.width(), self.screen_geometry.height(), self.scale_factor, self.ppi)
+        # print(self.physical_size.width())
+        # print(self.screen_geometry.width(), self.screen_geometry.height(), self.scale_factor, self.ppi)
         if self.screen_geometry.width() <= 1024:
             self.base_font_size = 12
             self.big_font_size = 18
@@ -589,7 +589,7 @@ class MathDoc(QWidget):
         self.exam.Generate()
         self.check_tips_label.setText('')
         self.answer_tips_label.setText('')
-        if self.exam.setting.type == 6:
+        if self.exam.setting.type == 6 or self.exam.setting.type == 7:
             # 在标签中显示图片
             pixmap = QPixmap(os.path.join(self.exam.q.path, 'question.png'))
             self.question_label.setPixmap(pixmap)
@@ -861,7 +861,7 @@ class TelePrompter(QWidget):
             # 获取第二个屏幕的几何信息
             screen_geometry = screens[1].geometry()
             self.second_screen = screens[1]
-            print(self.second_screen)
+            # print(self.second_screen)
         else:
             print("第二屏幕未检测到")
             screen_geometry = screens[0].geometry()
@@ -869,7 +869,7 @@ class TelePrompter(QWidget):
         self.setGeometry(screen_geometry)
         # 创建主布局
         main_layout = QVBoxLayout()
-        print(screen_geometry)
+        # print(screen_geometry)
         # 创建题目显示标签控件
         self.question_label = QLabel("题目", self)
         self.question_label.setFont(QFont("Arial", 60))

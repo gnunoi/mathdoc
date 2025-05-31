@@ -18,7 +18,7 @@ def GetFontSize():
     scale_factor = primary_screen.devicePixelRatio()
     screen_geometry = primary_screen.geometry()
     ppi = screen_geometry.width() / physical_size.width() * 25.4
-    dpi = ppi * scale_factor
+    # dpi = ppi * scale_factor
     if screen_geometry.width() <= 1024:
         base_font_size = 12
         big_font_size = 18
@@ -157,6 +157,20 @@ class Question():
 
     def LCM(self, a, b):
         return a * b // self.GCD(a, b)
+
+    def Latex2PNG(self, latex_formula, output_file, margin=0.5):
+        ppi, font_size = GetFontSize()
+        # print(ppi, font_size)
+        plt.rcParams['font.sans-serif'] = ['Arial']  # 用来正常显示中文标签
+        fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
+        # 在图形上添加文本（LaTeX 公式）
+        text = fig.text(0, 0, latex_formula, fontdict={'size': font_size})
+        # 自动调整布局，增加边距
+        fig.tight_layout(pad=margin)
+        # 保存图形为 PNG 文件，自动调整图片大小，背景透明
+        fig.savefig(output_file, dpi=ppi, format='png', transparent=True, bbox_inches='tight')
+        # 关闭图形，释放资源
+        plt.close(fig)
 
     def BeforeGenerate(self):
         """
@@ -614,8 +628,8 @@ class QuestionLR(Question):
         self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
-        print(type(self.correct_answer))
-        print(type(self.user_answer))
+        # print(type(self.correct_answer))
+        # print(type(self.user_answer))
         for opr in ['+', '-', '*', '/', '=',]:
             self.user_answer == self.user_answer.replace(opr, ' ')
         self.user_answer = self.user_answer.split(' ')[-1]
@@ -1479,7 +1493,7 @@ class QuestionConversion(QuestionLR):
             small_unit = random.choice(self.units[sub_type])
             big_rate = self.rates[sub_type][big_unit]
             small_rate = self.rates[sub_type][small_unit]
-            print(small_unit, big_unit, small_rate, big_rate)
+            # print(small_unit, big_unit, small_rate, big_rate)
             if small_unit == big_unit:
                 continue
             elif big_rate < small_rate or big_rate > small_rate * 1e6:
@@ -1528,8 +1542,8 @@ class QuestionConversion(QuestionLR):
         self.BeforeJudgeAnswer()
         try:
             user_answer = float(self.user_answer.strip().replace(' ', ''))
-            print(user_answer)
-            print(self.correct_answer)
+            # print(user_answer)
+            # print(self.correct_answer)
             if abs(user_answer - self.correct_answer) < 1e-3 :
                 self.is_correct = True
             else:
@@ -1583,20 +1597,6 @@ class QuestionPower(QuestionLR):
             self.comments = "乘幂的乘幂：(2**4)**4 = 2**(4*4) = 2**16 = 65536，答案输入：65536或：= 65536"
         self.Generate()
 
-    def Latex2PNG(self, latex_formula, output_file, margin=0.5):
-        ppi, font_size = GetFontSize()
-        print(ppi, font_size)
-        plt.rcParams['font.sans-serif'] = ['Arial']  # 用来正常显示中文标签
-        fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
-        # 在图形上添加文本（LaTeX 公式）
-        text = fig.text(0, 0, latex_formula, fontdict={'size': font_size})
-        # 自动调整布局，增加边距
-        fig.tight_layout(pad=margin)
-        # 保存图形为 PNG 文件，自动调整图片大小，背景透明
-        fig.savefig(output_file, dpi=ppi, format='png', transparent=True, bbox_inches='tight')
-        # 关闭图形，释放资源
-        plt.close(fig)
-
     def Generate(self):
         sub_type = self.subtype[0]
         self.BeforeGenerate()
@@ -1617,7 +1617,7 @@ class QuestionPower(QuestionLR):
         sub = random.choice(range(len(power)))
         a = power[sub]['base']
         n = random.choice(power[sub]['exponent'])
-        print(f'a = {a}, n = {n}')
+        # print(f'a = {a}, n = {n}')
         self.expression = f'{a} ** {n}'
         self.question = self.expression + ' = '
         self.formula = f'{a}' + '^' + '{' + f'{n}' + '} = '
@@ -1636,7 +1636,7 @@ class QuestionPower(QuestionLR):
             n2 = n1 + 1
         else:
             n2 = n1 - 1
-        print(f'a = {a}, n1 = {n1}, n2 = {n2}')
+        # print(f'a = {a}, n1 = {n1}, n2 = {n2}')
         self.expression = f'{a} ** {n1} {sign} {a} ** {n2}'
         self.question = self.expression + ' = '
         self.formula = f'{a}' + '^' + '{' + f'{n1}' + '}' + f'{sign}' + f'{a}' + '^' + '{' + f'{n2}' + '}' + ' = '
@@ -1666,7 +1666,7 @@ class QuestionPower(QuestionLR):
                 n2 = random.choice(power[sub]['exponent'])
             else:
                 n2 = int(n1 / 2)
-        print(f'a = {a}, n1 = {n1}, n2 = {n2}')
+        # print(f'a = {a}, n1 = {n1}, n2 = {n2}')
         self.expression = f'{a} ** {n1} {sign} {a} ** {n2}'
         self.question = self.expression + ' = '
         self.formula = f'{a}' + '^' + '{' + f'{n1}' + '}' + f'{latex_sign}' + f'{a}' + '^' + '{' + f'{n2}' + '}' + ' = '
@@ -1763,11 +1763,91 @@ class QuestionFraction(QuestionLR):
             self.comments = "分数乘法：1/2 × 1/3 = ，答案输入：1/6，或：1/2 × 1/3 = 1/6"
         elif subtype[0] == 3:
             self.comments = "分数除法：1/2 ÷ 1/3 = ，答案输入：3/2，或：1/2 ÷ 1/3 = 3/2"
-        print(self.comments)
+        # print(self.comments)
 
         self.Generate()
 
     def Generate(self):
-        self.question = '1/2 + 1/3 = '
-        self.correct_answer = Fraction(5, 6)
-        pass
+        sub_type = self.subtype[0]
+        self.BeforeGenerate()
+        a = self.RandInt(2, 10)
+        b = self.RandInt(1, a-1)
+        gcd = self.GCD(a, b)
+        if gcd != 1:
+            a //= gcd
+            b //= gcd
+        c = self.RandInt(2, 10)
+        d = self.RandInt(1, c-1)
+        gcd = self.GCD(c, d)
+        if gcd != 1:
+            c //= gcd
+            d //= gcd
+        self.numbers = [a, b, c, d]
+        if sub_type == 0:
+            self.expression = f'{b}/{a} + {d}/{c}'
+            sign = '+'
+            self.formula = '\\dfrac{' + f'{b}' + '}{' + f'{a}' + '}' + f'{sign}' + '\\dfrac{' + f'{d}' + '}{' + f'{c}' + '} = '
+            self.correct_answer = Fraction(b, a) + Fraction(d, c)
+        elif sub_type == 1:
+            self.expression = f'{b}/{a} - {d}/{c}'
+            sign = '-'
+            self.formula = '\\dfrac{' + f'{b}' + '}{' + f'{a}' + '}' + f'{sign}' + '\\dfrac{' + f'{d}' + '}{' + f'{c}' + '} = '
+            self.correct_answer = Fraction(b, a) - Fraction(d, c)
+        elif sub_type == 2:
+            self.expression = f'{b}/{a} × {d}/{c}'
+            sign = '\\times'
+            self.formula = '\\dfrac{' + f'{b}' + '}{' + f'{a}' + '}' + f'{sign}' + '\\dfrac{' + f'{d}' + '}{' + f'{c}' + '} = '
+            self.correct_answer = Fraction(b, a) * Fraction(d, c)
+        elif sub_type == 3:
+            self.expression = f'{b}/{a} ÷ {d}/{c}'
+            sign = '\\div'
+            self.formula = '\\dfrac{' + f'{b}' + '}{' + f'{a}' + '}' + f'{sign}' + '\\dfrac{' + f'{d}' + '}{' + f'{c}' + '} = '
+            self.correct_answer = Fraction(b, a) / Fraction(d, c)
+        self.question = self.expression + ' = '
+        print(f'{self.question} = {self.correct_answer}')
+        latex = r'${}$'.format(self.formula)
+        self.Latex2PNG(latex, self.png_file)
+        self.AfterGenerate()
+
+    def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
+        user_answer = Fraction(self.user_answer)
+        if user_answer == self.correct_answer:
+            self.is_correct = True
+        else:
+            self.is_correct = False
+        return self.is_correct
+
+    def CheckTips(self):
+        try:
+            [a, b, c, d] = self.numbers
+            denominator = self.LCM(a, c)
+            if self.subtype[0] == 0:
+                self.check_tips = f'{self.expression} = {int(denominator*b/a)}/{denominator} + {int(denominator*d/c)}/{denominator}'
+                self.check_tips += f' = {int(denominator*b/a + denominator*d/c)}/{denominator} = {self.correct_answer}'
+            elif self.subtype[0] == 1:
+                self.check_tips = f'{self.expression} = {int(denominator*b/a)}/{denominator} - {int(denominator*d/c)}/{denominator}'
+                self.check_tips += f' = {int(denominator*b/a - denominator*d/c)}/{denominator} = {self.correct_answer}'
+            elif self.subtype[0] == 2:
+                self.check_tips = f'{self.expression} = {b * d}/{a * c} = {self.correct_answer}'
+            elif self.subtype[0] == 3:
+                self.check_tips = f'{self.expression} = {b}/{a} × {c}/{d} = {b*c}/{a*d} = {self.correct_answer}'
+        except:
+            pass
+
+    def AnswerTips(self):
+        try:
+            [a, b, c, d] = self.numbers
+            denominator = self.LCM(a, c)
+            if self.subtype[0] == 0:
+                self.answer_tips = f'{self.expression} = {int(denominator*b/a)}/{denominator} + {int(denominator*d/c)}/{denominator}'
+                self.answer_tips += f' = {int(denominator*b/a + denominator*d/c)}/{denominator} = {self.correct_answer}'
+            elif self.subtype[0] == 1:
+                self.answer_tips = f'{self.expression} = {int(denominator*b/a)}/{denominator} - {int(denominator*d/c)}/{denominator}'
+                self.answer_tips += f' = {int(denominator*b/a - denominator*d/c)}/{denominator} = {self.correct_answer}'
+            elif self.subtype[0] == 2:
+                self.answer_tips = f'{self.expression} = {b * d}/{a * c} = {self.correct_answer}'
+            elif self.subtype[0] == 3:
+                self.answer_tips = f'{self.expression} = {b}/{a} × {c}/{d} = {b*c}/{a*d} = {self.correct_answer}'
+        except:
+            pass
