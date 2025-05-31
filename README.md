@@ -1,4 +1,7 @@
 # MathDoc Application
+## [Release V1.7.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.7.0)
+增加分数计算题型。
+
 ## [Release V1.6.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.6.1)
 自动根据屏幕像素调整字体大小。
 

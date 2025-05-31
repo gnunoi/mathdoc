@@ -47,7 +47,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.05.31(V1.6.1)"
+        self.version = "2025.06.1(V1.7.0)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.primary_screen = QApplication.primaryScreen()
         self.physical_size = self.primary_screen.physicalSize()
@@ -110,6 +110,7 @@ class MathDoc(QWidget):
             QRadioButton('解方程'),  # type = 4
             QRadioButton('单位换算'),  # type = 5
             QRadioButton('乘幂运算'),  # type = 6
+            QRadioButton('分数运算'),  # type = 7
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for rb in self.type_options:
@@ -248,6 +249,25 @@ class MathDoc(QWidget):
         self.power_group.setLayout(power_layout)
         control_panel.addWidget(self.power_group, 1)
 
+        # 分数运算题型
+        self.fraction_group = QGroupBox("分数运算题型")
+        self.fraction_group.setFont(self.base_font)
+        fraction_layout = QVBoxLayout()
+        self.fraction_options = [
+            QRadioButton('分数加法'),  # 0
+            QRadioButton('分数减法'),  # 1
+            QRadioButton('分数乘法'),  # 2
+            QRadioButton('分数除法'),  # 3
+        ]
+        if not any(rb.isChecked() for rb in self.fraction_options):
+            self.fraction_options[self.exam.setting.type_fraction].setChecked(True)
+        for rb in self.fraction_options:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            fraction_layout.addWidget(rb)
+        self.fraction_group.setLayout(fraction_layout)
+        control_panel.addWidget(self.fraction_group, 1)
+
         # 数值范围
         self.range_groups = []
         self.num_edit = []
@@ -376,6 +396,7 @@ class MathDoc(QWidget):
             set([self.equation_group, self.range_groups[4]]),  # type = 4 # 解方程题型
             set([self.conversion_group]),  # type = 5 # 单位换算题型
             set([self.power_group]),  # type = 6 # 乘幂运算题型
+            set([self.fraction_group]),  # type = 7 # 分数运算题型
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -549,6 +570,13 @@ class MathDoc(QWidget):
                             break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             subtype=[self.exam.setting.type_power])
+                elif i == 7 :
+                    for i, rb in enumerate(self.fraction_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_fraction = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_fraction])
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案

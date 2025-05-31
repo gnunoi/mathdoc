@@ -1551,7 +1551,6 @@ class QuestionConversion(QuestionLR):
 
 class QuestionPower(QuestionLR):
     def __init__(self, subtype=[0]):
-        self.name = "乘幂运算"
         self.power = [
             {'base': 2, 'exponent': range(17)},
             {'base': 3, 'exponent': range(9)},
@@ -1568,6 +1567,8 @@ class QuestionPower(QuestionLR):
             {'base': 15, 'exponent': range(3)},
             {'base': 16, 'exponent': range(5)},
         ]
+        super().__init__(type=6, subtype=subtype)
+        self.name = "乘幂运算"
         if subtype[0] == 0:
             self.comments = "乘幂求值：2**10 = 1024，答案输入：1024，或：=1024"
         elif subtype[0] == 1:
@@ -1580,8 +1581,6 @@ class QuestionPower(QuestionLR):
             self.comments = "乘幂乘法：2**10 * 2**5 = 2**5 = 32，答案输入：32或：= 32"
         elif subtype[0] == 5:
             self.comments = "乘幂的乘幂：(2**4)**4 = 2**(4*4) = 2**16 = 65536，答案输入：65536或：= 65536"
-
-        super().__init__(type=5, subtype=subtype)
         self.Generate()
 
     def Latex2PNG(self, latex_formula, output_file, margin=0.5):
@@ -1751,3 +1750,24 @@ class QuestionPower(QuestionLR):
                 self.answer_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
         except:
             pass
+
+class QuestionFraction(QuestionLR):
+    def __init__(self, subtype=[0]):
+        super().__init__(type=7, subtype=subtype)
+        self.name = "分数运算"
+        if subtype[0] == 0:
+            self.comments = "分数加法：1/2 + 1/3 = ，答案输入：5/6，或：1/2 + 1/3 = 5/6"
+        elif subtype[0] == 1:
+            comments = "分数减法：1/2 - 1/3 = ，答案输入：1/6，或：1/2 - 1/3 = 1/6"
+        elif subtype[0] == 2:
+            self.comments = "分数乘法：1/2 × 1/3 = ，答案输入：1/6，或：1/2 × 1/3 = 1/6"
+        elif subtype[0] == 3:
+            self.comments = "分数除法：1/2 ÷ 1/3 = ，答案输入：3/2，或：1/2 ÷ 1/3 = 3/2"
+        print(self.comments)
+
+        self.Generate()
+
+    def Generate(self):
+        self.question = '1/2 + 1/3 = '
+        self.correct_answer = Fraction(5, 6)
+        pass

@@ -181,6 +181,8 @@ class Exam:
             return QuestionConversion(subtype=self.subtype)
         elif self.type == 6:  # 6: 乘幂运算
             return QuestionPower(subtype=self.subtype)
+        elif self.type == 7:  # 7: 分数运算
+            return QuestionFraction(subtype=self.subtype)
         else:
             print(f'{self.type}: 无效的类型')
             return None
@@ -439,6 +441,7 @@ class Setting:
             'type_equation': 0,
             'type_conversion': 0,
             'type_power': 0,
+            'type_fraction': 0,
         }
         self.CreateTable()
         self.Read()
