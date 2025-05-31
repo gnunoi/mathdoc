@@ -1554,10 +1554,10 @@ class QuestionPower(QuestionLR):
         super().__init__(type=5, subtype=subtype)
         self.Generate()
 
-    def Latex2PNG(self, latex_formula, output_file, dpi=300, margin=0.5, font_size=36):
+    def Latex2PNG(self, latex_formula, output_file, dpi=300, margin=0.5, font_size=48):
         fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
         # 在图形上添加文本（LaTeX 公式）
-        text = fig.text(0, 0, latex_formula)  # ,  fontdict={'family': 'Arial', 'size': font_size})
+        text = fig.text(0, 0, latex_formula, fontdict={'family': 'Arial', 'size': font_size})
         # 自动调整布局，增加边距
         fig.tight_layout(pad=margin)
         # 保存图形为 PNG 文件，自动调整图片大小，背景透明
@@ -1668,63 +1668,53 @@ class QuestionPower(QuestionLR):
         return self.is_correct
 
     def CheckTips(self):
-        if self.subtype[0] == 0:
-            self.check_tips = f'{self.expression} = {self.correct_answer}'
-        elif self.subtype[0] == 1:
-            r1 = self.a ** self.n1
-            r2 = self.a ** self.n2
-            self.check_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
-        elif self.subtype[0] == 2:
-            r1 = self.a ** self.n1
-            r2 = self.a ** self.n2
-            self.check_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
-        elif self.subtype[0] == 3:
-            r1 = self.a ** self.n1
-            r2 = self.a ** self.n2
-            self.check_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
-        elif self.subtype[0] == 4:
-            r1 = self.a ** self.n1
-            r2 = self.a ** self.n2
-            self.check_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
-        elif self.subtype[0] == 5:
-            r1 = self.n1 * self.n2
-            self.check_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
+        try:
+            if self.subtype[0] == 0:
+                self.check_tips = f'{self.expression} = {self.correct_answer}'
+            elif self.subtype[0] == 1:
+                r1 = self.a ** self.n1
+                r2 = self.a ** self.n2
+                self.check_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
+            elif self.subtype[0] == 2:
+                r1 = self.a ** self.n1
+                r2 = self.a ** self.n2
+                self.check_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
+            elif self.subtype[0] == 3:
+                r1 = self.a ** self.n1
+                r2 = self.a ** self.n2
+                self.check_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
+            elif self.subtype[0] == 4:
+                r1 = self.a ** self.n1
+                r2 = self.a ** self.n2
+                self.check_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
+            elif self.subtype[0] == 5:
+                r1 = self.n1 * self.n2
+                self.check_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
+        except:
+            pass
 
     def AnswerTips(self):
-        print(self.a, self.n1, self.n2)
-        if self.subtype[0] == 0:
-            self.answer_tips = f'{self.expression} = {self.correct_answer}'
-        elif self.subtype[0] == 1:
-            try:
+        try:
+            if self.subtype[0] == 0:
+                self.answer_tips = f'{self.expression} = {self.correct_answer}'
+            elif self.subtype[0] == 1:
                 r1 = self.a ** self.n1
                 r2 = self.a ** self.n2
-            except:
-                pass
-            self.answer_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
-        elif self.subtype[0] == 2:
-            try:
+                self.answer_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
+            elif self.subtype[0] == 2:
                 r1 = self.a ** self.n1
                 r2 = self.a ** self.n2
-            except:
-                pass
-            self.answer_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
-        elif self.subtype[0] == 3:
-            try:
+                self.answer_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
+            elif self.subtype[0] == 3:
                 r1 = self.a ** self.n1
                 r2 = self.a ** self.n2
-            except:
-                pass
-            self.answer_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
-        elif self.subtype[0] == 4:
-            try:
+                self.answer_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
+            elif self.subtype[0] == 4:
                 r1 = self.a ** self.n1
                 r2 = self.a ** self.n2
                 self.answer_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
-            except:
-                pass
-        elif self.subtype[0] == 5:
-            try:
+            elif self.subtype[0] == 5:
                 r1 = self.n1 * self.n2
                 self.answer_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
-            except:
-                pass
+        except:
+            pass
