@@ -8,6 +8,8 @@ from itertools import combinations
 import sympy as sp
 import math
 import time
+import os
+import matplotlib.pyplot as plt
 
 """
 类名称: Question
@@ -86,6 +88,14 @@ class Question():
         self.user_answer = ''
         self.user_results = []
         self.try_numbers = 1000
+        self.path = self.GetPath()
+        self.png_file = os.path.join(self.path, 'question.png')
+
+    def GetPath(self):
+        home = os.path.expanduser("~")
+        desktop = os.path.join(home, "Desktop")
+        folder = os.path.join(desktop, ".mathdoc")
+        return folder
 
     def ClassName(self):
         return self.__class__.__name__
@@ -1512,35 +1522,194 @@ class QuestionConversion(QuestionLR):
 class QuestionPower(QuestionLR):
     def __init__(self, subtype=[0]):
         self.name = "乘幂运算"
-        super().__init__(type=5, subtype=subtype)
-
-        if self.subtype[0] == 0:
+        self.power = [
+            {'base': 2, 'exponent': range(17)},
+            {'base': 3, 'exponent': range(9)},
+            {'base': 4, 'exponent': range(9)},
+            {'base': 5, 'exponent': range(7)},
+            {'base': 6, 'exponent': range(4)},
+            {'base': 7, 'exponent': range(4)},
+            {'base': 8, 'exponent': range(6)},
+            {'base': 9, 'exponent': range(4)},
+            {'base': 10, 'exponent': range(9)},
+            {'base': 11, 'exponent': range(4)},
+            {'base': 13, 'exponent': range(3)},
+            {'base': 14, 'exponent': range(3)},
+            {'base': 15, 'exponent': range(3)},
+            {'base': 16, 'exponent': range(5)},
+        ]
+        if subtype[0] == 0:
             self.comments = "乘幂求值：2**10 = 1024，答案输入：1024，或：=1024"
-        elif self.subtype[0] == 1:
-            self.comments = "乘幂加法：2**5 + 2**6 = 32 + 64 = 96，答案输入：96，或：= 96"
-        elif self.subtype[0] == 2:
+        elif subtype[0] == 1:
+            comments = "乘幂加法：2**5 + 2**6 = 32 + 64 = 96，答案输入：96，或：= 96"
+        elif subtype[0] == 2:
             self.comments = "乘幂减法：2**5 - 2**6 = 32 - 64 = -32，答案输入：-32，或：= -32"
-        elif self.subtype[0] == 3:
+        elif subtype[0] == 3:
             self.comments = "乘幂乘法：2**5 * 2**5 = 32 * 32 = 1024，答案输入：1024或：= 1024"
-        elif self.subtype[0] == 4:
+        elif subtype[0] == 4:
             self.comments = "乘幂乘法：2**10 * 2**5 = 2**5 = 32，答案输入：32或：= 32"
-        elif self.subtype[0] == 5:
+        elif subtype[0] == 5:
             self.comments = "乘幂的乘幂：(2**4)**4 = 2**(4*4) = 2**16 = 65536，答案输入：65536或：= 65536"
+
+        super().__init__(type=5, subtype=subtype)
         self.Generate()
+
+    def Latex2PNG(self, latex_formula, output_file, dpi=300, margin=0.5, font_size=36):
+        fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
+        # 在图形上添加文本（LaTeX 公式）
+        text = fig.text(0, 0, latex_formula)  # ,  fontdict={'family': 'Arial', 'size': font_size})
+        # 自动调整布局，增加边距
+        fig.tight_layout(pad=margin)
+        # 保存图形为 PNG 文件，自动调整图片大小，背景透明
+        fig.savefig(output_file, dpi=dpi, format='png', transparent=True, bbox_inches='tight')
+        # 关闭图形，释放资源
+        plt.close(fig)
 
     def Generate(self):
         sub_type = self.subtype[0]
         self.BeforeGenerate()
-
+        if sub_type == 0:
+            self.GeneratePower()
+        elif sub_type == 1 or sub_type == 2:
+            self.GeneratePowerPS()
+        elif sub_type == 3 or sub_type == 4:
+            self.GeneratePowerMD()
+        elif sub_type == 5:
+            self.GeneratePowerPower()
+        latex = r'${}$'.format(self.formula)
+        self.Latex2PNG(latex, self.png_file)
         self.AfterGenerate()
+
+    def GeneratePower(self):
+        power = self.power
+        sub = random.choice(range(len(power)))
+        a = power[sub]['base']
+        n = random.choice(power[sub]['exponent'])
+        print(f'a = {a}, n = {n}')
+        self.expression = f'{a} ** {n}'
+        self.question = self.expression + ' = '
+        self.formula = f'{a}' + '^' + '{' + f'{n}' + '} = '
+        self.correct_answer = eval(self.expression)
+
+    def GeneratePowerPS(self):
+        subtype = self.subtype[0]
+        sign = '+'
+        if subtype == 2:
+            sign = '-'
+        power = self.power
+        sub = random.choice(range(len(power)))
+        a = power[sub]['base']
+        n1 = random.choice(power[sub]['exponent'])
+        if n1 == 0:
+            n2 = n1 + 1
+        else:
+            n2 = n1 - 1
+        print(f'a = {a}, n1 = {n1}, n2 = {n2}')
+        self.expression = f'{a} ** {n1} {sign} {a} ** {n2}'
+        self.question = self.expression + ' = '
+        self.formula = f'{a}' + '^' + '{' + f'{n1}' + '}' + f'{sign}' + f'{a}' + '^' + '{' + f'{n2}' + '}' + ' = '
+        self.correct_answer = eval(self.expression)
+        self.a = a
+        self.n1 = n1
+        self.n2 = n2
+
+    def GeneratePowerMD(self):
+        subtype = self.subtype[0]
+        sign = '*'
+        latex_sign = '\\times'
+        if subtype == 4:
+            sign = '/'
+            latex_sign = '\\div'
+        power = self.power
+        sub = random.choice(range(len(power)))
+        a = power[sub]['base']
+        n1 = random.choice(power[sub]['exponent'])
+        n2 = random.choice(power[sub]['exponent'])
+        if subtype == 3:
+            n1 = int(n1 / 2)
+            n2 = int(n2 / 2)
+        elif subtype == 4:
+            if n1 == 0:
+                n1 = power[sub]['exponent'][-1]
+                n2 = random.choice(power[sub]['exponent'])
+            else:
+                n2 = int(n1 / 2)
+        print(f'a = {a}, n1 = {n1}, n2 = {n2}')
+        self.expression = f'{a} ** {n1} {sign} {a} ** {n2}'
+        self.question = self.expression + ' = '
+        self.formula = f'{a}' + '^' + '{' + f'{n1}' + '}' + f'{latex_sign}' + f'{a}' + '^' + '{' + f'{n2}' + '}' + ' = '
+        self.correct_answer = eval(self.expression)
+        self.a = a
+        self.n1 = n1
+        self.n2 = n2
+
+    def GeneratePowerPower(self):
+        subtype = self.subtype[0]
+        power = self.power
+        sub = random.choice([0, 1, 8])
+        a = power[sub]['base']
+        n1 = max(1, int(random.choice(power[sub]['exponent']) / 4))
+        n2 = self.RandInt(1, 4)
+        self.expression = f'({a} ** {n1}) ** {n2}'
+        self.question = self.expression + ' = '
+        self.formula = f'\\left( {a}' + '^' + '{' + f'{n1}' + '}\\right)' + '^' + '{' + f'{n2}' + '}' + ' = '
+        self.correct_answer = eval(self.expression)
+        self.a = a
+        self.n1 = n1
+        self.n2 = n2
 
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
-        self.is_correct = True
+        user_answer = float(self.user_answer.strip().replace(' ', ''))
+        if abs(user_answer - self.correct_answer) < 1e-3 :
+            self.is_correct = True
+        else:
+            self.is_correct = False
         return self.is_correct
 
     def CheckTips(self):
-        pass
+        if self.subtype[0] == 0:
+            self.check_tips = f'{self.expression} = {self.correct_answer}'
+        elif self.subtype[0] == 1:
+            r1 = self.a ** self.n1
+            r2 = self.a ** self.n2
+            self.check_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
+        elif self.subtype[0] == 2:
+            r1 = self.a ** self.n1
+            r2 = self.a ** self.n2
+            self.check_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
+        elif self.subtype[0] == 3:
+            r1 = self.a ** self.n1
+            r2 = self.a ** self.n2
+            self.check_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
+        elif self.subtype[0] == 4:
+            r1 = self.a ** self.n1
+            r2 = self.a ** self.n2
+            self.check_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
+        elif self.subtype[0] == 5:
+            r1 = self.n1 * self.n2
+            self.check_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
 
     def AnswerTips(self):
-        pass
+        print(self.a, self.n1, self.n2)
+        if self.subtype[0] == 0:
+            self.answer_tips = f'{self.expression} = {self.correct_answer}'
+        elif self.subtype[0] == 1:
+            r1 = self.a ** self.n1
+            r2 = self.a ** self.n2
+            self.answer_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
+        elif self.subtype[0] == 2:
+            r1 = self.a ** self.n1
+            r2 = self.a ** self.n2
+            self.answer_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
+        elif self.subtype[0] == 3:
+            r1 = self.a ** self.n1
+            r2 = self.a ** self.n2
+            self.answer_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
+        elif self.subtype[0] == 4:
+            r1 = self.a ** self.n1
+            r2 = self.a ** self.n2
+            self.answer_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
+        elif self.subtype[0] == 5:
+            r1 = self.n1 * self.n2
+            self.answer_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'

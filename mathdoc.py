@@ -7,9 +7,11 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
                              QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
                              QDialog)
-from PyQt5.QtGui import (QFont, QPalette, QColor, QScreen)
+from PyQt5.QtGui import (QFont, QPalette, QColor, QScreen, QPixmap)
 from PyQt5.QtCore import (Qt, QRect)
 from exam import *
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 def GetScreenSize():
     screen = QDesktopWidget().screenGeometry()
@@ -532,7 +534,13 @@ class MathDoc(QWidget):
         self.exam.Generate()
         self.check_tips_label.setText('')
         self.answer_tips_label.setText('')
-        self.question_label.setText(f"{self.exam.q.question}")
+        if self.exam.setting.type == 6:
+            # 在标签中显示图片
+            pixmap = QPixmap(os.path.join(self.exam.q.path, 'question.png'))
+            self.question_label.setPixmap(pixmap)
+            self.question_label.setAlignment(Qt.AlignCenter)
+        else:
+            self.question_label.setText(f"{self.exam.q.question}")
         self.answer_label.setText(self.exam.q.comments)
 
         total = self.exam.record.question_number - 1
