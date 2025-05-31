@@ -180,7 +180,7 @@ class Exam:
         elif self.type == 5:  # 5: 单位换算
             return QuestionConversion(subtype=self.subtype)
         elif self.type == 6:  # 6: 乘幂运算
-            return QuestionConversion(subtype=self.subtype)
+            return QuestionPower(subtype=self.subtype)
         else:
             print(f'{self.type}: 无效的类型')
             return None

@@ -1508,3 +1508,39 @@ class QuestionConversion(QuestionLR):
         else:
             self.answer_tips = f'{self.small_num} ÷ {self.rate} = {self.big_num}'
         pass
+
+class QuestionPower(QuestionLR):
+    def __init__(self, subtype=[0]):
+        self.name = "乘幂运算"
+        super().__init__(type=5, subtype=subtype)
+
+        if self.subtype[0] == 0:
+            self.comments = "乘幂求值：2**10 = 1024，答案输入：1024，或：=1024"
+        elif self.subtype[0] == 1:
+            self.comments = "乘幂加法：2**5 + 2**6 = 32 + 64 = 96，答案输入：96，或：= 96"
+        elif self.subtype[0] == 2:
+            self.comments = "乘幂减法：2**5 - 2**6 = 32 - 64 = -32，答案输入：-32，或：= -32"
+        elif self.subtype[0] == 3:
+            self.comments = "乘幂乘法：2**5 * 2**5 = 32 * 32 = 1024，答案输入：1024或：= 1024"
+        elif self.subtype[0] == 4:
+            self.comments = "乘幂乘法：2**10 * 2**5 = 2**5 = 32，答案输入：32或：= 32"
+        elif self.subtype[0] == 5:
+            self.comments = "乘幂的乘幂：(2**4)**4 = 2**(4*4) = 2**16 = 65536，答案输入：65536或：= 65536"
+        self.Generate()
+
+    def Generate(self):
+        sub_type = self.subtype[0]
+        self.BeforeGenerate()
+
+        self.AfterGenerate()
+
+    def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
+        self.is_correct = True
+        return self.is_correct
+
+    def CheckTips(self):
+        pass
+
+    def AnswerTips(self):
+        pass

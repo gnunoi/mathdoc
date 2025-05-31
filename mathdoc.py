@@ -513,6 +513,13 @@ class MathDoc(QWidget):
                             break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             subtype=[self.exam.setting.type_conversion])
+                elif i == 6 :
+                    for i, rb in enumerate(self.power_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_power = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_power])
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案
