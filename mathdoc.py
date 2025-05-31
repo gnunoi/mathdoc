@@ -47,20 +47,47 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.05.31(V1.6.0)"
+        self.version = "2025.05.31(V1.6.1)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
+        self.primary_screen = QApplication.primaryScreen()
+        self.physical_size = self.primary_screen.physicalSize()
+        self.scale_factor = self.primary_screen.devicePixelRatio()
+        self.screen_geometry = self.primary_screen.geometry()
+        self.ppi = self.screen_geometry.width() / self.physical_size.width() * 25.4
+        self.setGeometry(self.screen_geometry)
+        print(self.physical_size.width())
+        print(self.screen_geometry.width(), self.screen_geometry.height(), self.scale_factor, self.ppi)
+        if self.screen_geometry.width() <= 1024:
+            self.base_font_size = 12
+            self.big_font_size = 18
+            self.huge_font_size = 20
+        elif self.screen_geometry.width() <= 1600:
+            self.base_font_size = 18
+            self.big_font_size = 28
+            self.huge_font_size = 32
+        elif self.screen_geometry.width() <= 2048:
+            self.base_font_size = 24
+            self.big_font_size = 36
+            self.huge_font_size = 40
+        elif self.screen_geometry.width() <= 3072:
+            self.base_font_size = 36
+            self.big_font_size = 54
+            self.huge_font_size = 60
+        else:
+            self.base_font_size = 54
+            self.big_font_size = 80
+            self.huge_font_size = 90
         self.set_list = []
         self.sets = set([])
         self.exam = Exam()
         self.Register()
         self.authorization= Authorization()
+
         if os.name == "nt":
-            self.base_font = QFont("SimSun", 24)
+            self.base_font = QFont("SimSun", self.base_font_size)
         else:
-            self.base_font = QFont("Pingfang SC", 24)
-        self.big_font = QFont("Arial", 32)
-        self.screen_geometry = QDesktopWidget().screenGeometry()
-        self.setGeometry(self.screen_geometry)
+            self.base_font = QFont("Pingfang SC", self.base_font_size)
+        self.big_font = QFont("Arial", self.big_font_size)
         self.prompter = TelePrompter(self)
         if self.prompter.second_screen:
             self.prompter.showMaximized()

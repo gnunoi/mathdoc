@@ -10,6 +10,36 @@ import math
 import time
 import os
 import matplotlib.pyplot as plt
+from PyQt5.QtWidgets import (QApplication)
+
+def GetFontSize():
+    primary_screen = QApplication.primaryScreen()
+    physical_size = primary_screen.physicalSize()
+    scale_factor = primary_screen.devicePixelRatio()
+    screen_geometry = primary_screen.geometry()
+    ppi = screen_geometry.width() / physical_size.width() * 25.4
+    dpi = ppi * scale_factor
+    if screen_geometry.width() <= 1024:
+        base_font_size = 12
+        big_font_size = 18
+        huge_font_size = 20
+    elif screen_geometry.width() <= 1600:
+        base_font_size = 18
+        big_font_size = 28
+        huge_font_size = 32
+    elif screen_geometry.width() <= 2048:
+        base_font_size = 24
+        big_font_size = 36
+        huge_font_size = 40
+    elif screen_geometry.width() <= 3072:
+        base_font_size = 36
+        big_font_size = 54
+        huge_font_size = 60
+    else:
+        base_font_size = 54
+        big_font_size = 80
+        huge_font_size = 90
+    return int(ppi), base_font_size
 
 """
 类名称: Question
@@ -1554,14 +1584,17 @@ class QuestionPower(QuestionLR):
         super().__init__(type=5, subtype=subtype)
         self.Generate()
 
-    def Latex2PNG(self, latex_formula, output_file, dpi=300, margin=0.5, font_size=48):
+    def Latex2PNG(self, latex_formula, output_file, margin=0.5):
+        ppi, font_size = GetFontSize()
+        print(ppi, font_size)
+        plt.rcParams['font.sans-serif'] = ['Arial']  # 用来正常显示中文标签
         fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
         # 在图形上添加文本（LaTeX 公式）
-        text = fig.text(0, 0, latex_formula, fontdict={'family': 'Arial', 'size': font_size})
+        text = fig.text(0, 0, latex_formula, fontdict={'size': font_size})
         # 自动调整布局，增加边距
         fig.tight_layout(pad=margin)
         # 保存图形为 PNG 文件，自动调整图片大小，背景透明
-        fig.savefig(output_file, dpi=dpi, format='png', transparent=True, bbox_inches='tight')
+        fig.savefig(output_file, dpi=ppi, format='png', transparent=True, bbox_inches='tight')
         # 关闭图形，释放资源
         plt.close(fig)
 
