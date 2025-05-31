@@ -1695,21 +1695,36 @@ class QuestionPower(QuestionLR):
         if self.subtype[0] == 0:
             self.answer_tips = f'{self.expression} = {self.correct_answer}'
         elif self.subtype[0] == 1:
-            r1 = self.a ** self.n1
-            r2 = self.a ** self.n2
+            try:
+                r1 = self.a ** self.n1
+                r2 = self.a ** self.n2
+            except:
+                pass
             self.answer_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
         elif self.subtype[0] == 2:
-            r1 = self.a ** self.n1
-            r2 = self.a ** self.n2
+            try:
+                r1 = self.a ** self.n1
+                r2 = self.a ** self.n2
+            except:
+                pass
             self.answer_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
         elif self.subtype[0] == 3:
-            r1 = self.a ** self.n1
-            r2 = self.a ** self.n2
+            try:
+                r1 = self.a ** self.n1
+                r2 = self.a ** self.n2
+            except:
+                pass
             self.answer_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
         elif self.subtype[0] == 4:
-            r1 = self.a ** self.n1
-            r2 = self.a ** self.n2
-            self.answer_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
+            try:
+                r1 = self.a ** self.n1
+                r2 = self.a ** self.n2
+                self.answer_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
+            except:
+                pass
         elif self.subtype[0] == 5:
-            r1 = self.n1 * self.n2
-            self.answer_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
+            try:
+                r1 = self.n1 * self.n2
+                self.answer_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
+            except:
+                pass
