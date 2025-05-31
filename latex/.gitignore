@@ -1,6 +1,0 @@
-.*
-.idea
-*.png
-!.gitignore
-!Makefile
-!*.py
