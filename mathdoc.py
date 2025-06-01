@@ -6,7 +6,7 @@ import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QMessageBox,
                              QLineEdit, QRadioButton, QPushButton, QGroupBox,
                              QVBoxLayout, QHBoxLayout, QFormLayout, QDesktopWidget,
-                             QDialog)
+                             QDialog, QGridLayout)
 from PyQt5.QtGui import (QFont, QPalette, QColor, QScreen, QPixmap)
 from PyQt5.QtCore import (Qt, QRect)
 from exam import *
@@ -47,7 +47,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.06.1(V1.7.0)"
+        self.version = "2025.06.1(V1.7.1)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.primary_screen = QApplication.primaryScreen()
         self.physical_size = self.primary_screen.physicalSize()
@@ -101,7 +101,7 @@ class MathDoc(QWidget):
 
         self.type_group = QGroupBox("题型")
         self.type_group.setFont(self.base_font)
-        type_layout = QVBoxLayout()
+        type_layout = QGridLayout()
         self.type_options = [
             QRadioButton('计算24点'), # type = 0
             QRadioButton('乘法速算'), # type = 1
@@ -113,17 +113,23 @@ class MathDoc(QWidget):
             QRadioButton('分数运算'),  # type = 7
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
-        for rb in self.type_options:
+        for i, rb in enumerate(self.type_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            type_layout.addWidget(rb)
+            type_layout.addWidget(rb, i // 2, i % 2)  # 每两行一个新列，确保两列布局
         self.type_group.setLayout(type_layout)
         control_panel.addWidget(self.type_group, 1)
+        # for rb in self.type_options:
+        #     rb.setFont(self.base_font)
+        #     rb.toggled.connect(self.UpdateSettings)
+        #     type_layout.addWidget(rb)
+        # self.type_group.setLayout(type_layout)
+        # control_panel.addWidget(self.type_group, 1)
 
         # 速算
         self.qc_group = QGroupBox("速算类型")
         self.qc_group.setFont(self.base_font)
-        qc_layout = QVBoxLayout()
+        qc_layout = QGridLayout()
         self.qc_options = [
             QRadioButton('和十速算法'),  # 0
             QRadioButton('逢五凑十法'),  # 1
@@ -136,10 +142,10 @@ class MathDoc(QWidget):
         ]
         if not any(rb.isChecked() for rb in self.qc_options):
             self.qc_options[self.exam.setting.type_qc].setChecked(True)
-        for rb in self.qc_options:
+        for i, rb in enumerate(self.qc_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            qc_layout.addWidget(rb)
+            qc_layout.addWidget(rb, i // 2, i % 2)
         self.qc_group.setLayout(qc_layout)
         control_panel.addWidget(self.qc_group, 1)
 

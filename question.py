@@ -1771,13 +1771,13 @@ class QuestionFraction(QuestionLR):
         sub_type = self.subtype[0]
         self.BeforeGenerate()
         a = self.RandInt(2, 10)
-        b = self.RandInt(1, a-1)
+        b = self.RandInt(1, 3*a-1)
         gcd = self.GCD(a, b)
         if gcd != 1:
             a //= gcd
             b //= gcd
         c = self.RandInt(2, 10)
-        d = self.RandInt(1, c-1)
+        d = self.RandInt(1, 3*c-1)
         gcd = self.GCD(c, d)
         if gcd != 1:
             c //= gcd
