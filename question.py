@@ -164,7 +164,8 @@ class Question():
         plt.rcParams['font.sans-serif'] = ['Arial']  # 用来正常显示中文标签
         fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
         # 在图形上添加文本（LaTeX 公式）
-        text = fig.text(0, 0, latex_formula, fontdict={'size': font_size})
+        # text = fig.text(0, 0, latex_formula, fontdict={'size': font_size})
+        text = fig.text(0, 0, latex_formula, fontdict={'size': 60})
         # 自动调整布局，增加边距
         fig.tight_layout(pad=margin)
         # 保存图形为 PNG 文件，自动调整图片大小，背景透明
