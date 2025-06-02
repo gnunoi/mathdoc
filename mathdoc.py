@@ -47,7 +47,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.06.1(V1.7.1)"
+        self.version = "2025.06.1(V1.8.0)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.primary_screen = QApplication.primaryScreen()
         self.physical_size = self.primary_screen.physicalSize()
@@ -55,8 +55,7 @@ class MathDoc(QWidget):
         self.screen_geometry = self.primary_screen.geometry()
         self.ppi = self.screen_geometry.width() / self.physical_size.width() * 25.4
         self.setGeometry(self.screen_geometry)
-        # print(self.physical_size.width())
-        # print(self.screen_geometry.width(), self.screen_geometry.height(), self.scale_factor, self.ppi)
+        # print(self.screen_geometry, self.scale_factor)
         if self.screen_geometry.width() <= 1024:
             self.base_font_size = 12
             self.big_font_size = 18
@@ -111,20 +110,16 @@ class MathDoc(QWidget):
             QRadioButton('单位换算'),  # type = 5
             QRadioButton('乘幂运算'),  # type = 6
             QRadioButton('分数运算'),  # type = 7
+            QRadioButton('小数运算'),  # type = 8
+            QRadioButton('比例运算'),  # type = 9
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for i, rb in enumerate(self.type_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            type_layout.addWidget(rb, i // 2, i % 2)  # 每两行一个新列，确保两列布局
+            type_layout.addWidget(rb, i % 5, i // 5)  # 每两行一个新列，确保两列布局
         self.type_group.setLayout(type_layout)
         control_panel.addWidget(self.type_group, 1)
-        # for rb in self.type_options:
-        #     rb.setFont(self.base_font)
-        #     rb.toggled.connect(self.UpdateSettings)
-        #     type_layout.addWidget(rb)
-        # self.type_group.setLayout(type_layout)
-        # control_panel.addWidget(self.type_group, 1)
 
         # 速算
         self.qc_group = QGroupBox("速算类型")
@@ -145,7 +140,7 @@ class MathDoc(QWidget):
         for i, rb in enumerate(self.qc_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            qc_layout.addWidget(rb, i // 2, i % 2)
+            qc_layout.addWidget(rb, i % 4, i // 4)
         self.qc_group.setLayout(qc_layout)
         control_panel.addWidget(self.qc_group, 1)
 
@@ -274,6 +269,44 @@ class MathDoc(QWidget):
         self.fraction_group.setLayout(fraction_layout)
         control_panel.addWidget(self.fraction_group, 1)
 
+        # 小数运算题型
+        self.decimal_group = QGroupBox("小数运算题型")
+        self.decimal_group.setFont(self.base_font)
+        decimal_layout = QVBoxLayout()
+        self.decimal_options = [
+            QRadioButton('小数加法'),  # 0
+            QRadioButton('小数减法'),  # 1
+            QRadioButton('小数乘法'),  # 2
+            QRadioButton('小数除法'),  # 3
+        ]
+        if not any(rb.isChecked() for rb in self.decimal_options):
+            self.decimal_options[self.exam.setting.type_decimal].setChecked(True)
+        for rb in self.decimal_options:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            decimal_layout.addWidget(rb)
+        self.decimal_group.setLayout(decimal_layout)
+        control_panel.addWidget(self.decimal_group, 1)
+
+        # 比例运算题型
+        self.ratio_group = QGroupBox("小数运算题型")
+        self.ratio_group.setFont(self.base_font)
+        ratio_layout = QVBoxLayout()
+        self.ratio_options = [
+            QRadioButton('小数加法'),  # 0
+            QRadioButton('小数减法'),  # 1
+            QRadioButton('小数乘法'),  # 2
+            QRadioButton('小数除法'),  # 3
+        ]
+        if not any(rb.isChecked() for rb in self.ratio_options):
+            self.ratio_options[self.exam.setting.type_ratio].setChecked(True)
+        for rb in self.ratio_options:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            ratio_layout.addWidget(rb)
+        self.ratio_group.setLayout(ratio_layout)
+        control_panel.addWidget(self.ratio_group, 1)
+        
         # 数值范围
         self.range_groups = []
         self.num_edit = []
@@ -403,6 +436,8 @@ class MathDoc(QWidget):
             set([self.conversion_group]),  # type = 5 # 单位换算题型
             set([self.power_group]),  # type = 6 # 乘幂运算题型
             set([self.fraction_group]),  # type = 7 # 分数运算题型
+            set([self.decimal_group]),  # type = 8 # 小数运算题型
+            set([self.ratio_group]),  # type = 9 # 比例运算题型
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -583,6 +618,20 @@ class MathDoc(QWidget):
                             break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             subtype=[self.exam.setting.type_fraction])
+                elif i == 8 :
+                    for i, rb in enumerate(self.decimal_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_decimal = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_decimal])
+                elif i == 9 :
+                    for i, rb in enumerate(self.ratio_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_ratio = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_ratio])
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案

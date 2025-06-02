@@ -183,6 +183,10 @@ class Exam:
             return QuestionPower(subtype=self.subtype)
         elif self.type == 7:  # 7: 分数运算
             return QuestionFraction(subtype=self.subtype)
+        elif self.type == 8:  # 8: 小数运算
+            return QuestionDecimal(subtype=self.subtype)
+        elif self.type == 9:  # 9: 比例运算
+            return QuestionDecimal(subtype=self.subtype)
         else:
             print(f'{self.type}: 无效的类型')
             return None
@@ -442,6 +446,8 @@ class Setting:
             'type_conversion': 0,
             'type_power': 0,
             'type_fraction': 0,
+            'type_decimal': 0,
+            'type_ratio': 0,
         }
         self.CreateTable()
         self.Read()

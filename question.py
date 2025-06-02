@@ -1,3 +1,4 @@
+import decimal
 import random
 import secrets
 import itertools
@@ -18,7 +19,7 @@ def GetFontSize():
     scale_factor = primary_screen.devicePixelRatio()
     screen_geometry = primary_screen.geometry()
     ppi = screen_geometry.width() / physical_size.width() * 25.4
-    # dpi = ppi * scale_factor
+    dpi = ppi * scale_factor
     if screen_geometry.width() <= 1024:
         base_font_size = 12
         big_font_size = 18
@@ -39,7 +40,7 @@ def GetFontSize():
         base_font_size = 54
         big_font_size = 80
         huge_font_size = 90
-    return int(ppi), base_font_size
+    return int(dpi), base_font_size
 
 """
 类名称: Question
@@ -159,17 +160,17 @@ class Question():
         return a * b // self.GCD(a, b)
 
     def Latex2PNG(self, latex_formula, output_file, margin=0.5):
-        ppi, font_size = GetFontSize()
-        # print(ppi, font_size)
+        dpi, font_size = GetFontSize()
+        print(dpi, font_size)
         plt.rcParams['font.sans-serif'] = ['Arial']  # 用来正常显示中文标签
         fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
         # 在图形上添加文本（LaTeX 公式）
-        # text = fig.text(0, 0, latex_formula, fontdict={'size': font_size})
-        text = fig.text(0, 0, latex_formula, fontdict={'size': 60})
+        text = fig.text(0, 0, latex_formula, fontdict={'size': font_size})
+        # text = fig.text(0, 0, latex_formula, fontdict={'size': 60})
         # 自动调整布局，增加边距
         fig.tight_layout(pad=margin)
         # 保存图形为 PNG 文件，自动调整图片大小，背景透明
-        fig.savefig(output_file, dpi=ppi, format='png', transparent=True, bbox_inches='tight')
+        fig.savefig(output_file, dpi=dpi, format='png', transparent=True, bbox_inches='tight')
         # 关闭图形，释放资源
         plt.close(fig)
 
@@ -1402,13 +1403,11 @@ class QuestionConversion(QuestionLR):
         self.name = "单位换算"
         # 定义长度单位之间的换算关系（基数为米）
         self.length_rates = {
-            "千米": 1e12,
-            "米": 1e9,
-            "分米": 1e8,
-            "厘米": 1e7,
-            "毫米": 1e6,
-            "微米": 1e3,
-            "纳米": 1,
+            "千米": 1000000,
+            "米": 1000,
+            "分米": 100,
+            "厘米": 10,
+            "毫米": 1,
         }
         self.area_rates = {
             "平方千米": 1e6,
@@ -1418,36 +1417,26 @@ class QuestionConversion(QuestionLR):
             "平方分米": 1e-2,
             "平方厘米": 1e-4,
             "平方毫米": 1e-6,
-            "平方微米": 1e-12,
-            "平方纳米": 1e-18,
         }
         self.volume_rates = {
-            "立方千米": 1e9,
-            "立方米": 1,
-            "立方分米": 1e-3,
-            "升": 1e-3,
-            "立方厘米": 1e-6,
-            "毫升": 1e-6,
-            "立方毫米": 1e-9,
-            "立方微米": 1e-18,
-            "立方纳米": 1e-27,
+            "立方米": 1e9,
+            "立方分米": 1e6,
+            "升": 1e6,
+            "立方厘米": 1e3,
+            "毫升": 1e3,
+            "立方毫米": 1,
         }
         self.mass_rates = {
             "吨": 1e6,
             "千克": 1e3,
             "克": 1,
             "毫克": 1e-3,
-            "微克": 1e-6,
-            "纳克": 1e-9,
         }
         self.time_rates = {
-            "天": 86400,
             "时": 3600,
             "分": 60,
             "秒": 1,
             "毫秒": 1e-3,
-            "微秒": 1e-6,
-            "纳秒": 1e-9,
         }
         self.rates = [
             self.length_rates,
@@ -1468,7 +1457,6 @@ class QuestionConversion(QuestionLR):
             self.mass_units,
             self.time_units,
         ]
-        # print(self.length_units)
         super().__init__(type=5, subtype=subtype)
 
         if self.subtype[0] == 0:
@@ -1480,7 +1468,7 @@ class QuestionConversion(QuestionLR):
         elif self.subtype[0] == 3:
             self.comments = "质量换算：1吨 = (    )千克，输入答案：1000，或1 000，或 = 1 000"
         elif self.subtype[0] == 4:
-            self.comments = "时间换算：1天 = (    )秒，输入答案：86400，或86 400，或 = 86 400"
+            self.comments = "时间换算：1时 = (    )秒，输入答案：3600，或3 600，或 = 3 600"
         self.Generate()
 
     def Generate(self):
@@ -1815,7 +1803,7 @@ class QuestionFraction(QuestionLR):
             self.formula = '\\dfrac{' + f'{b}' + '}{' + f'{a}' + '}' + f'{sign}' + '\\dfrac{' + f'{d}' + '}{' + f'{c}' + '} = '
             self.correct_answer = Fraction(b, a) / Fraction(d, c)
         self.question = self.expression + ' = '
-        print(f'{self.question} = {self.correct_answer}')
+        print(f'{self.question}{self.correct_answer}')
         latex = r'${}$'.format(self.formula)
         self.Latex2PNG(latex, self.png_file)
         self.AfterGenerate()
@@ -1860,5 +1848,90 @@ class QuestionFraction(QuestionLR):
                 self.answer_tips = f'{self.expression} = {b * d}/{a * c} = {self.correct_answer}'
             elif self.subtype[0] == 3:
                 self.answer_tips = f'{self.expression} = {b}/{a} × {c}/{d} = {b*c}/{a*d} = {self.correct_answer}'
+        except:
+            pass
+
+class QuestionDecimal(QuestionLR):
+    def __init__(self, subtype=[0]):
+        super().__init__(type=7, subtype=subtype)
+        self.name = "分数运算"
+        if subtype[0] == 0:
+            self.comments = "小数加法：0.1 + 0.2 = ，答案输入：0.3，或：0.1 + 0.2 = 0.3"
+        elif subtype[0] == 1:
+            comments = "小数减法：1.5 - 0.3 = ，答案输入：1.2，或：1.5 - 0.3 = 1.2"
+        elif subtype[0] == 2:
+            self.comments = "小数乘法：1.5 × 0.3 = ，答案输入：0.45，或：1.5 * 0.3 = 0.45"
+        elif subtype[0] == 3:
+            self.comments = "小数除法：1.5 ÷ 0.3 = ，答案输入：5，或：1.5 / 0.3 = 5"
+
+        self.Generate()
+
+    def Generate(self):
+        sub_type = self.subtype[0]
+        self.BeforeGenerate()
+        if sub_type == 0:
+            a = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([2, 4, 5, 10, 20, 50]))
+            b = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([2, 4, 5, 10, 20, 50]))
+            self.numbers = [a, b]
+            self.expression = f'{a} + {b}'
+            self.correct_answer = decimal.Decimal(a) + decimal.Decimal(b)
+        elif sub_type == 1:
+            a = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([2, 4, 5, 10, 20, 50]))
+            b = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([2, 4, 5, 10, 20, 50]))
+            self.numbers = [a, b]
+            self.expression = f'{a} - {b}'
+            self.correct_answer = decimal.Decimal(a) - decimal.Decimal(b)
+        elif sub_type == 2:
+            a = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([1, 10]))
+            b = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([10]))
+            self.numbers = [a, b]
+            self.expression = f'{a} * {b}'
+            self.correct_answer = a * b
+            print(self.correct_answer)
+        elif sub_type == 3:
+            a = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([1, 10]))
+            b = decimal.Decimal(random.choice([1, 2, 4, 5, 8, 10, 20, 25, 40, 50])) / decimal.Decimal(random.choice([10]))
+            self.numbers = [a, b]
+            self.expression = f'{a} / {b}'
+            self.correct_answer = a / b
+            print(self.correct_answer)
+        self.question = self.expression.replace('*', '×').replace('/', '÷') + ' = '
+        print(f'{self.question}{self.correct_answer}')
+        self.AfterGenerate()
+
+    def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
+        user_answer = decimal.Decimal(self.user_answer)
+        if user_answer == self.correct_answer:
+            self.is_correct = True
+        else:
+            self.is_correct = False
+        return self.is_correct
+
+    def CheckTips(self):
+        try:
+            [a, b] = self.numbers
+            if self.subtype[0] == 0:
+                self.check_tips = f'{self.expression} = {decimal.Decimal(a) + decimal.Decimal(b)}'
+            if self.subtype[0] == 1:
+                self.check_tips = f'{self.expression} = {decimal.Decimal(a) - decimal.Decimal(b)}'
+            if self.subtype[0] == 2:
+                self.check_tips = f'{self.expression} = {decimal.Decimal(a) * decimal.Decimal(b)}'
+            if self.subtype[0] == 3:
+                self.check_tips = f'{self.expression} = {decimal.Decimal(a) / decimal.Decimal(b)}'
+        except:
+            pass
+
+    def AnswerTips(self):
+        try:
+            [a, b] = self.numbers
+            if self.subtype[0] == 0:
+                self.answer_tips = f'{self.expression} = {decimal.Decimal(a) + decimal.Decimal(b)}'
+            if self.subtype[0] == 1:
+                self.answer_tips = f'{self.expression} = {decimal.Decimal(a) - decimal.Decimal(b)}'
+            if self.subtype[0] == 2:
+                self.answer_tips = f'{self.expression} = {decimal.Decimal(a) * decimal.Decimal(b)}'
+            if self.subtype[0] == 3:
+                self.answer_tips = f'{self.expression} = {decimal.Decimal(a) / decimal.Decimal(b)}'
         except:
             pass
