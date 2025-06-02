@@ -1853,7 +1853,7 @@ class QuestionFraction(QuestionLR):
 
 class QuestionDecimal(QuestionLR):
     def __init__(self, subtype=[0]):
-        super().__init__(type=7, subtype=subtype)
+        super().__init__(type=8, subtype=subtype)
         self.name = "分数运算"
         if subtype[0] == 0:
             self.comments = "小数加法：0.1 + 0.2 = ，答案输入：0.3，或：0.1 + 0.2 = 0.3"
@@ -1933,5 +1933,84 @@ class QuestionDecimal(QuestionLR):
                 self.answer_tips = f'{self.expression} = {decimal.Decimal(a) * decimal.Decimal(b)}'
             if self.subtype[0] == 3:
                 self.answer_tips = f'{self.expression} = {decimal.Decimal(a) / decimal.Decimal(b)}'
+        except:
+            pass
+
+class QuestionRatio(QuestionLR):
+    def __init__(self, subtype=[0]):
+        super().__init__(type=9, subtype=subtype)
+        self.name = "分数运算"
+        if subtype[0] == 0:
+            self.comments = "内项：2 : 1 = (    ) : 3 ，答案输入：6"
+        if subtype[0] == 1:
+            self.comments = "外项：2 : 1 = 1 : (    ) ，答案输入：0.5，或：1/2"
+        if subtype[0] == 2:
+            self.comments = ("比值：2 : 4 = (    )，答案输入：0.5，或：1/2")
+        self.Generate()
+
+    def Generate(self):
+        sub_type = self.subtype[0]
+        self.BeforeGenerate()
+        if sub_type == 0:
+            while True:
+                a = self.RandInt(1, 20)
+                b = self.RandInt(2, 10)
+                if self.GCD(a, b) == 1:
+                    break
+            c = b * self.RandInt(2, 10)
+            self.correct_answer = c * a // b
+            self.numbers = [a, b, c]
+            self.expression = f'{a} : {b} = (    ) : {c}'
+        elif sub_type == 1:
+            while True:
+                a = self.RandInt(1, 20)
+                b = self.RandInt(2, 10)
+                if self.GCD(a, b) == 1:
+                    break
+            c = a * self.RandInt(2, 10)
+            self.correct_answer = b * c // a
+            self.numbers = [a, b, c]
+            self.expression = f'{a} : {b} = {c} : (    )'
+        elif sub_type == 2:
+            b = self.RandInt(1, 20)
+            a = b * self.RandInt(2, 10) / 10
+            self.correct_answer = a / b
+            self.numbers = [a, b]
+            self.expression = f'{a} : {b} = (    )'
+        self.question = self.expression
+        print(f'{self.question}，正确答案：{self.correct_answer}')
+        self.AfterGenerate()
+
+    def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
+        user_answer = decimal.Decimal(self.user_answer)
+        print(user_answer, self.correct_answer)
+        if user_answer == self.correct_answer:
+            self.is_correct = True
+        else:
+            self.is_correct = False
+        return self.is_correct
+
+    def CheckTips(self):
+        try:
+            [a, b, c] = self.numbers
+            if self.subtype[0] == 0:
+                self.check_tips = f'(    ) = {a} × {c} ÷ {b} = {a * c // b}'
+            elif self.subtype[0] == 1:
+                self.check_tips = f'(    ) = {c} ÷ {a} × {b} = {b * c // a}'
+            elif self.subtype[0] == 2:
+                self.check_tips = f'(    ) = {a} ÷ {b} = {a / b}'
+        except:
+            pass
+
+    def AnswerTips(self):
+        try:
+            [a, b, c] = self.numbers
+            if self.subtype[0] == 0:
+                self.answer_tips = f'(    ) = {a} × {c} ÷ {b} = {a * c // b}'
+            elif self.subtype[0] == 1:
+                self.answer_tips = f'(    ) = {b} × {c} ÷ {a} = {b * c // a}'
+            elif self.subtype[0] == 2:
+                self.answer_tips = f'(    ) = {a} ÷ {b} = {a / b}'
         except:
             pass

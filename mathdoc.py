@@ -289,14 +289,13 @@ class MathDoc(QWidget):
         control_panel.addWidget(self.decimal_group, 1)
 
         # 比例运算题型
-        self.ratio_group = QGroupBox("小数运算题型")
+        self.ratio_group = QGroupBox("比例运算题型")
         self.ratio_group.setFont(self.base_font)
         ratio_layout = QVBoxLayout()
         self.ratio_options = [
-            QRadioButton('小数加法'),  # 0
-            QRadioButton('小数减法'),  # 1
-            QRadioButton('小数乘法'),  # 2
-            QRadioButton('小数除法'),  # 3
+            QRadioButton('内项'),  # 0
+            QRadioButton('外项'),  # 1
+            QRadioButton('比值'),  # 2
         ]
         if not any(rb.isChecked() for rb in self.ratio_options):
             self.ratio_options[self.exam.setting.type_ratio].setChecked(True)

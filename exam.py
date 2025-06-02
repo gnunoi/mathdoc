@@ -186,7 +186,7 @@ class Exam:
         elif self.type == 8:  # 8: 小数运算
             return QuestionDecimal(subtype=self.subtype)
         elif self.type == 9:  # 9: 比例运算
-            return QuestionDecimal(subtype=self.subtype)
+            return QuestionRatio(subtype=self.subtype)
         else:
             print(f'{self.type}: 无效的类型')
             return None
