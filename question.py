@@ -1958,7 +1958,7 @@ class QuestionRatio(QuestionLR):
                 if self.GCD(a, b) == 1:
                     break
             c = b * self.RandInt(2, 10)
-            self.correct_answer = c * a // b
+            self.correct_answer = decimal.Decimal(c) * decimal.Decimal(a) // decimal.Decimal(b)
             self.numbers = [a, b, c]
             self.expression = f'{a} : {b} = (    ) : {c}'
         elif sub_type == 1:
@@ -1968,13 +1968,13 @@ class QuestionRatio(QuestionLR):
                 if self.GCD(a, b) == 1:
                     break
             c = a * self.RandInt(2, 10)
-            self.correct_answer = b * c // a
+            self.correct_answer = decimal.Decimal(b) * decimal.Decimal(c) // decimal.Decimal(a)
             self.numbers = [a, b, c]
             self.expression = f'{a} : {b} = {c} : (    )'
         elif sub_type == 2:
             b = self.RandInt(1, 20)
             a = b * self.RandInt(2, 10) / 10
-            self.correct_answer = a / b
+            self.correct_answer = decimal.Decimal(a) / decimal.Decimal(b)
             self.numbers = [a, b]
             self.expression = f'{a} : {b} = (    )'
         self.question = self.expression
@@ -1984,6 +1984,7 @@ class QuestionRatio(QuestionLR):
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
         user_answer = decimal.Decimal(self.user_answer)
+        print(type(user_answer), type(self.correct_answer))
         print(user_answer, self.correct_answer)
         if user_answer == self.correct_answer:
             self.is_correct = True
@@ -1993,7 +1994,10 @@ class QuestionRatio(QuestionLR):
 
     def CheckTips(self):
         try:
-            [a, b, c] = self.numbers
+            if self.subtype[0] == 0 or self.subtype[0] == 1:
+                [a, b, c] = self.numbers
+            elif self.subtype[0] == 2:
+                [a, b] = self.numbers
             if self.subtype[0] == 0:
                 self.check_tips = f'(    ) = {a} × {c} ÷ {b} = {a * c // b}'
             elif self.subtype[0] == 1:
@@ -2005,7 +2009,10 @@ class QuestionRatio(QuestionLR):
 
     def AnswerTips(self):
         try:
-            [a, b, c] = self.numbers
+            if self.subtype[0] == 0 or self.subtype[0] == 1:
+                [a, b, c] = self.numbers
+            elif self.subtype[0] == 2:
+                [a, b] = self.numbers
             if self.subtype[0] == 0:
                 self.answer_tips = f'(    ) = {a} × {c} ÷ {b} = {a * c // b}'
             elif self.subtype[0] == 1:
