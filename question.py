@@ -1890,7 +1890,9 @@ class QuestionDecimal(QuestionLR):
             print(self.correct_answer)
         elif sub_type == 3:
             a = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([1, 10]))
-            b = decimal.Decimal(random.choice([1, 2, 4, 5, 8, 10, 20, 25, 40, 50])) / decimal.Decimal(random.choice([10]))
+            b = 1
+            while b == 1:
+                b = decimal.Decimal(random.choice([1, 2, 4, 5, 8, 10, 20, 25, 40, 50])) / decimal.Decimal(random.choice([10]))
             self.numbers = [a, b]
             self.expression = f'{a} / {b}'
             self.correct_answer = a / b
