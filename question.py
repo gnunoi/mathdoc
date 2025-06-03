@@ -1943,11 +1943,11 @@ class QuestionRatio(QuestionLR):
         super().__init__(type=9, subtype=subtype)
         self.name = "分数运算"
         if subtype[0] == 0:
-            self.comments = "内项：2 : 1 = (    ) : 3 ，答案输入：6"
+            self.comments = "内项计算：2 : 1 = (    ) : 3 ，答案输入：6"
         if subtype[0] == 1:
-            self.comments = "外项：2 : 1 = 1 : (    ) ，答案输入：0.5，或：1/2"
+            self.comments = "外项计算：2 : 1 = 1 : (    ) ，答案输入：0.5，或：1/2"
         if subtype[0] == 2:
-            self.comments = ("比值：2 : 4 = (    )，答案输入：0.5，或：1/2")
+            self.comments = ("比值计算：2 : 4 = (    )，答案输入：0.5，或：1/2")
         self.Generate()
 
     def Generate(self):
