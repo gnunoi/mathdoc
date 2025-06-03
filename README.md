@@ -1,6 +1,7 @@
 # MathDoc Application
 ## [Release V1.8.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.8.0)
-增加小数计算题型。
+1、增加小数计算题型。
+2、增加比例计算题型。
 
 ## [Release V1.7.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.7.1)
 修改题型、速算题型的UI，变为两列布置。
