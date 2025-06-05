@@ -47,7 +47,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.06.03(V1.8.0)"
+        self.version = "2025.06.03(V1.9.0)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.primary_screen = QApplication.primaryScreen()
         self.physical_size = self.primary_screen.physicalSize()
@@ -106,12 +106,16 @@ class MathDoc(QWidget):
             QRadioButton('乘法速算'), # type = 1
             QRadioButton('四则运算'), # type = 2
             QRadioButton('质因数分解'), # type = 3
-            QRadioButton('解方程'),  # type = 4
-            QRadioButton('单位换算'),  # type = 5
-            QRadioButton('乘幂运算'),  # type = 6
-            QRadioButton('分数运算'),  # type = 7
-            QRadioButton('小数运算'),  # type = 8
-            QRadioButton('比例运算'),  # type = 9
+            QRadioButton('单位换算'),  # type = 4
+            QRadioButton('分数计算'),  # type = 5
+            QRadioButton('小数计算'),  # type = 6
+            QRadioButton('比例计算'),  # type = 7
+            QRadioButton('周长问题'),  # type = 8
+            QRadioButton('面积问题'),  # type = 9
+            QRadioButton('体积问题'),  # type = 10
+            QRadioButton('表面积问题'),  # type = 11
+            QRadioButton('乘幂运算'),  # type = 12
+            QRadioButton('解方程'),  # type = 13
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for i, rb in enumerate(self.type_options):
@@ -122,7 +126,7 @@ class MathDoc(QWidget):
         control_panel.addWidget(self.type_group, 1)
 
         # 速算
-        self.qc_group = QGroupBox("速算类型")
+        self.qc_group = QGroupBox("速算题型")
         self.qc_group.setFont(self.base_font)
         qc_layout = QGridLayout()
         self.qc_options = [
@@ -160,7 +164,7 @@ class MathDoc(QWidget):
         control_panel.addWidget(self.factor_group, 1)
 
         # 算术项数
-        self.term_group = QGroupBox("算术项数")
+        self.term_group = QGroupBox("项数")
         self.term_group.setFont(self.base_font)
         term_layout = QVBoxLayout()
         self.radio_terms = [QRadioButton(f'{i + 2}项') for i in range(4)]
@@ -232,7 +236,7 @@ class MathDoc(QWidget):
         # 乘幂运算题型
         self.power_group = QGroupBox("乘幂运算题型")
         self.power_group.setFont(self.base_font)
-        power_layout = QVBoxLayout()
+        power_layout = QGridLayout()
         self.power_options = [
             QRadioButton('乘幂求值'),  # 0
             QRadioButton('乘幂加法'),  # 1
@@ -243,15 +247,15 @@ class MathDoc(QWidget):
         ]
         if not any(rb.isChecked() for rb in self.power_options):
             self.power_options[self.exam.setting.type_power].setChecked(True)
-        for rb in self.power_options:
+        for i, rb in enumerate(self.power_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            power_layout.addWidget(rb)
+            power_layout.addWidget(rb, i % 3, i // 3)
         self.power_group.setLayout(power_layout)
         control_panel.addWidget(self.power_group, 1)
 
         # 分数运算题型
-        self.fraction_group = QGroupBox("分数运算题型")
+        self.fraction_group = QGroupBox("分数计算题型")
         self.fraction_group.setFont(self.base_font)
         fraction_layout = QVBoxLayout()
         self.fraction_options = [
@@ -270,7 +274,7 @@ class MathDoc(QWidget):
         control_panel.addWidget(self.fraction_group, 1)
 
         # 小数运算题型
-        self.decimal_group = QGroupBox("小数运算题型")
+        self.decimal_group = QGroupBox("小数计算题型")
         self.decimal_group.setFont(self.base_font)
         decimal_layout = QVBoxLayout()
         self.decimal_options = [
@@ -305,6 +309,75 @@ class MathDoc(QWidget):
             ratio_layout.addWidget(rb)
         self.ratio_group.setLayout(ratio_layout)
         control_panel.addWidget(self.ratio_group, 1)
+
+        # 周长问题
+        self.perimeter_group = QGroupBox("周长问题")
+        self.perimeter_group.setFont(self.base_font)
+        perimeter_layout = QGridLayout()
+        self.perimeter_options = [
+            QRadioButton('三角形'),  # 0
+            QRadioButton('长方形'),  # 1
+            QRadioButton('正方形'),  # 2
+            QRadioButton('平行四边形'),  # 3
+            QRadioButton('梯形'),  # 4
+            QRadioButton('圆'),  # 5
+            QRadioButton('半圆'),  # 6
+            QRadioButton('四分之一圆'),  # 7
+        ]
+        if not any(rb.isChecked() for rb in self.perimeter_options):
+            self.perimeter_options[self.exam.setting.type_perimeter].setChecked(True)
+        for i, rb in enumerate(self.perimeter_options):
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            perimeter_layout.addWidget(rb, i % 4, i // 4)
+        self.perimeter_group.setLayout(perimeter_layout)
+        control_panel.addWidget(self.perimeter_group, 1)
+
+        # 面积问题
+        self.area_group = QGroupBox("面积问题")
+        self.area_group.setFont(self.base_font)
+        area_layout = QGridLayout()
+        self.area_options = [
+            QRadioButton('三角形'),  # 0
+            QRadioButton('长方形'),  # 1
+            QRadioButton('正方形'),  # 2
+            QRadioButton('平行四边形'),  # 3
+            QRadioButton('梯形'),  # 4
+            QRadioButton('圆'),  # 5
+            QRadioButton('半圆'),  # 6
+            QRadioButton('四分之一圆'),  # 7
+        ]
+        if not any(rb.isChecked() for rb in self.area_options):
+            self.area_options[self.exam.setting.type_area].setChecked(True)
+        for i, rb in enumerate(self.area_options):
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            area_layout.addWidget(rb, i % 4, i // 4)
+        self.area_group.setLayout(area_layout)
+        control_panel.addWidget(self.area_group, 1)
+
+        # 体积问题
+        self.volume_group = QGroupBox("面积问题")
+        self.volume_group.setFont(self.base_font)
+        volume_layout = QGridLayout()
+        self.volume_options = [
+            QRadioButton('长方体'),  # 0
+            QRadioButton('正方体'),  # 1
+            QRadioButton('棱柱体'),  # 2
+            QRadioButton('圆柱体'),  # 3
+            QRadioButton('圆锥体'),  # 4
+            QRadioButton('棱锥体'),  # 5
+            QRadioButton('球体'),    # 6
+            QRadioButton('半球'),    # 7
+        ]
+        if not any(rb.isChecked() for rb in self.volume_options):
+            self.volume_options[self.exam.setting.type_volume].setChecked(True)
+        for i, rb in enumerate(self.volume_options):
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            volume_layout.addWidget(rb, i % 4, i // 4)
+        self.volume_group.setLayout(volume_layout)
+        control_panel.addWidget(self.volume_group, 1)
         
         # 数值范围
         self.range_groups = []
@@ -431,12 +504,17 @@ class MathDoc(QWidget):
             set([self.qc_group, self.range_groups[1]]), # type = 1 # 24点题型
             set([self.term_group, self.operator_group,self.range_groups[2]]), # type = 2 # 速算题型
             set([self.factor_group, self.range_groups[3]]), # type = 3 # 质因数分解题型
-            set([self.equation_group, self.range_groups[4]]),  # type = 4 # 解方程题型
-            set([self.conversion_group]),  # type = 5 # 单位换算题型
-            set([self.power_group]),  # type = 6 # 乘幂运算题型
-            set([self.fraction_group]),  # type = 7 # 分数运算题型
-            set([self.decimal_group]),  # type = 8 # 小数运算题型
-            set([self.ratio_group]),  # type = 9 # 比例运算题型
+            set([self.conversion_group]),  # type = 4 # 单位换算题型
+            set([self.fraction_group]),  # type = 5 # 分数运算题型
+            set([self.decimal_group]),  # type = 6 # 小数运算题型
+            set([self.ratio_group]),  # type = 7 # 比例运算题型
+            set([self.perimeter_group]),  # type = 8 # 周长问题
+            set([self.area_group]),  # type = 9 # 面积问题
+            set([self.volume_group]),  # type = 10 # 体积问题
+            set([self.perimeter_group]),  # type = 11 # 表面积问题
+            set([self.power_group]),  # type = 12 # 乘幂运算题型
+            set([self.equation_group, self.range_groups[4]]),  # type = 13 # 解方程题型
+
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -585,7 +663,70 @@ class MathDoc(QWidget):
                                             subtype = [self.exam.setting.factor_type],
                                             range = [self.exam.setting.min_composite,
                                                      self.exam.setting.max_composite])
-                elif i == 4:
+                elif i == 4 :
+                    for i, rb in enumerate(self.conversion_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_conversion = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_conversion])
+                elif i == 5 :
+                    for i, rb in enumerate(self.fraction_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_fraction = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_fraction])
+                elif i == 6 :
+                    for i, rb in enumerate(self.decimal_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_decimal = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_decimal])
+                elif i == 7 :
+                    for i, rb in enumerate(self.ratio_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_ratio = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_ratio])
+                elif i == 8 :
+                    for i, rb in enumerate(self.perimeter_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_perimeter = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_perimeter])
+                elif i == 9 :
+                    for i, rb in enumerate(self.area_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_area = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_area])
+                elif i == 10 :
+                    for i, rb in enumerate(self.volume_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_volume = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_volume])
+                elif i == 11 :
+                    for i, rb in enumerate(self.perimeter_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_perimeter = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_perimeter])
+                elif i == 12:
+                    for i, rb in enumerate(self.power_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_power = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_power])
+                elif i == 13:
                     for i, rb in enumerate(self.equation_options):
                         if rb.isChecked():
                             self.exam.setting.type_equation = i
@@ -596,41 +737,6 @@ class MathDoc(QWidget):
                                                      self.exam.setting.max_coefficient,
                                                      self.exam.setting.min_constant,
                                                      self.exam.setting.max_constant])
-                elif i == 5 :
-                    for i, rb in enumerate(self.conversion_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_conversion = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_conversion])
-                elif i == 6 :
-                    for i, rb in enumerate(self.power_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_power = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_power])
-                elif i == 7 :
-                    for i, rb in enumerate(self.fraction_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_fraction = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_fraction])
-                elif i == 8 :
-                    for i, rb in enumerate(self.decimal_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_decimal = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_decimal])
-                elif i == 9 :
-                    for i, rb in enumerate(self.ratio_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_ratio = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_ratio])
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案
@@ -643,7 +749,7 @@ class MathDoc(QWidget):
         self.exam.Generate()
         self.check_tips_label.setText('')
         self.answer_tips_label.setText('')
-        if self.exam.setting.type == 6 or self.exam.setting.type == 7:
+        if self.exam.setting.type in [5, 12]:
             # 在标签中显示图片
             pixmap = QPixmap(os.path.join(self.exam.q.path, 'question.png'))
             self.question_label.setPixmap(pixmap)

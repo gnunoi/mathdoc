@@ -175,18 +175,26 @@ class Exam:
             return Question4AO(subtype=self.subtype, range=self.range)
         elif self.type == 3: # 3: 质因数分解
             return QuestionFactor(subtype=self.subtype, range=self.range)
-        elif self.type == 4:  # 4: 解方程
-            return QuestionEquation(subtype=self.subtype, range=self.range)
-        elif self.type == 5:  # 5: 单位换算
+        elif self.type == 4:  # 4: 单位换算
             return QuestionConversion(subtype=self.subtype)
-        elif self.type == 6:  # 6: 乘幂运算
-            return QuestionPower(subtype=self.subtype)
-        elif self.type == 7:  # 7: 分数运算
+        elif self.type == 5:  # 5: 分数运算
             return QuestionFraction(subtype=self.subtype)
-        elif self.type == 8:  # 8: 小数运算
+        elif self.type == 6:  # 6: 小数运算
             return QuestionDecimal(subtype=self.subtype)
-        elif self.type == 9:  # 9: 比例运算
+        elif self.type == 7:  # 7: 比例运算
             return QuestionRatio(subtype=self.subtype)
+        elif self.type == 8:  # 8: 周长问题
+            return QuestionPerimeter(subtype=self.subtype)
+        elif self.type == 9:  # 9: 面积问题
+            return QuestionArea(subtype=self.subtype)
+        elif self.type == 10:  # 10: 体积问题
+            return QuestionVolume(subtype=self.subtype)
+        elif self.type == 11:  # 11: 表面积问题
+            return QuestionVolume(subtype=self.subtype)
+        elif self.type == 12:  # 12: 乘幂运算
+            return QuestionPower(subtype=self.subtype)
+        elif self.type == 13:  # 13: 解方程
+            return QuestionEquation(subtype=self.subtype, range=self.range)
         else:
             print(f'{self.type}: 无效的类型')
             return None
@@ -448,6 +456,9 @@ class Setting:
             'type_fraction': 0,
             'type_decimal': 0,
             'type_ratio': 0,
+            'type_perimeter': 0,
+            'type_area': 0,
+            'type_volume': 0,
         }
         self.CreateTable()
         self.Read()
