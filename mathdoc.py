@@ -710,21 +710,14 @@ class MathDoc(QWidget):
                             break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             subtype=[self.exam.setting.type_volume])
-                elif i == 11 :
-                    for i, rb in enumerate(self.perimeter_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_perimeter = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_perimeter])
-                elif i == 12:
+                elif i == 11:
                     for i, rb in enumerate(self.power_options):
                         if rb.isChecked():
                             self.exam.setting.type_power = i
                             break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             subtype=[self.exam.setting.type_power])
-                elif i == 13:
+                elif i == 12:
                     for i, rb in enumerate(self.equation_options):
                         if rb.isChecked():
                             self.exam.setting.type_equation = i
@@ -735,6 +728,7 @@ class MathDoc(QWidget):
                                                      self.exam.setting.max_coefficient,
                                                      self.exam.setting.min_constant,
                                                      self.exam.setting.max_constant])
+                    print(range)
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案

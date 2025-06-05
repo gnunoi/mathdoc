@@ -1010,7 +1010,7 @@ class QuestionConversion(QuestionLR):
             self.mass_units,
             self.time_units,
         ]
-        super().__init__(type=5, subtype=subtype)
+        super().__init__(type=4, subtype=subtype)
 
         if self.subtype[0] == 0:
             self.comments = "长度换算：1米 = (    )毫米，输入答案：1000，或1 000，或 = 1 000"
@@ -1107,7 +1107,7 @@ class QuestionConversion(QuestionLR):
 
 class QuestionFraction(QuestionLR):
     def __init__(self, subtype=[0]):
-        super().__init__(type=7, subtype=subtype)
+        super().__init__(type=5, subtype=subtype)
         self.name = "分数运算"
         if subtype[0] == 0:
             self.comments = "分数加法：1/2 + 1/3 = ，答案输入：5/6，或：1/2 + 1/3 = 5/6"
@@ -1221,7 +1221,7 @@ class QuestionFraction(QuestionLR):
 
 class QuestionDecimal(QuestionLR):
     def __init__(self, subtype=[0]):
-        super().__init__(type=8, subtype=subtype)
+        super().__init__(type=6, subtype=subtype)
         self.name = "分数运算"
         if subtype[0] == 0:
             self.comments = "小数加法：0.1 + 0.2 = ，答案输入：0.3，或：0.1 + 0.2 = 0.3"
@@ -1311,7 +1311,7 @@ class QuestionDecimal(QuestionLR):
 
 class QuestionRatio(QuestionLR):
     def __init__(self, subtype=[0]):
-        super().__init__(type=9, subtype=subtype)
+        super().__init__(type=7, subtype=subtype)
         self.name = "分数运算"
         if subtype[0] == 0:
             self.comments = "内项计算：2 : 1 = (    ) : 3 ，答案输入：6"
@@ -1400,7 +1400,7 @@ class QuestionRatio(QuestionLR):
 
 class QuestionPerimeter(QuestionLR):
     def __init__(self, subtype=[0]):
-        super().__init__(type=10, subtype=subtype)
+        super().__init__(type=8, subtype=subtype)
         self.name = "周长计算"
         self.comments = "输入周长的数值。如：6，或 = 6"
         self.Generate()
@@ -1548,7 +1548,7 @@ class QuestionPerimeter(QuestionLR):
 
 class QuestionArea(QuestionLR):
     def __init__(self, subtype=[0]):
-        super().__init__(type=11, subtype=subtype)
+        super().__init__(type=9, subtype=subtype)
         self.name = "面积计算"
         self.comments = "输入面积的数值。如：16，或 4 * 4 = 16"
         self.Generate()
@@ -1692,7 +1692,7 @@ class QuestionArea(QuestionLR):
 
 class QuestionVolume(QuestionLR):
     def __init__(self, subtype=[0]):
-        super().__init__(type=12, subtype=subtype)
+        super().__init__(type=10, subtype=subtype)
         self.name = "体积计算"
         self.comments = "输入体积的数值。如：64，或 4 * 4 * 4 = 64"
         self.Generate()
@@ -1844,7 +1844,7 @@ class QuestionPower(QuestionLR):
             {'base': 15, 'exponent': range(3)},
             {'base': 16, 'exponent': range(5)},
         ]
-        super().__init__(type=6, subtype=subtype)
+        super().__init__(type=11, subtype=subtype)
         self.name = "乘幂运算"
         if subtype[0] == 0:
             self.comments = "乘幂求值：2**10 = 1024，答案输入：1024，或：=1024"
@@ -2019,7 +2019,7 @@ class QuestionPower(QuestionLR):
 
 class QuestionEquation(QuestionLR):
     def __init__(self, subtype=[0], range=[1, 5, 1, 20]):
-        super().__init__(type=1, subtype=subtype, range=range)
+        super().__init__(type=12, subtype=subtype, range=range)
         self.name = "解方程"
         if self.subtype[0] == 0:
             self.comments = "输入未知数x的解，如：5，或者  x = 5"
