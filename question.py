@@ -1723,7 +1723,7 @@ class QuestionVolume(QuestionLR):
             r = self.RandInt(1, 10)
             h = self.RandInt(1, 10)
             self.correct_answer = decimal.Decimal(314 * r * r) * h / 100
-            self.numbers = [4, h]
+            self.numbers = [r, h]
             self.expression = f'求半径为{r}厘米、高为{h}厘米的圆柱体体积（单位：立方厘米，π取3.14）。'
         elif sub_type == 4: # 圆锥体
             r = self.RandInt(1, 10)
@@ -1731,27 +1731,23 @@ class QuestionVolume(QuestionLR):
             self.correct_answer = decimal.Decimal(round(314 * r * r * h / 3, 0)) / 100
             self.numbers = [r, h]
             self.expression = f'求半径为{r}厘米、高为{h}厘米的圆锥体体积（单位：立方厘米，π取3.14，保留2位小数）。'
-        elif sub_type == 5:
-            r = self.RandInt(1, 10)
-            self.correct_answer = decimal.Decimal(314 * r * r) / 100
+        elif sub_type == 5: # 棱锥体
+            s = self.RandInt(1, 100)
+            h = self.RandInt(1, 10)
+            self.correct_answer = decimal.Decimal(round(s * h / 3, 2) * 100) / 100
             print(self.correct_answer)
-            self.numbers = [r]
-            if self.RandInt(1, 10) % 2 == 0:
-                self.expression = f'半径为{r}厘米，求圆的面积（单位：平方厘米），π取值3.14。'
-            else:
-                self.expression = f'直径为{2*r}厘米，求圆的面积（单位：平方厘米），π取值3.14。'
+            self.numbers = [s, h]
+            self.expression = f'求底面积为{s}平方厘米、高为{h}厘米的棱锥体的体积（单位：立方厘米），保留2位小数。'
         elif sub_type == 6: # 球体
             r = self.RandInt(1, 10)
-            h = self.RandInt(1, 10)
-            self.correct_answer = decimal.Decimal(round(314 * r * r * h * 4 / 3, 0)) / 100
-            self.numbers = [r, h]
-            self.expression = f'求半径为{r}厘米、高为{h}厘米的球体体积（单位：立方厘米，π取3.14，保留2位小数）。'
+            self.correct_answer = decimal.Decimal(round(314 * r * r * r * 4 / 3, 0)) / 100
+            self.numbers = [r]
+            self.expression = f'求半径为{r}厘米的球体体积（单位：立方厘米，π取3.14，保留2位小数）。'
         elif sub_type == 7: # 半球
             r = self.RandInt(1, 10)
-            h = self.RandInt(1, 10)
-            self.correct_answer = decimal.Decimal(round(314 * r * r * h * 2 / 3, 0)) / 100
-            self.numbers = [r, h]
-            self.expression = f'求半径为{r}厘米、高为{h}厘米的半球体积（单位：立方厘米，π取3.14，保留2位小数）。'
+            self.correct_answer = decimal.Decimal(round(314 * r * r * r * 2 / 3, 0)) / 100
+            self.numbers = [r]
+            self.expression = f'求半径为{r}厘米的半球体积（单位：立方厘米，π取3.14，保留2位小数）。'
         self.question = self.expression
         print(f'{self.question}正确答案：{self.correct_answer}')
         self.AfterGenerate()
@@ -1770,59 +1766,63 @@ class QuestionVolume(QuestionLR):
 
     def CheckTips(self):
         try:
-            if self.subtype[0] == 0:
-                [a, h] = self.numbers
-                self.check_tips = f'1/2 × {a} × {h} = {self.correct_answer}'
-            elif self.subtype[0] == 1:
-                [a, b] = self.numbers
-                self.check_tips = f'{a} × {b} = {self.correct_answer}'
-            elif self.subtype[0] == 2:
+            sub_type = self.subtype[0]
+            if sub_type == 0:  # 长方体
+                [a, b, c] = self.numbers
+                self.check_tips = f'{a} × {b} × {c} = {self.correct_answer}'
+            elif sub_type == 1:  # 正方体
                 [a] = self.numbers
-                self.check_tips = f'{a} × {a} = {self.correct_answer}'
-            elif self.subtype[0] == 3:
-                [a, h] = self.numbers
-                self.check_tips = f'{a} × {h} = {self.correct_answer}'
-            elif self.subtype[0] == 4:
-                [a, b, h] = self.numbers
-                self.check_tips = f'1/2 × ({a} + {b}) × {h} = {self.correct_answer}'
-            elif self.subtype[0] == 5:
+                self.check_tips = f'{a} × {a} × {a} = {self.correct_answer}'
+            elif sub_type == 2:  # 棱柱体
+                [a, h1, h2] = self.numbers
+                self.check_tips = f'{a} × {h1} × {h2} ÷ 2 = {self.correct_answer}'
+            elif sub_type == 3:
+                [r, h] = self.numbers
+                self.check_tips = f'π × {r} × {r} × {h} = {self.correct_answer}'
+            elif sub_type == 4:  # 圆锥体
+                [r, h] = self.numbers
+                self.check_tips = f'1/3 × π × {r} × {r} × {h} = {self.correct_answer}'
+            elif sub_type == 5: #
+                print(self.correct_answer)
+                [s, h] = self.numbers
+                self.check_tips = f'1/3 × {s} × {h} = {self.correct_answer}'
+            elif sub_type == 6:  # 球体
                 [r] = self.numbers
-                self.check_tips = f'3.14 × {r}  × {r} = {self.correct_answer}'
-            elif self.subtype[0] == 6:
+                self.check_tips = f'4/3 × π × {r} × {r} × {r} = {self.correct_answer}'
+            elif sub_type == 7:  # 半球
                 [r] = self.numbers
-                self.check_tips = f'3.14 × {r} × {r} ÷ 2 = {self.correct_answer}'
-            elif self.subtype[0] == 7:
-                [r] = self.numbers
-                self.check_tips = f'3.14 × {r} × {r} ÷ 4 = {self.correct_answer}'
+                self.check_tips = f'2/3 × π × {r} × {r} × {r} = {self.correct_answer}'
         except:
             pass
 
     def AnswerTips(self):
         try:
-            if self.subtype[0] == 0:
-                [a, h] = self.numbers
-                self.answer_tips = f'1/2 × {a} × {h} = {self.correct_answer}'
-            elif self.subtype[0] == 1:
-                [a, b] = self.numbers
-                self.answer_tips = f'{a} × {b} = {self.correct_answer}'
-            elif self.subtype[0] == 2:
+            sub_type = self.subtype[0]
+            if sub_type == 0:  # 长方体
+                [a, b, c] = self.numbers
+                self.answer_tips = f'{a} × {b} × {c} = {self.correct_answer}'
+            elif sub_type == 1:  # 正方体
                 [a] = self.numbers
-                self.answer_tips = f'{a} × {a} = {self.correct_answer}'
-            elif self.subtype[0] == 3:
-                [a, h] = self.numbers
-                self.answer_tips = f'{a} × {h} = {self.correct_answer}'
-            elif self.subtype[0] == 4:
-                [a, b, h] = self.numbers
-                self.answer_tips = f'1/2 × ({a} + {b}) × {h} = {self.correct_answer}'
-            elif self.subtype[0] == 5:
+                self.answer_tips = f'{a} × {a} × {a} = {self.correct_answer}'
+            elif sub_type == 2:  # 棱柱体
+                [a, h1, h2] = self.numbers
+                self.answer_tips = f'{a} × {h1} × {h2} ÷ 2 = {self.correct_answer}'
+            elif sub_type == 3:
+                [r, h] = self.numbers
+                self.answer_tips = f'π × {r} × {r} × {h} = {self.correct_answer}'
+            elif sub_type == 4:  # 圆锥体
+                [r, h] = self.numbers
+                self.answer_tips = f'1/3 × π × {r} × {r} × {h} = {self.correct_answer}'
+            elif sub_type == 5: #
+                print(self.correct_answer)
+                [s, h] = self.numbers
+                self.answer_tips = f'1/3 × {s} × {h} = {self.correct_answer}'
+            elif sub_type == 6:  # 球体
                 [r] = self.numbers
-                self.answer_tips = f'3.14 × {r}  × {r} = {self.correct_answer}'
-            elif self.subtype[0] == 6:
+                self.answer_tips = f'4/3 × π × {r} × {r} × {r} = {self.correct_answer}'
+            elif sub_type == 7:  # 半球
                 [r] = self.numbers
-                self.answer_tips = f'3.14 × {r} × {r} ÷ 2 = {self.correct_answer}'
-            elif self.subtype[0] == 7:
-                [r] = self.numbers
-                self.answer_tips = f'3.14 × {r} × {r} ÷ 4 = {self.correct_answer}'
+                self.answer_tips = f'2/3 × π × {r} × {r} × {r} = {self.correct_answer}'
         except:
             pass
 
