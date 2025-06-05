@@ -1,4 +1,9 @@
 # MathDoc Application
+## [Release V1.9.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.0)
+1、增加周长计算题型。
+2、增加面积计算题型。
+3、增加体积计算题型。
+
 ## [Release V1.8.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.8.0)
 1、增加小数计算题型。
 2、增加比例计算题型。
