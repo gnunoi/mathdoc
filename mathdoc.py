@@ -113,9 +113,8 @@ class MathDoc(QWidget):
             QRadioButton('周长问题'),  # type = 8
             QRadioButton('面积问题'),  # type = 9
             QRadioButton('体积问题'),  # type = 10
-            QRadioButton('表面积问题'),  # type = 11
-            QRadioButton('乘幂运算'),  # type = 12
-            QRadioButton('解方程'),  # type = 13
+            QRadioButton('乘幂运算'),  # type = 11
+            QRadioButton('解方程'),  # type = 12
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for i, rb in enumerate(self.type_options):
@@ -511,7 +510,6 @@ class MathDoc(QWidget):
             set([self.perimeter_group]),  # type = 8 # 周长问题
             set([self.area_group]),  # type = 9 # 面积问题
             set([self.volume_group]),  # type = 10 # 体积问题
-            set([self.perimeter_group]),  # type = 11 # 表面积问题
             set([self.power_group]),  # type = 12 # 乘幂运算题型
             set([self.equation_group, self.range_groups[4]]),  # type = 13 # 解方程题型
 
@@ -749,7 +747,7 @@ class MathDoc(QWidget):
         self.exam.Generate()
         self.check_tips_label.setText('')
         self.answer_tips_label.setText('')
-        if self.exam.setting.type in [5, 12]:
+        if self.exam.setting.type in [5, 11]:
             # 在标签中显示图片
             pixmap = QPixmap(os.path.join(self.exam.q.path, 'question.png'))
             self.question_label.setPixmap(pixmap)

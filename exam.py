@@ -189,11 +189,9 @@ class Exam:
             return QuestionArea(subtype=self.subtype)
         elif self.type == 10:  # 10: 体积问题
             return QuestionVolume(subtype=self.subtype)
-        elif self.type == 11:  # 11: 表面积问题
-            return QuestionVolume(subtype=self.subtype)
-        elif self.type == 12:  # 12: 乘幂运算
+        elif self.type == 11:  # 11: 乘幂运算
             return QuestionPower(subtype=self.subtype)
-        elif self.type == 13:  # 13: 解方程
+        elif self.type == 12:  # 12: 解方程
             return QuestionEquation(subtype=self.subtype, range=self.range)
         else:
             print(f'{self.type}: 无效的类型')
