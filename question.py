@@ -161,7 +161,7 @@ class Question():
 
     def Latex2PNG(self, latex_formula, output_file, margin=0.5):
         dpi, font_size = GetFontSize()
-        print(dpi, font_size)
+        # print(dpi, font_size)
         plt.rcParams['font.sans-serif'] = ['Arial']  # 用来正常显示中文标签
         fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
         # 在图形上添加文本（LaTeX 公式）
@@ -275,7 +275,6 @@ class Question():
             self.user_results.append(result)
             result = eval(self.Fraction(self.user_answer))
             self.user_results.append(result)
-            # print(self.user_results)
         except:
             pass
         return True
@@ -295,7 +294,6 @@ class QuestionRL(Question):
         self.type = type
         self.subtype = subtype
         self.range = range
-        self.Generate()
 
 """
 类名称: QuestionFactor
@@ -310,7 +308,7 @@ class QuestionFactor(QuestionRL):
         super().__init__(type=3, subtype = subtype, range = range)
         self.name = "质因数分解"
         self.comments = ""
-        self.Generate()
+        # self.Generate()
 
     def IsPrime(self, num):
         """判断一个数是否为质数"""
@@ -364,6 +362,7 @@ class QuestionFactor(QuestionRL):
             self.comments = "求最小公倍数，如：24, 40，输入：120，或：24 = 8 * 3, 40 = 8 * 5, = 8 * 3 * 5 = 40 * 3 = 120"
             self.GenerateLCM()
         self.start_time = datetime.now()
+        print(self.question)
 
     def GenerateComposite(self):
         min = self.range[0]
@@ -429,7 +428,6 @@ class QuestionFactor(QuestionRL):
             print(f'{self.user_answer}含有无效信息')
 
     def JudgeAnswer(self):
-        # print(f'JudgeAnswer() in QuestionFactor')
         super().BeforeJudgeAnswer()
         self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
@@ -440,7 +438,6 @@ class QuestionFactor(QuestionRL):
             return self.JudgeAnswerQFactor()
         else:
             self.is_correct = self.user_answer == self.correct_answer
-            # print(self.is_correct)
             return self.is_correct
 
     def JudgeAnswerQFactor(self):
@@ -510,16 +507,15 @@ class QuestionFactor(QuestionRL):
 class Question24Point(QuestionRL):
     def __init__(self, subtype = [0], range=[1, 10]):
         super().__init__(type = 0, subtype = subtype, range = range)
-        # print(range)
         self.name = "计算24点"
         self.comments = "输入表达式，使得表达式的值为24。如: (5+3)*(8-5)。"
-        self.Generate()
 
     def Generate(self):
         self.BeforeGenerate()
         self.Question()
         self.Answer()
         self.AfterGenerate()
+        print(self.question)
 
     def BeforeGenerate(self):
         super().BeforeGenerate()
@@ -602,13 +598,13 @@ class QuestionLR(Question):
         self.type = type
         self.subtype = subtype
         self.range = range
-        self.Generate()
 
     def Generate(self):
         self.BeforeGenerate()
         self.Question()
         self.Answer()
         self.AfterGenerate()
+        print(self.question)
 
     def Question(self):
         try:
@@ -630,8 +626,6 @@ class QuestionLR(Question):
         self.BeforeJudgeAnswer()
         self.end_time = datetime.now()
         self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
-        # print(type(self.correct_answer))
-        # print(type(self.user_answer))
         for opr in ['+', '-', '*', '/', '=',]:
             self.user_answer == self.user_answer.replace(opr, ' ')
         self.user_answer = self.user_answer.split(' ')[-1]
@@ -649,7 +643,6 @@ class QuestionLR(Question):
             return False
 
     def Answer(self):
-        print(f'self.expression = {self.expression}')
         self.correct_answer = int(eval(self.Fraction(self.expression)))
         return self.correct_answer
 
@@ -688,7 +681,6 @@ class QuestionLR(Question):
             print('判断正负号的计算过程出错')
 
     def CheckTips(self):
-        # print(self.user_answer)
         tips = ''
         try:
             if type(self.user_answer) == str:
@@ -721,7 +713,6 @@ class QuestionQC(QuestionLR):
         super().__init__(type=1, subtype=subtype, range=range)
         self.name = "两位数乘法速算"
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
-        self.Generate()
 
     def BeforeGenerate(self):
         super().BeforeGenerate()
@@ -730,15 +721,9 @@ class QuestionQC(QuestionLR):
         subtype = self.subtype[0]
         min_val = self.range[0]
         max_val = self.range[1]
-
-        if subtype < 0 or subtype > 7:
-            print(f"不支持的子类型: {subtype}")
-            return False
-
-        if subtype == 7:
-            subtype = self.RandInt(0, 5)
+        if subtype < 0 or subtype >= 7:
+            subtype = self.RandInt(0, 6)
             self.subtype2 = [subtype]
-            # print(f'subtpe = {subtype}')
         if subtype == 0:  # 和十速算法
             n1 = self.RandInt(int(min_val / 10), int(max_val / 10)) * 10
             n2 = self.RandInt(1, 9)
@@ -831,7 +816,6 @@ class QuestionQC(QuestionLR):
             n = self.numbers[1]
             if n % 10 == 5:
                 m, n = n, m
-            print(m, n)
             if m % 25 == 0 and n % 4 == 0:
                 a = int(m / 25)
                 b = 25
@@ -899,7 +883,6 @@ class Question4AO(QuestionLR):
         # print(self.subtype)
         self.name = "四则速算"
         self.comments = "输入答案，可以含中间过程。如: 36 * 36 = 32 * 40 + 4 * 4 = 1280 + 16 = 1296"
-        self.Generate()
 
     def BeforeGenerate(self):
         super().BeforeGenerate()
@@ -1022,7 +1005,6 @@ class QuestionConversion(QuestionLR):
             self.comments = "质量换算：1吨 = (    )千克，输入答案：1000，或1 000，或 = 1 000"
         elif self.subtype[0] == 4:
             self.comments = "时间换算：1时 = (    )秒，输入答案：3600，或3 600，或 = 3 600"
-        self.Generate()
 
     def Generate(self):
         sub_type = self.subtype[0]
@@ -1035,7 +1017,6 @@ class QuestionConversion(QuestionLR):
             small_unit = random.choice(self.units[sub_type])
             big_rate = self.rates[sub_type][big_unit]
             small_rate = self.rates[sub_type][small_unit]
-            # print(small_unit, big_unit, small_rate, big_rate)
             if small_unit == big_unit:
                 continue
             elif big_rate < small_rate or big_rate > small_rate * 1e6:
@@ -1067,7 +1048,6 @@ class QuestionConversion(QuestionLR):
                 str_small_num = f'{small_num: ,.1f}'.replace(',', ' ')
                 self.question = f'{str_small_num}{small_unit} = (        ){big_unit}'
             self.correct_answer = big_num
-        print(f'{self.question} : {self.correct_answer}')
         self.big_unit = big_unit
         self.small_unit = small_unit
         self.big_rate = big_rate
@@ -1079,13 +1059,12 @@ class QuestionConversion(QuestionLR):
             self.small_num = f'{small_num: ,.1f}'.replace(',', ' ')
         self.rate = str(f'{big_rate / small_rate : ,.0f}').replace(',', ' ')
         self.AfterGenerate()
+        print(self.question)
 
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
         try:
             user_answer = float(self.user_answer.strip().replace(' ', ''))
-            # print(user_answer)
-            # print(self.correct_answer)
             if abs(user_answer - self.correct_answer) < 1e-3 :
                 self.is_correct = True
             else:
@@ -1096,14 +1075,12 @@ class QuestionConversion(QuestionLR):
 
     def CheckTips(self):
         self.check_tips = f'1{self.big_unit} = {self.rate}{self.small_unit}'
-        pass
 
     def AnswerTips(self):
         if self.direction > 0:
             self.answer_tips = f'{self.big_num} × {self.rate} = {self.small_num}'
         else:
             self.answer_tips = f'{self.small_num} ÷ {self.rate} = {self.big_num}'
-        pass
 
 class QuestionFraction(QuestionLR):
     def __init__(self, subtype=[0]):
@@ -1117,9 +1094,6 @@ class QuestionFraction(QuestionLR):
             self.comments = "分数乘法：1/2 × 1/3 = ，答案输入：1/6，或：1/2 × 1/3 = 1/6"
         elif subtype[0] == 3:
             self.comments = "分数除法：1/2 ÷ 1/3 = ，答案输入：3/2，或：1/2 ÷ 1/3 = 3/2"
-        # print(self.comments)
-
-        self.Generate()
 
     def Generate(self):
         sub_type = self.subtype[0]
@@ -1232,8 +1206,6 @@ class QuestionDecimal(QuestionLR):
         elif subtype[0] == 3:
             self.comments = "小数除法：1.5 ÷ 0.3 = ，答案输入：5，或：1.5 / 0.3 = 5"
 
-        self.Generate()
-
     def Generate(self):
         sub_type = self.subtype[0]
         self.BeforeGenerate()
@@ -1255,7 +1227,6 @@ class QuestionDecimal(QuestionLR):
             self.numbers = [a, b]
             self.expression = f'{a} * {b}'
             self.correct_answer = a * b
-            print(self.correct_answer)
         elif sub_type == 3:
             a = decimal.Decimal(self.RandInt(1, 50)) / decimal.Decimal(random.choice([1, 10]))
             b = 1
@@ -1264,7 +1235,6 @@ class QuestionDecimal(QuestionLR):
             self.numbers = [a, b]
             self.expression = f'{a} / {b}'
             self.correct_answer = a / b
-            print(self.correct_answer)
         self.question = self.expression.replace('*', '×').replace('/', '÷') + ' = '
         print(f'{self.question}{self.correct_answer}')
         self.AfterGenerate()
@@ -1319,7 +1289,6 @@ class QuestionRatio(QuestionLR):
             self.comments = "外项计算：2 : 1 = 1 : (    ) ，答案输入：0.5，或：1/2"
         if subtype[0] == 2:
             self.comments = ("比值计算：2 : 4 = (    )，答案输入：0.5，或：1/2")
-        self.Generate()
 
     def Generate(self):
         sub_type = self.subtype[0]
@@ -1403,7 +1372,6 @@ class QuestionPerimeter(QuestionLR):
         super().__init__(type=8, subtype=subtype)
         self.name = "周长计算"
         self.comments = "输入周长的数值。如：6，或 = 6"
-        self.Generate()
 
     def Generate(self):
         sub_type = self.subtype[0]
@@ -1551,7 +1519,6 @@ class QuestionArea(QuestionLR):
         super().__init__(type=9, subtype=subtype)
         self.name = "面积计算"
         self.comments = "输入面积的数值。如：16，或 4 * 4 = 16"
-        self.Generate()
 
     def Generate(self):
         sub_type = self.subtype[0]
@@ -1695,7 +1662,6 @@ class QuestionVolume(QuestionLR):
         super().__init__(type=10, subtype=subtype)
         self.name = "体积计算"
         self.comments = "输入体积的数值。如：64，或 4 * 4 * 4 = 64"
-        self.Generate()
 
     def Generate(self):
         sub_type = self.subtype[0]
@@ -1858,7 +1824,6 @@ class QuestionPower(QuestionLR):
             self.comments = "乘幂乘法：2**10 * 2**5 = 2**5 = 32，答案输入：32或：= 32"
         elif subtype[0] == 5:
             self.comments = "乘幂的乘幂：(2**4)**4 = 2**(4*4) = 2**16 = 65536，答案输入：65536或：= 65536"
-        self.Generate()
 
     def Generate(self):
         sub_type = self.subtype[0]
@@ -1874,6 +1839,7 @@ class QuestionPower(QuestionLR):
         latex = r'${}$'.format(self.formula)
         self.Latex2PNG(latex, self.png_file)
         self.AfterGenerate()
+        print(self.question)
 
     def GeneratePower(self):
         power = self.power
@@ -2017,6 +1983,263 @@ class QuestionPower(QuestionLR):
         except:
             pass
 
+class QuestionEq1v1d(QuestionLR):
+    def __init__(self, subtype=[0], range=[1, 5, 1, 20]):
+        super().__init__(type=12, subtype=subtype, range=range)
+        self.name = "求一元一次方程的解"
+        self.comments = "输入未知数的解，可以包括中间过程。如：5，或：x = 5，或：x + 2 = 7, x = 5"
+
+    def BeforeGenerate(self):
+        super().BeforeGenerate()
+
+    def AfterGenerate(self):
+        super().AfterGenerate()
+
+    def Generate(self):
+        self.BeforeGenerate()
+        subtype = self.subtype[0]
+        if subtype == 0:
+            self.GenerateEq1v1d_0()
+        if subtype == 1:
+            self.GenerateEq1v1d_1()
+        if subtype == 2:
+            self.GenerateEq1v1d_2()
+        if subtype == 3:
+            self.GenerateEq1v1d_3()
+        try:
+            latex = r'${}$'.format(self.question)
+            self.Latex2PNG(latex, self.png_file)
+        except:
+            pass
+        self.AfterGenerate()
+
+    def GenerateEq1v1d_0(self):
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min2, max2)
+            if a != 0:
+                break
+        b = self.RandInt(min2, max2)
+        self.numbers = [a, b]
+        x = sp.symbols('x')
+        equation = sp.Eq(x + a, b)
+        self.correct_answer = sp.solve(equation, x)
+        if a > 0:
+            self.question = f'x + {a} = {b}'
+        if a < 0:
+            self.question = f'x - {-a} = {b}'
+        print(self.question)
+
+    def GenerateEq1v1d_1(self):
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min1, max1)
+            if a != 0  and a != 1 and a != -1:
+                break
+        b = self.RandInt(min2, max2)
+        self.numbers = [a, b]
+        x = sp.symbols('x')
+        equation = sp.Eq(a * x, b)
+        self.correct_answer = sp.solve(equation, x)
+        self.question = f'{a}x = {b}'
+        print(self.question)
+
+    def GenerateEq1v1d_2(self):
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min1, max1)
+            if a != 0  and a != 1 and a != -1:
+                break
+        while True:
+            b = self.RandInt(min2, max2)
+            if b != 0:
+                break
+        c = self.RandInt(min2, max2)
+        self.numbers = [a, b, c]
+        x = sp.symbols('x')
+        equation = sp.Eq(a * x + b, c)
+        self.correct_answer = sp.solve(equation, x)
+        if b > 0:
+            self.question = f'{a}x + {b} = {c}'
+        elif b < 0:
+            self.question = f'{a}x - {-b} = {c}'
+        print(self.question)
+
+    def GenerateEq1v1d_3(self):
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min1, max1)
+            if a != 0  and a != 1 and a != -1:
+                break
+        while True:
+            b = self.RandInt(min2, max2)
+            if b != 0:
+                break
+        while True:
+            c = self.RandInt(min1, max1)
+            if c !=0 and c != a:
+                break
+        while True:
+            d = self.RandInt(min2, max2)
+            if d !=0:
+                break
+        self.numbers = [a, b, c, d]
+        x = sp.symbols('x')
+        equation = sp.Eq(a * x + b, c * x + d)
+        self.correct_answer = sp.solve(equation, x)
+        if b > 0 and d > 0:
+            self.question = f'{a}x + {b} = {c}x + {d}'
+        elif b > 0 and d < 0:
+            self.question = f'{a}x + {b} = {c}x - {-d}'
+        elif b < 0 and d > 0:
+            self.question = f'{a}x - {-b} = {c}x + {d}'
+        elif b < 0 and d < 0:
+            self.question = f'{a}x - {-b} = {c}x - {-d}'
+        print(self.question)
+
+    def JudgeAnswer(self):
+        self.BeforeJudgeAnswer()
+        self.end_time = datetime.now()
+        self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
+        subtype = self.subtype[0]
+        try:
+            user_answer = Fraction(self.user_answer)
+            # print(user_answer, self.correct_answer)
+            if user_answer in self.correct_answer:
+                self.is_correct = True
+            else:
+                self.is_correct = False
+            return self.is_correct
+        except:
+            self.is_correct = False
+            return False
+
+    def CheckTips(self):
+        try:
+            if self.subtype[0] == 0:
+                self.CheckTips1v1d()
+            elif self.subtype[0] == 1:
+                self.CheckTips2v1d()
+            elif self.subtype[0] == 2:
+                self.CheckTips1v2d()
+            pass
+        except:
+            self.check_tips = '无效的答案'
+
+    def CheckTips1v1d(self):
+        x = sp.Rational(self.user_answer)
+        a, b, c, d = tuple(self.numbers)
+        self.check_tips = f''
+        e = a * x + b
+        f = c * x + d
+        self.check_tips += f'左式 = {e}, 右式 = {f}, {e} ≠ {f}'
+
+    def CheckTips2v1d(self):
+        x = sp.Rational(self.user_answer[0])
+        y = sp.Rational(self.user_answer[1])
+        a1, b1, c1, a2, b2, c2 = tuple(self.numbers)
+        self.check_tips = f''
+        d1 = a1 * x + b1 * y
+        d2 = a2 * x + b2 * y
+        conj = '\n'
+        if d1 != c1:
+            self.check_tips += f'{conj}(1)左式 = {d1}, (1)右式 = {c1}, {d1} ≠ {c1}'
+            conj = ', '
+        if d2 != c2:
+            self.check_tips += f'{conj}(2)左式 = {d2}, (2)右式 = {c2}, {d2} ≠ {c2}'
+
+    def CheckTips1v2d(self):
+        [a, b, c] = self.numbers
+        # print(a, b, c)
+        if len(self.user_answer) == 2:
+            [x1, x2] = self.user_answer
+        elif len(self.user_answer) == 1:
+            x1 = self.user_answer[0]
+            x2 = x1
+        else:
+            return
+        x1 = sp.sympify(x1)
+        x2 = sp.sympify(x2)
+        d1 = x1 + x2
+        e1 = x1 * x2
+        d2 = Fraction(-b, a)
+        e2 = Fraction(c, a)
+        # print(d2, e2)
+        self.check_tips = ''
+        conj = ''
+        if d1 != d2:
+            self.check_tips += f'x1 + x2 ≠ {d2}'
+            conj = ', '
+        if e1 != e2:
+            self.check_tips += f'{conj}x1⋅x2 ≠ {e2}'
+
+    def AnswerTips(self):
+        try:
+            subtype = self.subtype[0]
+            if subtype == 0:
+                self.AnswerTips1v1d()
+            elif subtype == 1:
+                self.AnswerTips2v1d()
+            elif subtype == 2:
+                self.AnswerTips1v2d()
+        except:
+            pass
+
+    def AnswerTips1v1d(self):
+        a, b, c, d = tuple(self.numbers)
+        if a > c:
+            e = a - c
+            f = d - b
+        elif a < c:
+            e = c - a
+            f = b - d
+        else:
+            err = '方程系数不能为0'
+            print(err)
+        if e == 1:
+            self.answer_tips = f'x = {f}'
+        else:
+            self.answer_tips = f'{e}x = {f} ⇒ x = {f} ÷ {e} = {self.correct_answer[0]}'
+
+    def AnswerTips2v1d(self):
+        x = sp.Rational(self.user_answer[0])
+        y = sp.Rational(self.user_answer[1])
+        a1, b1, c1, a2, b2, c2 = tuple(self.numbers)
+        lcm = self.LCM(b1, b2)
+        str1 = f'(1)式' if b1 == lcm else f'(1)式 × {lcm//b1}'
+        str2 = f'(2)式' if b2 == lcm else f'(2)式 × {lcm//b2}'
+        d1 = a1 * lcm // b1 - a2 * lcm // b2
+        if d1 == 1:
+            str3 = 'x'
+        elif d1 == -1:
+            str3 = '-x'
+        else:
+            str3 = f'{d1}x'
+        self.answer_tips = f'{str1} - {str2}得到：{str3} = {c1 * lcm // b1 - c2 * lcm // b2}'
+        self.answer_tips += f'⇒ x = {self.correct_answer[0]}, y = {self.correct_answer[1]}'
+        print(self.answer_tips)
+
+    def AnswerTips1v2d(self):
+        delta = b * b - 4 * a * c
+        r1 = Fraction(-b, 2 * a)
+        r2 = sp.sympify(sp.sqrt(delta) / (2 * a))
+        if r2 == 0:
+            self.answer_tips = f'delta = 0, x1 = x2 = {r1}'
+        else:
+            self.answer_tips = f'delta = {delta}, x1 = {r1 + r2}, x2 = {r1 - r2}'
+
 class QuestionEquation(QuestionLR):
     def __init__(self, subtype=[0], range=[1, 5, 1, 20]):
         super().__init__(type=12, subtype=subtype, range=range)
@@ -2027,7 +2250,6 @@ class QuestionEquation(QuestionLR):
             self.comments = "输入未知数x和y的解，可以包括推导过程。如：2x = 2, x = 1, 3y = -1, y = -1/3 或：1, -1/3"
         elif self.subtype[0] == 2:
             self.comments = "输入未知数x的解，可以包括推导过程。如：delta = 4 * 4 - 4 * 2 = 8, x1 = -2 - sqrt(2), x2 = -2 + sqrt(2)"
-        self.Generate()
 
     def BeforeGenerate(self):
         super().BeforeGenerate()
@@ -2163,7 +2385,6 @@ class QuestionEquation(QuestionLR):
 
     def Generate1v2d(self):
         [min1, max1, min2, max2] = self.range
-        print(self.range)
         try_numbers = 0
         while try_numbers < self.try_numbers:
             try_numbers += 1
@@ -2177,11 +2398,9 @@ class QuestionEquation(QuestionLR):
                 a = a // gcd
                 b = b // gcd
                 c = c // gcd
-            print(f'{try_numbers}: a = {a}, b = {b}, c = {c}')
             if b * b - 4 * a * c < 0:
                 continue
             self.numbers = [a, b, c]
-            print(self.numbers)
             x = sp.symbols('x')
             eq = sp.Eq(a * x ** 2 + b * x + c, 0)
 
@@ -2242,7 +2461,6 @@ class QuestionEquation(QuestionLR):
         self.user_answer = re.sub(r"\s+", "", self.user_answer) # 删除空白符
         for opr in [',', '，', '＝']:
             self.user_answer == self.user_answer.replace(opr, '=')
-        print(self.user_answer)
         self.user_answer = self.user_answer.split('=')[-1]
         try:
             if sp.Rational(self.correct_answer[0]) == sp.Rational(self.user_answer):
@@ -2259,7 +2477,6 @@ class QuestionEquation(QuestionLR):
 
     def Get2Numbers(self):
         user_input = self.user_input.replace(',', ' ').replace('  ', ' ')
-        print(user_input)
         # 尝试将输入分割为两个部分
         parts = user_input.split()
         if len(parts) != 2:
@@ -2300,7 +2517,6 @@ class QuestionEquation(QuestionLR):
         # 检查是否成功提取了x和y的值
         if x_val is None or y_val is None:
             x_val, y_val = self.Get2Numbers()
-            # print(x_val, y_val)
         if self.correct_answer == [x_val, y_val]:
             self.is_correct = True
         else:
@@ -2311,7 +2527,6 @@ class QuestionEquation(QuestionLR):
 
     def JudgeAnswer1v2d(self):
         user_input = self.user_input.strip()
-        print(user_input)
         numbers = []
 
         # 尝试匹配带x1=和x2=的格式（允许逗号后有空格）
@@ -2320,11 +2535,9 @@ class QuestionEquation(QuestionLR):
 
         # 查找所有匹配项
         matches = re.findall(pattern, user_input)
-        print(matches)
         if matches:
             # 提取x1和x2后的内容
             result = {match[0]: match[1].strip() for match in matches}
-            # print(result)
             numbers = [result['x1'], result['x2']]
         else:
             # 处理直接输入两个数字的情况（逗号或空格分隔）
@@ -2383,7 +2596,6 @@ class QuestionEquation(QuestionLR):
 
     def CheckTips1v2d(self):
         [a, b, c] = self.numbers
-        # print(a, b, c)
         if len(self.user_answer) == 2:
             [x1, x2] = self.user_answer
         elif len(self.user_answer) == 1:
@@ -2397,7 +2609,6 @@ class QuestionEquation(QuestionLR):
         e1 = x1 * x2
         d2 = Fraction(-b, a)
         e2 = Fraction(c, a)
-        # print(d2, e2)
         self.check_tips = ''
         conj = ''
         if d1 != d2:
@@ -2450,15 +2661,12 @@ class QuestionEquation(QuestionLR):
             str3 = f'{d1}x'
         self.answer_tips = f'{str1} - {str2}得到：{str3} = {c1 * lcm // b1 - c2 * lcm // b2}'
         self.answer_tips += f'⇒ x = {self.correct_answer[0]}, y = {self.correct_answer[1]}'
-        print(self.answer_tips)
 
     def AnswerTips1v2d(self):
         [a, b, c] = self.numbers
-        # print(a, b, c)
         delta = b * b - 4 * a * c
         r1 = Fraction(-b, 2 * a)
         r2 = sp.sympify(sp.sqrt(delta) / (2 * a))
-        print(type(r1+r2), type(r1-r2))
         if r2 == 0:
             self.answer_tips = f'delta = 0, x1 = x2 = {r1}'
         else:

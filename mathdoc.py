@@ -114,7 +114,8 @@ class MathDoc(QWidget):
             QRadioButton('面积问题'),  # type = 9
             QRadioButton('体积问题'),  # type = 10
             QRadioButton('乘幂运算'),  # type = 11
-            QRadioButton('解方程'),  # type = 12
+            QRadioButton('一元一次方程'),  # type = 12
+            QRadioButton('解方程'),  # type = 13
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for i, rb in enumerate(self.type_options):
@@ -356,7 +357,7 @@ class MathDoc(QWidget):
         control_panel.addWidget(self.area_group, 1)
 
         # 体积问题
-        self.volume_group = QGroupBox("面积问题")
+        self.volume_group = QGroupBox("体积问题")
         self.volume_group.setFont(self.base_font)
         volume_layout = QGridLayout()
         self.volume_options = [
@@ -377,7 +378,27 @@ class MathDoc(QWidget):
             volume_layout.addWidget(rb, i % 4, i // 4)
         self.volume_group.setLayout(volume_layout)
         control_panel.addWidget(self.volume_group, 1)
-        
+
+        # 一元一次方程
+        self.eq1v1d_group = QGroupBox("一元一次方程")
+        self.eq1v1d_group.setFont(self.base_font)
+        eq1v1d_layout = QGridLayout()
+        self.eq1v1d_options = [
+            QRadioButton('x + a = b'),  # 0
+            QRadioButton('ax = b'),  # 1
+            QRadioButton('ax + b = c'),  # 2
+            QRadioButton('ax + b = cx + d'),  # 3
+            QRadioButton('分数方程'),  # 4
+        ]
+        if not any(rb.isChecked() for rb in self.eq1v1d_options):
+            self.eq1v1d_options[self.exam.setting.type_eq1v1d].setChecked(True)
+        for i, rb in enumerate(self.eq1v1d_options):
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            eq1v1d_layout.addWidget(rb, i % 5, i // 5)
+        self.eq1v1d_group.setLayout(eq1v1d_layout)
+        control_panel.addWidget(self.eq1v1d_group, 1)
+
         # 数值范围
         self.range_groups = []
         self.num_edit = []
@@ -510,9 +531,9 @@ class MathDoc(QWidget):
             set([self.perimeter_group]),  # type = 8 # 周长问题
             set([self.area_group]),  # type = 9 # 面积问题
             set([self.volume_group]),  # type = 10 # 体积问题
-            set([self.power_group]),  # type = 12 # 乘幂运算题型
+            set([self.power_group]),  # type = 11 # 乘幂运算题型
+            set([self.eq1v1d_group, self.range_groups[4]]),  # type = 12 # 一元一次方程
             set([self.equation_group, self.range_groups[4]]),  # type = 13 # 解方程题型
-
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -718,6 +739,17 @@ class MathDoc(QWidget):
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             subtype=[self.exam.setting.type_power])
                 elif i == 12:
+                    for i, rb in enumerate(self.eq1v1d_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_eq1v1d = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_eq1v1d],
+                                            range=[self.exam.setting.min_coefficient,
+                                                   self.exam.setting.max_coefficient,
+                                                   self.exam.setting.min_constant,
+                                                   self.exam.setting.max_constant])
+                elif i == 13:
                     for i, rb in enumerate(self.equation_options):
                         if rb.isChecked():
                             self.exam.setting.type_equation = i
@@ -728,7 +760,6 @@ class MathDoc(QWidget):
                                                      self.exam.setting.max_coefficient,
                                                      self.exam.setting.min_constant,
                                                      self.exam.setting.max_constant])
-                    print(range)
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案
@@ -741,7 +772,7 @@ class MathDoc(QWidget):
         self.exam.Generate()
         self.check_tips_label.setText('')
         self.answer_tips_label.setText('')
-        if self.exam.setting.type in [5, 11]:
+        if self.exam.setting.type in [5, 11, 12]:
             # 在标签中显示图片
             pixmap = QPixmap(os.path.join(self.exam.q.path, 'question.png'))
             self.question_label.setPixmap(pixmap)
@@ -1015,7 +1046,7 @@ class TelePrompter(QWidget):
             self.second_screen = screens[1]
             # print(self.second_screen)
         else:
-            print("第二屏幕未检测到")
+            # print("第二屏幕未检测到")
             screen_geometry = screens[0].geometry()
         # 设置窗口在第屏幕的位置和大小
         self.setGeometry(screen_geometry)

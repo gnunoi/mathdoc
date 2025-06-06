@@ -166,7 +166,6 @@ class Exam:
         self.q = self.CreateQuestion()
 
     def CreateQuestion(self):
-        # print(self.type, self.subtype, self.range)
         if self.type == 0: # 0: 计算24点
             return Question24Point(subtype=self.subtype, range=self.range)
         elif self.type == 1: # 1: 乘法速算
@@ -191,7 +190,9 @@ class Exam:
             return QuestionVolume(subtype=self.subtype)
         elif self.type == 11:  # 11: 乘幂运算
             return QuestionPower(subtype=self.subtype)
-        elif self.type == 12:  # 12: 解方程
+        elif self.type == 12:  # 12: 一元一次方程
+            return QuestionEq1v1d(subtype=self.subtype, range=self.range)
+        elif self.type == 13:  # 13: 解方程
             return QuestionEquation(subtype=self.subtype, range=self.range)
         else:
             print(f'{self.type}: 无效的类型')
@@ -199,7 +200,6 @@ class Exam:
 
     def SubmitAnswer(self):
         q = self.q
-        print(q.type)
         if not q.ProcessUserInput():
             print('无效输入，继续做题')
             return
@@ -242,12 +242,9 @@ class Exam:
         count = 0
         for count in range(100):
             count += 1
-            # print(count)
             if q.question in ql:
-                print(f'{[q.question]} 存在于 {ql} 中')
                 q.Generate()
             else:
-                # print(f'{[q.question]} 不存在于 {ql} 中')
                 return True
         return False
 
@@ -329,7 +326,7 @@ class User:
 
         self.CreateTable()
         self.Read()
-        print(self.username)
+        # print(self.username)
 
     def CreateTable(self):
         db = self.db
@@ -448,15 +445,16 @@ class Setting:
             'max_coefficient': 5,
             'min_constant': -20,
             'max_constant': 20,
-            'type_equation': 0,
             'type_conversion': 0,
-            'type_power': 0,
             'type_fraction': 0,
             'type_decimal': 0,
             'type_ratio': 0,
             'type_perimeter': 0,
             'type_area': 0,
             'type_volume': 0,
+            'type_power': 0,
+            'type_eq1v1d': 0,
+            'type_equation': 0,
         }
         self.CreateTable()
         self.Read()
