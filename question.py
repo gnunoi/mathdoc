@@ -13,13 +13,20 @@ import os
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import (QApplication)
 
+dpi = 0
+base_font_size = 0
 def GetFontSize():
+    global dpi
+    global base_font_size
+    if dpi > 0 and base_font_size > 0:
+        return int(dpi), base_font_size
     primary_screen = QApplication.primaryScreen()
     physical_size = primary_screen.physicalSize()
     scale_factor = primary_screen.devicePixelRatio()
     screen_geometry = primary_screen.geometry()
     ppi = screen_geometry.width() / physical_size.width() * 25.4
     dpi = ppi * scale_factor
+    print(physical_size.width(), physical_size.height(), scale_factor, screen_geometry.width(), screen_geometry.height())
     if screen_geometry.width() <= 1024:
         base_font_size = 12
         big_font_size = 18
@@ -2213,52 +2220,9 @@ class QuestionEq1v1d(QuestionLR):
                     str4 = f'({a - c})'
                 else:
                     str4 = f'{a - c}'
-                self.answer_tips = f'{str1}x = {str2}；x = ({str2}) ÷ {str1} = {str3} ÷ {str4}= {self.correct_answer[0]}'
+                self.answer_tips = f'{str1}x = {str2} ⇒ x = ({str2}) ÷ {str1} = {str3} ÷ {str4}= {self.correct_answer[0]}'
         except:
             pass
-
-    def AnswerTips1v1d(self):
-        a, b, c, d = tuple(self.numbers)
-        if a > c:
-            e = a - c
-            f = d - b
-        elif a < c:
-            e = c - a
-            f = b - d
-        else:
-            err = '方程系数不能为0'
-            print(err)
-        if e == 1:
-            self.answer_tips = f'x = {f}'
-        else:
-            self.answer_tips = f'{e}x = {f} ⇒ x = {f} ÷ {e} = {self.correct_answer[0]}'
-
-    def AnswerTips2v1d(self):
-        x = sp.Rational(self.user_answer[0])
-        y = sp.Rational(self.user_answer[1])
-        a1, b1, c1, a2, b2, c2 = tuple(self.numbers)
-        lcm = self.LCM(b1, b2)
-        str1 = f'(1)式' if b1 == lcm else f'(1)式 × {lcm//b1}'
-        str2 = f'(2)式' if b2 == lcm else f'(2)式 × {lcm//b2}'
-        d1 = a1 * lcm // b1 - a2 * lcm // b2
-        if d1 == 1:
-            str3 = 'x'
-        elif d1 == -1:
-            str3 = '-x'
-        else:
-            str3 = f'{d1}x'
-        self.answer_tips = f'{str1} - {str2}得到：{str3} = {c1 * lcm // b1 - c2 * lcm // b2}'
-        self.answer_tips += f'⇒ x = {self.correct_answer[0]}, y = {self.correct_answer[1]}'
-        print(self.answer_tips)
-
-    def AnswerTips1v2d(self):
-        delta = b * b - 4 * a * c
-        r1 = Fraction(-b, 2 * a)
-        r2 = sp.sympify(sp.sqrt(delta) / (2 * a))
-        if r2 == 0:
-            self.answer_tips = f'delta = 0, x1 = x2 = {r1}'
-        else:
-            self.answer_tips = f'delta = {delta}, x1 = {r1 + r2}, x2 = {r1 - r2}'
 
 class QuestionEquation(QuestionLR):
     def __init__(self, subtype=[0], range=[1, 5, 1, 20]):

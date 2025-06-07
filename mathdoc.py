@@ -55,7 +55,6 @@ class MathDoc(QWidget):
         self.screen_geometry = self.primary_screen.geometry()
         self.ppi = self.screen_geometry.width() / self.physical_size.width() * 25.4
         self.setGeometry(self.screen_geometry)
-        # print(self.screen_geometry, self.scale_factor)
         if self.screen_geometry.width() <= 1024:
             self.base_font_size = 12
             self.big_font_size = 18
@@ -388,10 +387,6 @@ class MathDoc(QWidget):
             QRadioButton('ax = b'),  # 1
             QRadioButton('ax + b = c'),  # 2
             QRadioButton('ax + b = cx + d'),  # 3
-            QRadioButton('x + b/a = d/c'),  # 4
-            QRadioButton('(b/a)x = d/c'),  # 5
-            QRadioButton('(b/a)x + d/c = f/e'),  # 5
-            QRadioButton('(b/a)x + d/c = (f/e)x + h/g'),  # 7
         ]
         if not any(rb.isChecked() for rb in self.eq1v1d_options):
             self.eq1v1d_options[self.exam.setting.type_eq1v1d].setChecked(True)
