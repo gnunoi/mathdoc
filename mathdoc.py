@@ -379,33 +379,41 @@ class MathDoc(QWidget):
         control_panel.addWidget(self.volume_group, 1)
 
         # 一元一次方程
-        self.eq1v1d_group = QGroupBox("一元一次方程")
+        self.eq1v1d_group = QGroupBox("方程类型")
         self.eq1v1d_group.setFont(self.base_font)
         eq1v1d_layout = QGridLayout()
         self.eq1v1d_options = [
+            QRadioButton('整数方程'),  # 0
+            # QRadioButton('分数方程'),  # 1
+            # QRadioButton('整体换元'),  # 2
+        ]
+        if not any(rb.isChecked() for rb in self.eq1v1d_options):
+            self.eq1v1d_options[self.exam.setting.type_eq1v1d].setChecked(True)
+        for i, rb in enumerate(self.eq1v1d_options):
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            eq1v1d_layout.addWidget(rb, i % 3, i // 3)
+        self.eq1v1d_group.setLayout(eq1v1d_layout)
+        control_panel.addWidget(self.eq1v1d_group, 1)
+
+        # 一元一次方程
+        self.eq1v1d_group2 = QGroupBox("方程形式")
+        self.eq1v1d_group2.setFont(self.base_font)
+        eq1v1d_layout = QGridLayout()
+        self.eq1v1d_options2 = [
             QRadioButton('x + a = b'),  # 0
             QRadioButton('ax = b'),  # 1
             QRadioButton('ax + b = c'),  # 2
             QRadioButton('ax + b = cx + d'),  # 3
         ]
-        if not any(rb.isChecked() for rb in self.eq1v1d_options):
-            self.eq1v1d_options[self.exam.setting.type_eq1v1d].setChecked(True)
-        ql = [
-            QLabel('整数方程'),
-            QLabel('分数方程'),
-            QLabel('整体换元'),
-        ]
-        for i, rb in enumerate(self.eq1v1d_options):
-            # print(i, 0, i // 4)
-            # qlabel = ql[i // 4]
-            # qlabel.setFont(self.base_font)
-            # if i % 4 == 0:
-            #     eq1v1d_layout.addWidget(qlabel, i % 4, i // 4)
+        if not any(rb.isChecked() for rb in self.eq1v1d_options2):
+            self.eq1v1d_options2[self.exam.setting.type_eq1v1d_form].setChecked(True)
+        for i, rb in enumerate(self.eq1v1d_options2):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
             eq1v1d_layout.addWidget(rb, i % 4, i // 4)
-        self.eq1v1d_group.setLayout(eq1v1d_layout)
-        control_panel.addWidget(self.eq1v1d_group, 1)
+        self.eq1v1d_group2.setLayout(eq1v1d_layout)
+        control_panel.addWidget(self.eq1v1d_group2, 1)
 
         # 数值范围
         self.range_groups = []
@@ -540,7 +548,7 @@ class MathDoc(QWidget):
             set([self.area_group]),  # type = 9 # 面积问题
             set([self.volume_group]),  # type = 10 # 体积问题
             set([self.power_group]),  # type = 11 # 乘幂运算题型
-            set([self.eq1v1d_group, self.range_groups[4]]),  # type = 12 # 一元一次方程
+            set([self.eq1v1d_group, self.eq1v1d_group2, self.range_groups[4]]),  # type = 12 # 一元一次方程
             set([self.equation_group, self.range_groups[4]]),  # type = 13 # 解方程题型
         ]
         self.sets = set([])
@@ -751,8 +759,12 @@ class MathDoc(QWidget):
                         if rb.isChecked():
                             self.exam.setting.type_eq1v1d = i
                             break
+                    for i, rb in enumerate(self.eq1v1d_options2):
+                        if rb.isChecked():
+                            self.exam.setting.type_eq1v1d_form = i
+                            break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_eq1v1d],
+                                            subtype=[self.exam.setting.type_eq1v1d, self.exam.setting.type_eq1v1d_form],
                                             range=[self.exam.setting.min_coefficient,
                                                    self.exam.setting.max_coefficient,
                                                    self.exam.setting.min_constant,

@@ -26,7 +26,7 @@ def GetFontSize():
     screen_geometry = primary_screen.geometry()
     ppi = screen_geometry.width() / physical_size.width() * 25.4
     dpi = ppi * scale_factor
-    print(physical_size.width(), physical_size.height(), scale_factor, screen_geometry.width(), screen_geometry.height())
+    # print(physical_size.width(), physical_size.height(), scale_factor, screen_geometry.width(), screen_geometry.height())
     if screen_geometry.width() <= 1024:
         base_font_size = 12
         big_font_size = 18
@@ -1903,7 +1903,6 @@ class QuestionPower(QuestionLR):
                 n2 = random.choice(power[sub]['exponent'])
             else:
                 n2 = int(n1 / 2)
-        # print(f'a = {a}, n1 = {n1}, n2 = {n2}')
         self.expression = f'{a} ** {n1} {sign} {a} ** {n2}'
         self.question = self.expression + ' = '
         self.formula = f'{a}' + '^' + '{' + f'{n1}' + '}' + f'{latex_sign}' + f'{a}' + '^' + '{' + f'{n2}' + '}' + ' = '
@@ -2005,15 +2004,21 @@ class QuestionEq1v1d(QuestionLR):
 
     def Generate(self):
         self.BeforeGenerate()
-        subtype = self.subtype[0]
-        if subtype == 0:
-            self.GenerateEq1v1d_0()
-        if subtype == 1:
-            self.GenerateEq1v1d_1()
-        if subtype == 2:
-            self.GenerateEq1v1d_2()
-        if subtype == 3:
-            self.GenerateEq1v1d_3()
+        subtype = self.subtype
+        print(subtype)
+        if subtype[0] == 0:
+            if subtype[1] == 0:
+                self.GenerateEq1v1d_0()
+            elif subtype[1] == 1:
+                self.GenerateEq1v1d_1()
+            elif subtype[1] == 2:
+                self.GenerateEq1v1d_2()
+            elif subtype[1] == 3:
+                self.GenerateEq1v1d_3()
+        elif subtype[0] == 1:
+            pass
+        elif subtype[0] == 2:
+            pass
         try:
             latex = r'${}$'.format(self.question)
             self.Latex2PNG(latex, self.png_file)
