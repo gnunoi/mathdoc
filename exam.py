@@ -237,9 +237,10 @@ class Exam:
         :return:
         """
         q = self.q
-        ql = self.record.question_list
         q.Generate()
+
         count = 0
+        ql = self.record.question_list
         for count in range(100):
             count += 1
             if q.question in ql:

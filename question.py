@@ -161,6 +161,7 @@ class Question():
 
     def Latex2PNG(self, latex_formula, output_file, margin=0.5):
         dpi, font_size = GetFontSize()
+        dpi *= 1.2
         # print(dpi, font_size)
         plt.rcParams['font.sans-serif'] = ['Arial']  # 用来正常显示中文标签
         fig = plt.figure(figsize=(1, 1))  # 初始尺寸，后续会自动调整
@@ -2129,71 +2130,90 @@ class QuestionEq1v1d(QuestionLR):
     def CheckTips(self):
         try:
             if self.subtype[0] == 0:
-                self.CheckTips1v1d()
+                [a, b] = self.numbers
+                answer = sp.Rational(self.user_answer)
+                self.check_tips = f'左式 = {answer} + {a} = {answer + a}；右式 = {b}；左式 ≠ 右式'
             elif self.subtype[0] == 1:
-                self.CheckTips2v1d()
+                [a, b] = self.numbers
+                answer = sp.Rational(self.user_answer)
+                self.check_tips = f'左式 = {a} × {answer}= {a * answer}；右式 = {b}；左式 ≠ 右式'
             elif self.subtype[0] == 2:
-                self.CheckTips1v2d()
-            pass
+                [a, b, c] = self.numbers
+                answer = sp.Rational(self.user_answer)
+                if answer < 0:
+                    str1 = f'× ({answer})'
+                else:
+                    str1 = f'× {answer}'
+                if b < 0:
+                    str2 = f'- {-b}'
+                else:
+                    str2 = f'+ {b}'
+                self.check_tips = f'左式 = {a} {str1} {str2} = {a * answer + b}；右式 = {c}；左式 ≠ 右式'
+            elif self.subtype[0] == 3:
+                [a, b, c, d] = self.numbers
+                answer = sp.Rational(self.user_answer)
+                if answer < 0:
+                    str1 = f'× ({answer})'
+                else:
+                    str1 = f'× {answer}'
+                if b < 0:
+                    str2 = f'- {-b}'
+                else:
+                    str2 = f'+ {b}'
+                if d < 0:
+                    str3 = f'- {-d}'
+                else:
+                    str3 = f'+ {d}'
+                self.check_tips = f'左式 = {a} {str1} {str2} = {a * answer + b}；右式 = {c} {str1} {str3} = {c * answer + d}；左式 ≠ 右式'
         except:
             self.check_tips = '无效的答案'
 
-    def CheckTips1v1d(self):
-        x = sp.Rational(self.user_answer)
-        a, b, c, d = tuple(self.numbers)
-        self.check_tips = f''
-        e = a * x + b
-        f = c * x + d
-        self.check_tips += f'左式 = {e}, 右式 = {f}, {e} ≠ {f}'
-
-    def CheckTips2v1d(self):
-        x = sp.Rational(self.user_answer[0])
-        y = sp.Rational(self.user_answer[1])
-        a1, b1, c1, a2, b2, c2 = tuple(self.numbers)
-        self.check_tips = f''
-        d1 = a1 * x + b1 * y
-        d2 = a2 * x + b2 * y
-        conj = '\n'
-        if d1 != c1:
-            self.check_tips += f'{conj}(1)左式 = {d1}, (1)右式 = {c1}, {d1} ≠ {c1}'
-            conj = ', '
-        if d2 != c2:
-            self.check_tips += f'{conj}(2)左式 = {d2}, (2)右式 = {c2}, {d2} ≠ {c2}'
-
-    def CheckTips1v2d(self):
-        [a, b, c] = self.numbers
-        # print(a, b, c)
-        if len(self.user_answer) == 2:
-            [x1, x2] = self.user_answer
-        elif len(self.user_answer) == 1:
-            x1 = self.user_answer[0]
-            x2 = x1
-        else:
-            return
-        x1 = sp.sympify(x1)
-        x2 = sp.sympify(x2)
-        d1 = x1 + x2
-        e1 = x1 * x2
-        d2 = Fraction(-b, a)
-        e2 = Fraction(c, a)
-        # print(d2, e2)
-        self.check_tips = ''
-        conj = ''
-        if d1 != d2:
-            self.check_tips += f'x1 + x2 ≠ {d2}'
-            conj = ', '
-        if e1 != e2:
-            self.check_tips += f'{conj}x1⋅x2 ≠ {e2}'
-
     def AnswerTips(self):
         try:
-            subtype = self.subtype[0]
-            if subtype == 0:
-                self.AnswerTips1v1d()
-            elif subtype == 1:
-                self.AnswerTips2v1d()
-            elif subtype == 2:
-                self.AnswerTips1v2d()
+            if self.subtype[0] == 0:
+                [a, b] = self.numbers
+                if a < 0:
+                    str1 = f'+ {-a}'
+                else:
+                    str1 = f'- {a}'
+                self.answer_tips = f'x = {b} {str1} = {self.correct_answer}'
+            elif self.subtype[0] == 1:
+                [a, b] = self.numbers
+                if a < 0:
+                    str1 = f'÷ ({a})'
+                else:
+                    str1 = f'÷ {a}'
+                self.answer_tips = f'x = {b} {str1} = {self.correct_answer[0]}'
+            elif self.subtype[0] == 2:
+                [a, b, c] = self.numbers
+                if b < 0:
+                    str1 = f'+ {-b}'
+                else:
+                    str1 = f'- {b}'
+                if a < 0:
+                    str2 = f'÷ ({a})'
+                else:
+                    str2 = f'÷ {a}'
+                self.answer_tips = f'x = ({c} {str1}) {str2} = {c - b} {str2}= {self.correct_answer[0]}'
+            elif self.subtype[0] == 3:
+                [a, b, c, d] = self.numbers
+                if c < 0:
+                    str1 = f'({a} + {-c})'
+                else:
+                    str1 = f'({a} - {c})'
+                if b < 0:
+                    str2 = f'{d} + {-b}'
+                else:
+                    str2 = f'{d} - {b}'
+                if d - b < 0:
+                    str3 = f'({d - b})'
+                else:
+                    str3 = f'{d - b}'
+                if a - c < 0:
+                    str4 = f'({a - c})'
+                else:
+                    str4 = f'{a - c}'
+                self.answer_tips = f'{str1}x = {str2}；x = ({str2}) ÷ {str1} = {str3} ÷ {str4}= {self.correct_answer[0]}'
         except:
             pass
 

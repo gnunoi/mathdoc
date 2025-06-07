@@ -388,14 +388,27 @@ class MathDoc(QWidget):
             QRadioButton('ax = b'),  # 1
             QRadioButton('ax + b = c'),  # 2
             QRadioButton('ax + b = cx + d'),  # 3
-            QRadioButton('分数方程'),  # 4
+            QRadioButton('x + b/a = d/c'),  # 4
+            QRadioButton('(b/a)x = d/c'),  # 5
+            QRadioButton('(b/a)x + d/c = f/e'),  # 5
+            QRadioButton('(b/a)x + d/c = (f/e)x + h/g'),  # 7
         ]
         if not any(rb.isChecked() for rb in self.eq1v1d_options):
             self.eq1v1d_options[self.exam.setting.type_eq1v1d].setChecked(True)
+        ql = [
+            QLabel('整数方程'),
+            QLabel('分数方程'),
+            QLabel('整体换元'),
+        ]
         for i, rb in enumerate(self.eq1v1d_options):
+            # print(i, 0, i // 4)
+            # qlabel = ql[i // 4]
+            # qlabel.setFont(self.base_font)
+            # if i % 4 == 0:
+            #     eq1v1d_layout.addWidget(qlabel, i % 4, i // 4)
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            eq1v1d_layout.addWidget(rb, i % 5, i // 5)
+            eq1v1d_layout.addWidget(rb, i % 4, i // 4)
         self.eq1v1d_group.setLayout(eq1v1d_layout)
         control_panel.addWidget(self.eq1v1d_group, 1)
 
