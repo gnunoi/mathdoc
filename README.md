@@ -1,4 +1,7 @@
 # MathDoc Application
+## [Release V1.9.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.1)
+1、分离并完善一元一次方程题型。
+
 ## [Release V1.9.0](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.0)
 1、增加周长计算题型。
 2、增加面积计算题型。
