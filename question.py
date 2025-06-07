@@ -2142,14 +2142,21 @@ class QuestionEq1v1d(QuestionLR):
     def CheckTips(self):
         try:
             if self.subtype[0] == 0:
+                self.CheckTips0()
+        except:
+            pass
+
+    def CheckTips0(self):
+        try:
+            if self.subtype[1] == 0:
                 [a, b] = self.numbers
                 answer = sp.Rational(self.user_answer)
                 self.check_tips = f'左式 = {answer} + {a} = {answer + a}；右式 = {b}；左式 ≠ 右式'
-            elif self.subtype[0] == 1:
+            elif self.subtype[1] == 1:
                 [a, b] = self.numbers
                 answer = sp.Rational(self.user_answer)
                 self.check_tips = f'左式 = {a} × {answer}= {a * answer}；右式 = {b}；左式 ≠ 右式'
-            elif self.subtype[0] == 2:
+            elif self.subtype[1] == 2:
                 [a, b, c] = self.numbers
                 answer = sp.Rational(self.user_answer)
                 if answer < 0:
@@ -2161,7 +2168,7 @@ class QuestionEq1v1d(QuestionLR):
                 else:
                     str2 = f'+ {b}'
                 self.check_tips = f'左式 = {a} {str1} {str2} = {a * answer + b}；右式 = {c}；左式 ≠ 右式'
-            elif self.subtype[0] == 3:
+            elif self.subtype[1] == 3:
                 [a, b, c, d] = self.numbers
                 answer = sp.Rational(self.user_answer)
                 if answer < 0:
@@ -2183,20 +2190,27 @@ class QuestionEq1v1d(QuestionLR):
     def AnswerTips(self):
         try:
             if self.subtype[0] == 0:
+                self.AnswerTips0()
+        except:
+            pass
+
+    def AnswerTips0(self):
+        try:
+            if self.subtype[1] == 0:
                 [a, b] = self.numbers
                 if a < 0:
                     str1 = f'+ {-a}'
                 else:
                     str1 = f'- {a}'
-                self.answer_tips = f'x = {b} {str1} = {self.correct_answer}'
-            elif self.subtype[0] == 1:
+                self.answer_tips = f'x = {b} {str1} = {self.correct_answer[0]}'
+            elif self.subtype[1] == 1:
                 [a, b] = self.numbers
                 if a < 0:
                     str1 = f'÷ ({a})'
                 else:
                     str1 = f'÷ {a}'
                 self.answer_tips = f'x = {b} {str1} = {self.correct_answer[0]}'
-            elif self.subtype[0] == 2:
+            elif self.subtype[1] == 2:
                 [a, b, c] = self.numbers
                 if b < 0:
                     str1 = f'+ {-b}'
@@ -2207,7 +2221,7 @@ class QuestionEq1v1d(QuestionLR):
                 else:
                     str2 = f'÷ {a}'
                 self.answer_tips = f'x = ({c} {str1}) {str2} = {c - b} {str2}= {self.correct_answer[0]}'
-            elif self.subtype[0] == 3:
+            elif self.subtype[1] == 3:
                 [a, b, c, d] = self.numbers
                 if c < 0:
                     str1 = f'({a} + {-c})'
