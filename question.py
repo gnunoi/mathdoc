@@ -2053,14 +2053,17 @@ class QuestionEq1v1d(QuestionLR):
         max2 = self.range[3]
         while True:
             a = self.RandInt(min1, max1)
-            if a != 0  and a != 1 and a != -1:
+            if a != 0 and a != 1:
                 break
         b = self.RandInt(min2, max2)
         self.numbers = [a, b]
         x = sp.symbols('x')
         equation = sp.Eq(a * x, b)
         self.correct_answer = sp.solve(equation, x)
-        self.question = f'{a}x = {b}'
+        if a == -1:
+            self.question = f'-x = {b}'
+        else:
+            self.question = f'{a}x = {b}'
         print(self.question)
 
     def GenerateEq1v1d_2(self):
@@ -2070,7 +2073,7 @@ class QuestionEq1v1d(QuestionLR):
         max2 = self.range[3]
         while True:
             a = self.RandInt(min1, max1)
-            if a != 0  and a != 1 and a != -1:
+            if a != 0  and a != 1:
                 break
         while True:
             b = self.RandInt(min2, max2)
@@ -2081,10 +2084,15 @@ class QuestionEq1v1d(QuestionLR):
         x = sp.symbols('x')
         equation = sp.Eq(a * x + b, c)
         self.correct_answer = sp.solve(equation, x)
+        if a == -1:
+            str1 = '-x'
+        else:
+            str1 = f'{a}x'
         if b > 0:
-            self.question = f'{a}x + {b} = {c}'
+            str2 = f'+ {b}'
         elif b < 0:
-            self.question = f'{a}x - {-b} = {c}'
+            str2 = f'- {-b}'
+        self.question = f'{str1} {str2} = {c}'
         print(self.question)
 
     def GenerateEq1v1d_3(self):
@@ -2094,7 +2102,7 @@ class QuestionEq1v1d(QuestionLR):
         max2 = self.range[3]
         while True:
             a = self.RandInt(min1, max1)
-            if a != 0  and a != 1 and a != -1:
+            if a != 0:
                 break
         while True:
             b = self.RandInt(min2, max2)
@@ -2112,14 +2120,27 @@ class QuestionEq1v1d(QuestionLR):
         x = sp.symbols('x')
         equation = sp.Eq(a * x + b, c * x + d)
         self.correct_answer = sp.solve(equation, x)
-        if b > 0 and d > 0:
-            self.question = f'{a}x + {b} = {c}x + {d}'
-        elif b > 0 and d < 0:
-            self.question = f'{a}x + {b} = {c}x - {-d}'
-        elif b < 0 and d > 0:
-            self.question = f'{a}x - {-b} = {c}x + {d}'
-        elif b < 0 and d < 0:
-            self.question = f'{a}x - {-b} = {c}x - {-d}'
+        if a == 1:
+            str1 = 'x'
+        elif a == -1:
+            str1 = '-x'
+        else:
+            str1 = f'{a}x'
+        if b > 0:
+            str2 = f'+ {b}'
+        else:
+            str2 = f'- {-b}'
+        if c == 1:
+            str3 = 'x'
+        elif c == -1:
+            str3 = '-x'
+        else:
+            str3 = f'{c}x'
+        if d > 0:
+            str4 = f'+ {d}'
+        else:
+            str4 = f'- {-d}'
+        self.question = f'{str1} {str2} = {str3} {str4}'
         print(self.question)
 
     def JudgeAnswer(self):
@@ -2196,50 +2217,87 @@ class QuestionEq1v1d(QuestionLR):
 
     def AnswerTips0(self):
         try:
-            if self.subtype[1] == 0:
+            if self.subtype[1] == 0: # x + a = b
                 [a, b] = self.numbers
                 if a < 0:
                     str1 = f'+ {-a}'
                 else:
                     str1 = f'- {a}'
                 self.answer_tips = f'x = {b} {str1} = {self.correct_answer[0]}'
-            elif self.subtype[1] == 1:
+            elif self.subtype[1] == 1: # ax = b
                 [a, b] = self.numbers
-                if a < 0:
-                    str1 = f'÷ ({a})'
+                if a == -1:
+                    self.answer_tips = f'x = {self.correct_answer[0]}'
+                elif a < 0:
+                    str1 = f'÷ {-a}'
+                    self.answer_tips = f'{-a}x = {-b} ⇒ x = {-b} {str1} = {self.correct_answer[0]}'
                 else:
                     str1 = f'÷ {a}'
-                self.answer_tips = f'x = {b} {str1} = {self.correct_answer[0]}'
-            elif self.subtype[1] == 2:
+                    self.answer_tips = f'x = {b} {str1} = {self.correct_answer[0]}'
+            elif self.subtype[1] == 2: # ax + b = c
                 [a, b, c] = self.numbers
-                if b < 0:
-                    str1 = f'+ {-b}'
+                if a > 0:
+                    if b < 0:
+                        str2 = f'{c} + {-b}'
+                    else:
+                        str2 = f'{c} - {b}'
+                    if a == 1:
+                        str1 = 'x'
+                    else:
+                        str1 = f'{a}x'
+                    e = a
+                    f = c - b
+                else: # a < 0
+                    if c < 0:
+                        str2 = f'{b} + {-c}'
+                    else:
+                        str2 = f'{b} - {c}'
+                    if a == -1:
+                        str1 = 'x'
+                    else:
+                        str1 = f'{-a}x'
+                    e = -a
+                    f = b - c
+                if e == 1:
+                    self.answer_tips = f'{str1} = {str2} ⇒ x = {self.correct_answer[0]}'
+                elif self.GCD(e, abs(f)) != 1:
+                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {f}/{e} = {self.correct_answer[0]}'
                 else:
-                    str1 = f'- {b}'
-                if a < 0:
-                    str2 = f'÷ ({a})'
-                else:
-                    str2 = f'÷ {a}'
-                self.answer_tips = f'x = ({c} {str1}) {str2} = {c - b} {str2}= {self.correct_answer[0]}'
-            elif self.subtype[1] == 3:
+                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {self.correct_answer[0]}'
+            elif self.subtype[1] == 3: # ax + b = cx + d
                 [a, b, c, d] = self.numbers
-                if c < 0:
-                    str1 = f'({a} + {-c})'
-                else:
-                    str1 = f'({a} - {c})'
-                if b < 0:
-                    str2 = f'{d} + {-b}'
-                else:
-                    str2 = f'{d} - {b}'
-                if d - b < 0:
-                    str3 = f'({d - b})'
-                else:
-                    str3 = f'{d - b}'
-                if a - c < 0:
-                    str4 = f'({a - c})'
-                else:
+                if a > c: # a - c > 0
                     str4 = f'{a - c}'
-                self.answer_tips = f'{str1}x = {str2} ⇒ x = ({str2}) ÷ {str1} = {str3} ÷ {str4}= {self.correct_answer[0]}'
+                    str3 = f'{d - b}'
+                    e = a - c
+                    f = d - b
+                    if c < 0:
+                        str1 = f'({a} + {-c})x'
+                    else:
+                        str1 = f'({a} - {c})x'
+                    if b < 0:
+                        str2 = f'{d} + {-b}'
+                    else:
+                        str2 = f'{d} - {b}'
+                else: # a - c < 0
+                    str4 = f'{c - a}'
+                    str3 = f'{b - d}'
+                    e = c - a
+                    f = b - d
+                    if a < 0:
+                        str1 = f'({c} + {-a})x'
+                    else:
+                        str1 = f'({c} - {a})x'
+                    if d < 0:
+                        str2 = f'{b} + {-d}'
+                    else:
+                        str2 = f'{b} - {d}'
+                if e == 1:
+                    self.answer_tips = f'{str1} = {str2} ⇒ x = {self.correct_answer[0]}'
+                elif self.GCD(e, abs(f)) != 1:
+                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {f}/{e} = {self.correct_answer[0]}'
+                else:
+                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {self.correct_answer[0]}'
         except:
             pass
 
