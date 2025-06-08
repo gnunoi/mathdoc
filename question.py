@@ -2295,9 +2295,9 @@ class QuestionEq1v1d(QuestionLR):
                 if e == 1:
                     self.answer_tips = f'{str1} = {str2} ⇒ x = {self.correct_answer[0]}'
                 elif self.GCD(e, abs(f)) != 1:
-                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {f}/{e} = {self.correct_answer[0]}'
+                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ {e}x = {f} ⇒ x = {f}/{e} = {self.correct_answer[0]}'
                 else:
-                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {self.correct_answer[0]}'
+                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ {e}x = {f} ⇒ x = {self.correct_answer[0]}'
         except:
             pass
 

@@ -1,4 +1,7 @@
 # MathDoc Application
+## [Release V1.9.2](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.2)
+1、完善一元一次方程题型的题目与答题提示。
+
 ## [Release V1.9.1](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.1)
 1、分离并完善一元一次方程题型。
 
