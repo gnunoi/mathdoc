@@ -47,7 +47,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.06.08(V1.9.2)"
+        self.version = "2025.06.08(V1.9.3)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.primary_screen = QApplication.primaryScreen()
         self.physical_size = self.primary_screen.physicalSize()
@@ -384,7 +384,7 @@ class MathDoc(QWidget):
         eq1v1d_layout = QGridLayout()
         self.eq1v1d_options = [
             QRadioButton('整数方程'),  # 0
-            # QRadioButton('分数方程'),  # 1
+            QRadioButton('分数方程'),  # 1
             # QRadioButton('整体换元'),  # 2
         ]
         if not any(rb.isChecked() for rb in self.eq1v1d_options):

@@ -291,6 +291,22 @@ class Question():
         print(self.expression)
         return
 
+    def Fraction2Latex(self, frac):
+        # 判断输入是否为Fraction
+        if not isinstance(frac, Fraction):
+            return frac
+        numerator = frac.numerator
+        denominator = frac.denominator
+
+        # 处理分母为1的特殊情况
+        if denominator == 1:
+            return str(numerator)
+
+        # 将负号放在分数线前面
+        if numerator < 0:
+            return r"-" + r"\dfrac{" + str(-numerator) + "}{" + str(denominator) + "}"
+        else:
+            return r"\dfrac{" + str(numerator) + "}{" + str(denominator) + "}"
 
 """
 类名称：QuestionRL
@@ -2008,25 +2024,37 @@ class QuestionEq1v1d(QuestionLR):
         print(subtype)
         if subtype[0] == 0:
             if subtype[1] == 0:
-                self.GenerateEq1v1d_0()
+                self.GenerateEq1v1d_00()
             elif subtype[1] == 1:
-                self.GenerateEq1v1d_1()
+                self.GenerateEq1v1d_01()
             elif subtype[1] == 2:
-                self.GenerateEq1v1d_2()
+                self.GenerateEq1v1d_02()
             elif subtype[1] == 3:
-                self.GenerateEq1v1d_3()
+                self.GenerateEq1v1d_03()
         elif subtype[0] == 1:
-            pass
+            if subtype[1] == 0:
+                self.GenerateEq1v1d_10()
+            elif subtype[1] == 1:
+                self.GenerateEq1v1d_11()
+            elif subtype[1] == 2:
+                self.GenerateEq1v1d_12()
+            elif subtype[1] == 3:
+                self.GenerateEq1v1d_13()
         elif subtype[0] == 2:
             pass
+
         try:
-            latex = r'${}$'.format(self.question)
+            self.question = f'{self.equation.lhs} = {self.equation.rhs}'.replace('*', '')
+            print(self.question)
+            latex = sp.latex(self.equation)
+            latex = r'${}$'.format(latex).replace('frac', 'dfrac')
+            print(latex)
             self.Latex2PNG(latex, self.png_file)
         except:
             pass
         self.AfterGenerate()
 
-    def GenerateEq1v1d_0(self):
+    def GenerateEq1v1d_00(self):
         min1 = self.range[0]
         max1 = self.range[1]
         min2 = self.range[2]
@@ -2040,13 +2068,9 @@ class QuestionEq1v1d(QuestionLR):
         x = sp.symbols('x')
         equation = sp.Eq(x + a, b)
         self.correct_answer = sp.solve(equation, x)
-        if a > 0:
-            self.question = f'x + {a} = {b}'
-        if a < 0:
-            self.question = f'x - {-a} = {b}'
-        print(self.question)
+        self.equation = equation
 
-    def GenerateEq1v1d_1(self):
+    def GenerateEq1v1d_01(self):
         min1 = self.range[0]
         max1 = self.range[1]
         min2 = self.range[2]
@@ -2060,13 +2084,9 @@ class QuestionEq1v1d(QuestionLR):
         x = sp.symbols('x')
         equation = sp.Eq(a * x, b)
         self.correct_answer = sp.solve(equation, x)
-        if a == -1:
-            self.question = f'-x = {b}'
-        else:
-            self.question = f'{a}x = {b}'
-        print(self.question)
+        self.equation = equation
 
-    def GenerateEq1v1d_2(self):
+    def GenerateEq1v1d_02(self):
         min1 = self.range[0]
         max1 = self.range[1]
         min2 = self.range[2]
@@ -2084,18 +2104,9 @@ class QuestionEq1v1d(QuestionLR):
         x = sp.symbols('x')
         equation = sp.Eq(a * x + b, c)
         self.correct_answer = sp.solve(equation, x)
-        if a == -1:
-            str1 = '-x'
-        else:
-            str1 = f'{a}x'
-        if b > 0:
-            str2 = f'+ {b}'
-        elif b < 0:
-            str2 = f'- {-b}'
-        self.question = f'{str1} {str2} = {c}'
-        print(self.question)
+        self.equation = equation
 
-    def GenerateEq1v1d_3(self):
+    def GenerateEq1v1d_03(self):
         min1 = self.range[0]
         max1 = self.range[1]
         min2 = self.range[2]
@@ -2120,28 +2131,117 @@ class QuestionEq1v1d(QuestionLR):
         x = sp.symbols('x')
         equation = sp.Eq(a * x + b, c * x + d)
         self.correct_answer = sp.solve(equation, x)
-        if a == 1:
-            str1 = 'x'
-        elif a == -1:
-            str1 = '-x'
+        self.equation = equation
+
+    def GenerateEq1v1d_10(self): # x + b/a = d/c
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min1, max1)
+            b = self.RandInt(min2, max2)
+            if a != 0 and b != 0 and self.GCD(a, b) == 1:
+                break
+        while True:
+            c = self.RandInt(min1, max1)
+            d = self.RandInt(min2, max2)
+            if c != 0 and d != 0 and self.GCD(c, d) == 1:
+                break
+        x = sp.symbols('x')
+        a1 = Fraction(b, a)
+        b1 = Fraction(d, c)
+        equation = sp.Eq(x + a1, b1)
+        self.correct_answer = sp.solve(equation, x)
+        self.numbers = [a1, b1]
+        self.equation = equation
+
+    def GenerateEq1v1d_11(self): # (b/a)x = d/c
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min1, max1)
+            b = self.RandInt(min2, max2)
+            if a != 0 and b != 0 and self.GCD(a, b) == 1:
+                break
+        while True:
+            c = self.RandInt(min1, max1)
+            d = self.RandInt(min2, max2)
+            if c != 0 and d != 0 and self.GCD(c, d) == 1:
+                break
+        x = sp.symbols('x')
+        a1 = Fraction(b, a)
+        b1 = Fraction(d, c)
+        equation = sp.Eq(a1 * x, b1)
+        self.correct_answer = sp.solve(equation, x)
+        self.numbers = [a1, b1]
+        self.equation = equation
+
+    def GenerateEq1v1d_12(self): # (b/a)x + d/c = e/a or e/c
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min1, max1)
+            b = self.RandInt(min2, max2)
+            if a != 0 and b != 0 and self.GCD(a, b) == 1:
+                break
+        while True:
+            c = self.RandInt(min1, max1)
+            d = self.RandInt(min2, max2)
+            if c != 0 and d != 0 and self.GCD(c, d) == 1:
+                break
+        while True:
+            e = self.RandInt(min2, max2)
+            if e != 0:
+                break
+        x = sp.symbols('x')
+        a1 = Fraction(b, a)
+        b1 = Fraction(d, c)
+        if self.RandInt(0, 1) == 0:
+            c1 = Fraction(e, a)
         else:
-            str1 = f'{a}x'
-        if b > 0:
-            str2 = f'+ {b}'
-        else:
-            str2 = f'- {-b}'
-        if c == 1:
-            str3 = 'x'
-        elif c == -1:
-            str3 = '-x'
-        else:
-            str3 = f'{c}x'
-        if d > 0:
-            str4 = f'+ {d}'
-        else:
-            str4 = f'- {-d}'
-        self.question = f'{str1} {str2} = {str3} {str4}'
-        print(self.question)
+            c1 = Fraction(e, c)
+        equation = sp.Eq(a1 * x + b1, c1)
+        self.correct_answer = sp.solve(equation, x)
+        self.numbers = [a1, b1, c1]
+        self.equation = equation
+
+    def GenerateEq1v1d_13(self): # (b/a)x + d/c = (f/e)x + h/g
+        min1 = self.range[0]
+        max1 = self.range[1]
+        min2 = self.range[2]
+        max2 = self.range[3]
+        while True:
+            a = self.RandInt(min1, max1)
+            b = self.RandInt(min2, max2)
+            if a != 0 and b != 0 and self.GCD(a, b) == 1:
+                break
+        while True:
+            c = self.RandInt(min1, max1)
+            d = self.RandInt(min2, max2)
+            if c != 0 and d != 0 and self.GCD(c, d) == 1:
+                break
+        while True:
+            e = self.RandInt(min2, max2)
+            if e != 0 and self.GCD(a, e) == 1:
+                break
+        while True:
+            f = self.RandInt(min2, max2)
+            if f != 0 and self.GCD(c, f) == 1:
+                break
+        x = sp.symbols('x')
+        a1 = Fraction(b, a)
+        b1 = Fraction(d, c)
+        c1 = Fraction(e, a)
+        d1 = Fraction(f, c)
+        equation = sp.Eq(a1 * x + b1, c1 * x + d1)
+        self.correct_answer = sp.solve(equation, x)
+        self.numbers = [a1, b1, c1, d1]
+        self.equation = equation
 
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
@@ -2162,7 +2262,7 @@ class QuestionEq1v1d(QuestionLR):
 
     def CheckTips(self):
         try:
-            if self.subtype[0] == 0:
+            if self.subtype[0] in [0, 1]:
                 self.CheckTips0()
         except:
             pass
@@ -2210,7 +2310,7 @@ class QuestionEq1v1d(QuestionLR):
 
     def AnswerTips(self):
         try:
-            if self.subtype[0] == 0:
+            if self.subtype[0] in [0, 1]:
                 self.AnswerTips0()
         except:
             pass
@@ -2230,7 +2330,10 @@ class QuestionEq1v1d(QuestionLR):
                     self.answer_tips = f'x = {self.correct_answer[0]}'
                 elif a < 0:
                     str1 = f'÷ {-a}'
-                    self.answer_tips = f'{-a}x = {-b} ⇒ x = {-b} {str1} = {self.correct_answer[0]}'
+                    if type(a) == Fraction:
+                        self.answer_tips = f'({-a})x = {-b} ⇒ x = {-b} {str1} = {self.correct_answer[0]}'
+                    else:
+                        self.answer_tips = f'{-a}x = {-b} ⇒ x = {-b} {str1} = {self.correct_answer[0]}'
                 else:
                     str1 = f'÷ {a}'
                     self.answer_tips = f'x = {b} {str1} = {self.correct_answer[0]}'
@@ -2244,7 +2347,10 @@ class QuestionEq1v1d(QuestionLR):
                     if a == 1:
                         str1 = 'x'
                     else:
-                        str1 = f'{a}x'
+                        if type(a) == Fraction:
+                            str1 = f'({a})x'
+                        else:
+                            str1 = f'{a}x'
                     e = a
                     f = c - b
                 else: # a < 0
@@ -2255,13 +2361,16 @@ class QuestionEq1v1d(QuestionLR):
                     if a == -1:
                         str1 = 'x'
                     else:
-                        str1 = f'{-a}x'
+                        if type(a) == Fraction:
+                            str1 = f'({-a})x'
+                        else:
+                            str1 = f'{-a}x'
                     e = -a
                     f = b - c
                 if e == 1:
                     self.answer_tips = f'{str1} = {str2} ⇒ x = {self.correct_answer[0]}'
                 elif self.GCD(e, abs(f)) != 1:
-                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {f}/{e} = {self.correct_answer[0]}'
+                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {f} ÷ {e} = {self.correct_answer[0]}'
                 else:
                     self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {self.correct_answer[0]}'
             elif self.subtype[1] == 3: # ax + b = cx + d
@@ -2294,10 +2403,16 @@ class QuestionEq1v1d(QuestionLR):
                         str2 = f'{b} - {d}'
                 if e == 1:
                     self.answer_tips = f'{str1} = {str2} ⇒ x = {self.correct_answer[0]}'
-                elif self.GCD(e, abs(f)) != 1:
-                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ {e}x = {f} ⇒ x = {f}/{e} = {self.correct_answer[0]}'
                 else:
-                    self.answer_tips = f'{str1} = {str2} = {f} ⇒ {e}x = {f} ⇒ x = {self.correct_answer[0]}'
+                    print(type(e), e, e.denominator1)
+                    if type(e) == Fraction and e.denominator != 1:
+                        str3 = f'({e})x'
+                    else:
+                        str3 = f'{e}x'
+                    if self.GCD(e, abs(f)) != 1:
+                        self.answer_tips = f'{str1} = {str2} = {f} ⇒ {str3} = {f} ⇒ x = {f} ÷ {e} = {self.correct_answer[0]}'
+                    else:
+                        self.answer_tips = f'{str1} = {str2} = {f} ⇒ {str3} = {f} ⇒ x = {self.correct_answer[0]}'
         except:
             pass
 
