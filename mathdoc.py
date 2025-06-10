@@ -112,9 +112,10 @@ class MathDoc(QWidget):
             QRadioButton('周长问题'),  # type = 8
             QRadioButton('面积问题'),  # type = 9
             QRadioButton('体积问题'),  # type = 10
-            QRadioButton('乘幂运算'),  # type = 11
-            QRadioButton('一元一次方程'),  # type = 12
-            QRadioButton('解方程'),  # type = 13
+            QRadioButton('倒数之和'),  # type = 11
+            QRadioButton('乘幂运算'),  # type = 12
+            QRadioButton('一元一次方程'),  # type = 13
+            QRadioButton('解方程'),  # type = 14
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for i, rb in enumerate(self.type_options):
@@ -547,9 +548,10 @@ class MathDoc(QWidget):
             set([self.perimeter_group]),  # type = 8 # 周长问题
             set([self.area_group]),  # type = 9 # 面积问题
             set([self.volume_group]),  # type = 10 # 体积问题
-            set([self.power_group]),  # type = 11 # 乘幂运算题型
-            set([self.eq1v1d_group, self.eq1v1d_group2, self.range_groups[4]]),  # type = 12 # 一元一次方程
-            set([self.equation_group, self.range_groups[4]]),  # type = 13 # 解方程题型
+            set([self.power_group]),  # type = 11 # 倒数之和
+            set([self.power_group]),  # type = 12 # 乘幂运算题型
+            set([self.eq1v1d_group, self.eq1v1d_group2, self.range_groups[4]]),  # type = 13 # 一元一次方程
+            set([self.equation_group, self.range_groups[4]]),  # type = 14 # 解方程题型
         ]
         self.sets = set([])
         for s in self.set_list:
@@ -755,6 +757,13 @@ class MathDoc(QWidget):
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             subtype=[self.exam.setting.type_power])
                 elif i == 12:
+                    for i, rb in enumerate(self.power_options):
+                        if rb.isChecked():
+                            self.exam.setting.type_power = i
+                            break
+                    self.exam.UpdateSetting(type=self.exam.setting.type,
+                                            subtype=[self.exam.setting.type_power])
+                elif i == 13:
                     for i, rb in enumerate(self.eq1v1d_options):
                         if rb.isChecked():
                             self.exam.setting.type_eq1v1d = i
@@ -769,7 +778,7 @@ class MathDoc(QWidget):
                                                    self.exam.setting.max_coefficient,
                                                    self.exam.setting.min_constant,
                                                    self.exam.setting.max_constant])
-                elif i == 13:
+                elif i == 14:
                     for i, rb in enumerate(self.equation_options):
                         if rb.isChecked():
                             self.exam.setting.type_equation = i
@@ -792,12 +801,15 @@ class MathDoc(QWidget):
         self.exam.Generate()
         self.check_tips_label.setText('')
         self.answer_tips_label.setText('')
-        if self.exam.setting.type in [5, 11, 12]:
-            # 在标签中显示图片
-            pixmap = QPixmap(os.path.join(self.exam.q.path, 'question.png'))
-            self.question_label.setPixmap(pixmap)
-            self.question_label.setAlignment(Qt.AlignCenter)
-        else:
+        try:
+            if self.exam.setting.type in [5, 11, 12, 13]:
+                # 在标签中显示图片
+                pixmap = QPixmap(os.path.join(self.exam.q.path, 'question.png'))
+                self.question_label.setPixmap(pixmap)
+                self.question_label.setAlignment(Qt.AlignCenter)
+            else:
+                self.question_label.setText(f"{self.exam.q.question}")
+        except:
             self.question_label.setText(f"{self.exam.q.question}")
         self.answer_label.setText(self.exam.q.comments)
 

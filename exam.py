@@ -72,7 +72,7 @@ class Exam:
         self.review = Review(self.db)
         self.wb = Workbook(self.user.username)
         self.mail = Mail()
-        self.ReadSetting()
+        # self.ReadSetting()
         # self.Dump(self.setting)
         # self.Dump(self)
         self.q = self.CreateQuestion()
@@ -188,11 +188,13 @@ class Exam:
             return QuestionArea(subtype=self.subtype)
         elif self.type == 10:  # 10: 体积问题
             return QuestionVolume(subtype=self.subtype)
-        elif self.type == 11:  # 11: 乘幂运算
+        elif self.type == 11:  # 11: 倒数之和
             return QuestionPower(subtype=self.subtype)
-        elif self.type == 12:  # 12: 一元一次方程
+        elif self.type == 12:  # 12: 乘幂运算
+            return QuestionPower(subtype=self.subtype)
+        elif self.type == 13:  # 13: 一元一次方程
             return QuestionEq1v1d(subtype=self.subtype, range=self.range)
-        elif self.type == 13:  # 13: 解方程
+        elif self.type == 14:  # 14: 解方程
             return QuestionEquation(subtype=self.subtype, range=self.range)
         else:
             print(f'{self.type}: 无效的类型')

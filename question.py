@@ -1816,6 +1816,7 @@ class QuestionVolume(QuestionLR):
         except:
             pass
 
+# class Question
 class QuestionPower(QuestionLR):
     def __init__(self, subtype=[0]):
         self.power = [
@@ -1876,7 +1877,7 @@ class QuestionPower(QuestionLR):
         self.formula = f'{a}' + '^' + '{' + f'{n}' + '} = '
         self.correct_answer = eval(self.expression)
 
-    def GeneratePowerPS(self):
+    def GeneratePowerPS(self): # 加减法
         subtype = self.subtype[0]
         sign = '+'
         if subtype == 2:
@@ -1894,11 +1895,12 @@ class QuestionPower(QuestionLR):
         self.question = self.expression + ' = '
         self.formula = f'{a}' + '^' + '{' + f'{n1}' + '}' + f'{sign}' + f'{a}' + '^' + '{' + f'{n2}' + '}' + ' = '
         self.correct_answer = eval(self.expression)
-        self.a = a
-        self.n1 = n1
-        self.n2 = n2
+        self.numbers = [a, n1, n2]
+        # self.a = a
+        # self.n1 = n1
+        # self.n2 = n2
 
-    def GeneratePowerMD(self):
+    def GeneratePowerMD(self): # 乘除法
         subtype = self.subtype[0]
         sign = '*'
         latex_sign = '\\times'
@@ -1919,10 +1921,12 @@ class QuestionPower(QuestionLR):
                 n2 = random.choice(power[sub]['exponent'])
             else:
                 n2 = int(n1 / 2)
-        self.expression = f'{a} ** {n1} {sign} {a} ** {n2}'
+        self.expression = f'{a}**{n1} {sign} {a}**{n2}'
         self.question = self.expression + ' = '
         self.formula = f'{a}' + '^' + '{' + f'{n1}' + '}' + f'{latex_sign}' + f'{a}' + '^' + '{' + f'{n2}' + '}' + ' = '
+        print(self.expression)
         self.correct_answer = eval(self.expression)
+        self.numbers = [a, n1, n2]
         self.a = a
         self.n1 = n1
         self.n2 = n2
@@ -1945,7 +1949,7 @@ class QuestionPower(QuestionLR):
     def JudgeAnswer(self):
         self.BeforeJudgeAnswer()
         try:
-            user_answer = float(self.user_answer.strip().replace(' ', ''))
+            user_answer = Fraction(self.user_answer.strip().replace(' ', ''))
             if abs(user_answer - self.correct_answer) < 1e-3 :
                 self.is_correct = True
             else:
@@ -1958,25 +1962,23 @@ class QuestionPower(QuestionLR):
         try:
             if self.subtype[0] == 0:
                 self.check_tips = f'{self.expression} = {self.correct_answer}'
-            elif self.subtype[0] == 1:
-                r1 = self.a ** self.n1
-                r2 = self.a ** self.n2
+                return
+            else:
+                [a, n1, n2] = self.numbers
+                r1 = a ** n1
+                r2 = a ** n2
+
+            if self.subtype[0] == 1:
                 self.check_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
             elif self.subtype[0] == 2:
-                r1 = self.a ** self.n1
-                r2 = self.a ** self.n2
                 self.check_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
             elif self.subtype[0] == 3:
-                r1 = self.a ** self.n1
-                r2 = self.a ** self.n2
                 self.check_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
             elif self.subtype[0] == 4:
-                r1 = self.a ** self.n1
-                r2 = self.a ** self.n2
                 self.check_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
             elif self.subtype[0] == 5:
-                r1 = self.n1 * self.n2
-                self.check_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
+                r1 = n1 * n2
+                self.check_tips = f'{self.expression} = {a} ** {r1} = {self.correct_answer}'
         except:
             pass
 
@@ -1984,25 +1986,22 @@ class QuestionPower(QuestionLR):
         try:
             if self.subtype[0] == 0:
                 self.answer_tips = f'{self.expression} = {self.correct_answer}'
-            elif self.subtype[0] == 1:
-                r1 = self.a ** self.n1
-                r2 = self.a ** self.n2
+            else:
+                [a, n1, n2] = self.numbers
+                r1 = a ** n1
+                r2 = a ** n2
+
+            if self.subtype[0] == 1:
                 self.answer_tips = f'{self.expression} = {r1} + {r2} = {self.correct_answer}'
             elif self.subtype[0] == 2:
-                r1 = self.a ** self.n1
-                r2 = self.a ** self.n2
                 self.answer_tips = f'{self.expression} = {r1} - {r2} = {self.correct_answer}'
             elif self.subtype[0] == 3:
-                r1 = self.a ** self.n1
-                r2 = self.a ** self.n2
                 self.answer_tips = f'{self.expression} = {r1} * {r2} = {self.correct_answer}'
             elif self.subtype[0] == 4:
-                r1 = self.a ** self.n1
-                r2 = self.a ** self.n2
                 self.answer_tips = f'{self.expression} = {r1} / {r2} = {self.correct_answer}'
             elif self.subtype[0] == 5:
-                r1 = self.n1 * self.n2
-                self.answer_tips = f'{self.expression} = {self.a} ** {r1} = {self.correct_answer}'
+                r1 = n1 * n2
+                self.answer_tips = f'{self.expression} = {a} ** {r1} = {self.correct_answer}'
         except:
             pass
 
@@ -2250,7 +2249,7 @@ class QuestionEq1v1d(QuestionLR):
         subtype = self.subtype[0]
         try:
             user_answer = Fraction(self.user_answer)
-            # print(user_answer, self.correct_answer)
+            print(user_answer, self.correct_answer)
             if user_answer in self.correct_answer:
                 self.is_correct = True
             else:
@@ -2375,6 +2374,7 @@ class QuestionEq1v1d(QuestionLR):
                     self.answer_tips = f'{str1} = {str2} = {f} ⇒ x = {self.correct_answer[0]}'
             elif self.subtype[1] == 3: # ax + b = cx + d
                 [a, b, c, d] = self.numbers
+                print(a, b, c, d)
                 if a > c: # a - c > 0
                     str4 = f'{a - c}'
                     str3 = f'{d - b}'
@@ -2401,10 +2401,10 @@ class QuestionEq1v1d(QuestionLR):
                         str2 = f'{b} + {-d}'
                     else:
                         str2 = f'{b} - {d}'
+
                 if e == 1:
                     self.answer_tips = f'{str1} = {str2} ⇒ x = {self.correct_answer[0]}'
                 else:
-                    print(type(e), e, e.denominator1)
                     if type(e) == Fraction and e.denominator != 1:
                         str3 = f'({e})x'
                     else:
