@@ -1,4 +1,7 @@
 # MathDoc Application
+## [Release V1.9.4](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.4)
+1、增加倒数之和题型。
+
 ## [Release V1.9.3](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.3)
 1、增加分数方程题型。
 
