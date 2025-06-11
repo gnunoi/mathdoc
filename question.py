@@ -318,6 +318,39 @@ class Question():
                 has_duplicates = True
                 break
         return has_duplicates
+
+    def PrimeFactors(self, num):
+        """返回n的质因数分解结果"""
+        factors = []
+        # 处理2的因子
+        while num % 2 == 0:
+            factors.append(2)
+            num = num // 2
+
+        # 处理奇数因子
+        i = 3
+        while i * i <= num:
+            while num % i == 0:
+                factors.append(i)
+                num = num // i
+            i += 2
+
+        # 如果剩余的n是质数
+        if num > 1:
+            factors.append(num)
+        return factors
+
+    def GetFactors(self, num):
+        factors = []
+        for i in range(1, int(num ** 0.5) + 1):
+            if num % i == 0:
+                factors.append(i)
+                if i != num // i:  # 避免添加重复的因数（当数是平方数时）
+                    factors.append(num // i)
+        factors.sort()  # 对因数列表进行排序
+        return factors
+
+
 """
 类名称：QuestionRL
 题目类型：从右向左求值，即答案是表达式，题目是数值
@@ -357,27 +390,6 @@ class QuestionFactor(QuestionRL):
                 return False
             i += 2
         return True
-
-    def PrimeFactors(self, num):
-        """返回n的质因数分解结果"""
-        factors = []
-        # 处理2的因子
-        while num % 2 == 0:
-            factors.append(2)
-            num = num // 2
-
-        # 处理奇数因子
-        i = 3
-        while i * i <= num:
-            while num % i == 0:
-                factors.append(i)
-                num = num // i
-            i += 2
-
-        # 如果剩余的n是质数
-        if num > 1:
-            factors.append(num)
-        return factors
 
     def Generate(self):
         """生成一个10到1000之间的随机数，保证有至少3个质因数"""
@@ -629,22 +641,73 @@ class QuestionReciprocal(QuestionRL): # 倒数之和题型
         self.BeforeGenerate()
         subtype = self.subtype[0]
         n = self.RandInt(2, 15)
+        nomimator = 0
+        num = 0
         self.numbers = [Fraction(1, n)]
         if subtype == 0: # 两个倒数之和
             self.question = f'1/(  ) + 1/(  ) = 1/{n}'
-            self.correct_answer = [n+1, n*(n+1)]
+            self.correct_answer = [n*(n+1), n+1]
             lhs = '\\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)}'
         elif subtype == 1: # 三个倒数之和
             self.question = f'1/(  ) + 1/(  ) + 1/(  ) = 1/{n}'
-            self.correct_answer = [n+2, n*(n+1), (n+1)*(n+2)]
+            self.correct_answer = [n*(n+1), (n+1)*(n+2), n+2]
             lhs = '\\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)}'
         elif subtype == 2: # 四个倒数之和
             self.question = f'1/(  ) + 1/(  ) + 1/(  ) + 1/(  ) = 1/{n}'
-            self.correct_answer = [n+3, n*(n+1), (n+1)*(n+2), (n+2)*(n+3)]
+            self.correct_answer = [n*(n+1), (n+1)*(n+2), (n+2)*(n+3), n+3]
             lhs = '\\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)}'
+        elif subtype == 3: # 两个倒数之和等于真分数
+            min = 32
+            max = 200
+            while True:
+                num = self.RandInt(min, max)
+                factors = self.GetFactors(num)[:-1]
+                if len(factors) > 4:
+                    break
+            a = random.choice(factors)
+            factors.remove(a)
+            b = random.choice(factors)
+            nomimator = a + b
+            gcd = self.GCD(nomimator, num)
+            # print(a, b, nomimator, num, gcd)
+            if gcd != 1:
+                nomimator //= gcd
+                num //= gcd
+            self.numbers = [Fraction(nomimator, num)]
+            self.correct_answer = [num // a, num // b]
+            self.question = f'1 / (  ) + 1 / (  ) = {nomimator} / {num}'
+            lhs = '\\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)}'
+        elif subtype == 4:  # 三个倒数之和等于真分数
+            print('三个倒数之和等于真分数')
+            min = 32
+            max = 200
+            while True:
+                num = self.RandInt(min, max)
+                factors = self.GetFactors(num)[:-1]
+                if len(factors) > 4:
+                    break
+            a = random.choice(factors)
+            factors.remove(a)
+            b = random.choice(factors)
+            factors.remove(b)
+            c = random.choice(factors)
+            nomimator = a + b + c
+            gcd = self.GCD(nomimator, num)
+            print(a, b, c, nomimator, num, gcd)
+            if gcd != 1:
+                nomimator //= gcd
+                num //= gcd
+            self.numbers = [Fraction(nomimator, num)]
+            a, b, c = sorted([a, b, c])
+            self.correct_answer = [num // a, num // b, num // c]
+            self.question = f'1 / (  ) + 1 / (  ) + 1 / (  ) = {nomimator} / {num}'
+            lhs = '\\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)}'
         try:
             print(self.question)
-            rhs = f'\\dfrac{{1}}{{{n}}}'
+            if subtype == 0 or subtype == 1 or subtype == 2:
+                rhs = f'\\dfrac{{1}}{{{n}}}'
+            else:
+                rhs = f'\\dfrac{{{nomimator}}}{{{num}}}'
             latex = r'${} = {}$'.format(lhs, rhs)
             self.Latex2PNG(latex, self.png_file)
         except:
@@ -663,7 +726,14 @@ class QuestionReciprocal(QuestionRL): # 倒数之和题型
 
         subtype = self.subtype[0]
         try:
-            if self.HasDuplicates(self.user_answer) or len(self.user_answer) != subtype + 2: # 输入数字个数符合要求且不相等
+            if self.HasDuplicates(self.user_answer): # 输入有相同的数字
+                self.is_correct = False
+                return False
+
+            if subtype in [0, 1, 2] and len(self.user_answer) != subtype + 2: # 输入的数字个数不符合要求
+                    self.is_correct = False
+                    return False
+            if subtype in [3] and len(self.user_answer) != subtype - 1:
                 self.is_correct = False
                 return False
             answer = 0
@@ -680,8 +750,12 @@ class QuestionReciprocal(QuestionRL): # 倒数之和题型
 
     def CheckTips(self):
         subtype = self.subtype[0]
-        if len(self.user_answer) != subtype + 2: # 输入的数字个数不正确
+
+        if subtype in [0, 1, 2] and len(self.user_answer) != subtype + 2: # 输入的数字个数不正确
             self.check_tips = f'要求输入{subtype + 2}个不同的自然数，实际输入了{len(self.user_answer)}个。'
+            return
+        if subtype > 3 and len(self.user_answer) != subtype - 1: # 输入的数字个数不正确
+            self.check_tips = f'要求输入{subtype - 1}个不同的自然数，实际输入了{len(self.user_answer)}个。'
             return
         for num in self.user_answer:
             if self.user_answer.count(num) > 1:
@@ -702,10 +776,54 @@ class QuestionReciprocal(QuestionRL): # 倒数之和题型
         n = Fraction(1, self.numbers[0])
 
         if subtype == 0:
-            self.answer_tips = f'1 / {n + 1} + 1 / {n*(n+1)} = 1 / {n}，正确答案：{n+1}, {n*(n+1)}'
+            self.answer_tips = f'1/{n} = 1/{n} - 1/{n+1} + 1/{n+1} = 1/{n*(n+1)} + 1/{n+1}，正确答案：{n*(n+1)}, {n+1}'
         elif subtype == 1:
-            self.answer_tips = f'1 / {n + 2} + 1 / {n*(n+1)} + 1 / {(n+1)*(n+2)} = 1 / {n}，正确答案：{n+2}, {n*(n+1)}, {(n+1)*(n+2)}'
-            self.answer_tips += f'\n1 / {2*n} + 1 / {3*n} + 1 / {6*n} = 1 / {n}，正确答案：{2*n}, {3*n}, {6*n}'
+            self.answer_tips = f' 1/{n} = 1/{n} - 1/{n+1} + 1/{n+1} - 1/{n+2} + 1/{n+2} = 1/{n*(n+1)} + 1/{(n+1)*(n+2)} + 1/{n+2}'
+            self.answer_tips += f'，正确答案：{n*(n+1)}, {(n+1)*(n+2)}, {n+2}'
+            self.answer_tips += f'\n∵ 1/2 + 1/3 + 1/6 = 1，∴ 1/{n} = 1/{2*n} + 1/{3*n} + 1/{6*n}，正确答案：{2*n}, {3*n}, {6*n}'
+        elif subtype == 2:
+            self.answer_tips = f' 1/{n} = 1/{n} - 1/{n+1} + 1/{n+1} - 1/{n+2} + 1/{n+2} - 1/{n+3} + 1/{n+3} = 1/{n*(n+1)} + 1/{(n+1)*(n+2)} + 1/{(n+2)*(n+3)} + 1/{n+3}'
+            self.answer_tips += f'\n正确答案：{n*(n+1)}, {(n+1)*(n+2)}, {(n+2)*(n+3)}, {n+3}'
+        elif subtype >= 3:
+            f = self.numbers[0]
+            solution, num, den = self.GetSolution(f, subtype - 1)
+            print(solution, num, den)
+            for i, s in enumerate(solution):
+                if i == 0:
+                    self.answer_tips = f'{s}/{den}'
+                else:
+                    self.answer_tips += f' + {s}/{den}'
+            for i, s in enumerate(solution):
+                if i == 0:
+                    self.answer_tips += f' = 1/{den//s}'
+                else:
+                    self.answer_tips += f' + 1/{den//s}'
+            if f.denominator != den: # 进行过约分
+                self.answer_tips += f' = {num}/{den}'
+            self.answer_tips += f' = {n}'
+            self.answer_tips += f'\n正确答案：'
+            for i, s in enumerate(solution):
+                if i == 0:
+                    self.answer_tips += f'{den // s}'
+                else:
+                    self.answer_tips += f', {den // s}'
+
+    def GetSolution(self, f, n):
+        numerator = f.numerator
+        denominator = f.denominator
+        # print(numerator, denominator)
+        i = 1
+        while True:
+            num = numerator * i
+            den = denominator * i
+            factors = self.GetFactors(den)
+            # print(num, den, factors)
+            for pair in itertools.combinations(factors, n):
+                # print(pair, sum(pair), num)
+                if sum(pair) == num:
+                    return list(pair), num, den
+            i += 1
+
 
 """
 类名称：QuestionLR

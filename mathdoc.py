@@ -367,13 +367,14 @@ class MathDoc(QWidget):
             QRadioButton('三个倒数之和等于倒数'),  # 1
             QRadioButton('四个倒数之和等于倒数'),  # 2
             QRadioButton('两个倒数之和等于真分数'),  # 3
+            QRadioButton('三个倒数之和等于真分数'),  # 4
         ]
         if not any(rb.isChecked() for rb in self.reciprocal_options):
             self.reciprocal_options[self.exam.setting.type_reciprocal].setChecked(True)
         for i, rb in enumerate(self.reciprocal_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            reciprocal_layout.addWidget(rb, i % 4, i // 4)
+            reciprocal_layout.addWidget(rb, i % 5, i // 5)
         self.reciprocal_group.setLayout(reciprocal_layout)
         control_panel.addWidget(self.reciprocal_group, 1)
 
