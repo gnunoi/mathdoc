@@ -785,6 +785,7 @@ class QuestionReciprocal(QuestionRL): # 倒数之和题型
             self.answer_tips = f' 1/{n} = 1/{n} - 1/{n+1} + 1/{n+1} - 1/{n+2} + 1/{n+2} - 1/{n+3} + 1/{n+3} = 1/{n*(n+1)} + 1/{(n+1)*(n+2)} + 1/{(n+2)*(n+3)} + 1/{n+3}'
             self.answer_tips += f'\n正确答案：{n*(n+1)}, {(n+1)*(n+2)}, {(n+2)*(n+3)}, {n+3}'
         elif subtype >= 3:
+            print(n)
             f = self.numbers[0]
             solution, num, den = self.GetSolution(f, subtype - 1)
             print(solution, num, den)
@@ -800,7 +801,7 @@ class QuestionReciprocal(QuestionRL): # 倒数之和题型
                     self.answer_tips += f' + 1/{den//s}'
             if f.denominator != den: # 进行过约分
                 self.answer_tips += f' = {num}/{den}'
-            self.answer_tips += f' = {n}'
+            self.answer_tips += f' = {f}'
             self.answer_tips += f'\n正确答案：'
             for i, s in enumerate(solution):
                 if i == 0:
