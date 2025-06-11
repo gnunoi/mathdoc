@@ -189,7 +189,7 @@ class Exam:
         elif self.type == 10:  # 10: 体积问题
             return QuestionVolume(subtype=self.subtype)
         elif self.type == 11:  # 11: 倒数之和
-            return QuestionPower(subtype=self.subtype)
+            return QuestionReciprocal(subtype=self.subtype, range=self.range)
         elif self.type == 12:  # 12: 乘幂运算
             return QuestionPower(subtype=self.subtype)
         elif self.type == 13:  # 13: 一元一次方程
@@ -348,10 +348,6 @@ class User:
             )
             ''')
             db.connect.commit()
-        else:
-            db.AddColumn('Users', 'MentorEmail', 'TEXT')
-            db.AddColumn('Users', 'ExpiredDate', 'TEXT')
-
 
     def Read(self):
         db = self.db
@@ -456,6 +452,7 @@ class Setting:
             'type_area': 0,
             'type_volume': 0,
             'type_power': 0,
+            'type_reciprocal': 0,
             'type_eq1v1d': 0,
             'type_eq1v1d_form': 0,
             'type_equation': 0,
@@ -546,11 +543,6 @@ class Record:
             Input TEXT
         )
         ''')
-        db.AddColumn(self.table_name, 'AnswerTips', 'TEXT')
-        db.AddColumn(self.table_name, 'Solution', 'TEXT')
-        db.AddColumn(self.table_name, 'Type', 'INTEGER')
-        db.AddColumn(self.table_name, 'Subtype', 'TEXT')
-        db.AddColumn(self.table_name, 'Input', 'TEXT')
         db.connect.commit()
 
     def Append(self, q):

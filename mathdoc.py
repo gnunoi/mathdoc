@@ -47,7 +47,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.06.10(V1.9.4)"
+        self.version = "2025.06.11(V1.9.4)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.primary_screen = QApplication.primaryScreen()
         self.physical_size = self.primary_screen.physicalSize()
@@ -233,27 +233,6 @@ class MathDoc(QWidget):
         self.conversion_group.setLayout(conversion_layout)
         control_panel.addWidget(self.conversion_group, 1)
 
-        # 乘幂运算题型
-        self.power_group = QGroupBox("乘幂运算题型")
-        self.power_group.setFont(self.base_font)
-        power_layout = QGridLayout()
-        self.power_options = [
-            QRadioButton('乘幂求值'),  # 0
-            QRadioButton('乘幂加法'),  # 1
-            QRadioButton('乘幂减法'),  # 2
-            QRadioButton('乘幂乘法'),  # 3
-            QRadioButton('乘幂除法'),  # 4
-            QRadioButton('乘幂的乘幂'),  # 5
-        ]
-        if not any(rb.isChecked() for rb in self.power_options):
-            self.power_options[self.exam.setting.type_power].setChecked(True)
-        for i, rb in enumerate(self.power_options):
-            rb.setFont(self.base_font)
-            rb.toggled.connect(self.UpdateSettings)
-            power_layout.addWidget(rb, i % 3, i // 3)
-        self.power_group.setLayout(power_layout)
-        control_panel.addWidget(self.power_group, 1)
-
         # 分数运算题型
         self.fraction_group = QGroupBox("分数计算题型")
         self.fraction_group.setFont(self.base_font)
@@ -378,6 +357,46 @@ class MathDoc(QWidget):
             volume_layout.addWidget(rb, i % 4, i // 4)
         self.volume_group.setLayout(volume_layout)
         control_panel.addWidget(self.volume_group, 1)
+
+        # 倒数之和题型 sum of reciprocals
+        self.reciprocal_group = QGroupBox("倒数之和题型")
+        self.reciprocal_group.setFont(self.base_font)
+        reciprocal_layout = QGridLayout()
+        self.reciprocal_options = [
+            QRadioButton('两个倒数之和等于倒数'),  # 0
+            QRadioButton('三个倒数之和等于倒数'),  # 1
+            QRadioButton('四个倒数之和等于倒数'),  # 2
+            QRadioButton('两个倒数之和等于真分数'),  # 3
+        ]
+        if not any(rb.isChecked() for rb in self.reciprocal_options):
+            self.reciprocal_options[self.exam.setting.type_reciprocal].setChecked(True)
+        for i, rb in enumerate(self.reciprocal_options):
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            reciprocal_layout.addWidget(rb, i % 4, i // 4)
+        self.reciprocal_group.setLayout(reciprocal_layout)
+        control_panel.addWidget(self.reciprocal_group, 1)
+
+        # 乘幂运算题型
+        self.power_group = QGroupBox("乘幂运算题型")
+        self.power_group.setFont(self.base_font)
+        power_layout = QGridLayout()
+        self.power_options = [
+            QRadioButton('乘幂求值'),  # 0
+            QRadioButton('乘幂加法'),  # 1
+            QRadioButton('乘幂减法'),  # 2
+            QRadioButton('乘幂乘法'),  # 3
+            QRadioButton('乘幂除法'),  # 4
+            QRadioButton('乘幂的乘幂'),  # 5
+        ]
+        if not any(rb.isChecked() for rb in self.power_options):
+            self.power_options[self.exam.setting.type_power].setChecked(True)
+        for i, rb in enumerate(self.power_options):
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            power_layout.addWidget(rb, i % 3, i // 3)
+        self.power_group.setLayout(power_layout)
+        control_panel.addWidget(self.power_group, 1)
 
         # 一元一次方程
         self.eq1v1d_group = QGroupBox("方程类型")
@@ -548,7 +567,7 @@ class MathDoc(QWidget):
             set([self.perimeter_group]),  # type = 8 # 周长问题
             set([self.area_group]),  # type = 9 # 面积问题
             set([self.volume_group]),  # type = 10 # 体积问题
-            set([self.power_group]),  # type = 11 # 倒数之和
+            set([self.reciprocal_group]),  # type = 11 # 倒数之和
             set([self.power_group]),  # type = 12 # 乘幂运算题型
             set([self.eq1v1d_group, self.eq1v1d_group2, self.range_groups[4]]),  # type = 13 # 一元一次方程
             set([self.equation_group, self.range_groups[4]]),  # type = 14 # 解方程题型
@@ -750,12 +769,12 @@ class MathDoc(QWidget):
                     self.exam.UpdateSetting(type=self.exam.setting.type,
                                             subtype=[self.exam.setting.type_volume])
                 elif i == 11:
-                    for i, rb in enumerate(self.power_options):
+                    for i, rb in enumerate(self.reciprocal_options):
                         if rb.isChecked():
-                            self.exam.setting.type_power = i
+                            self.exam.setting.type_reciprocal = i
                             break
                     self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_power])
+                                            subtype=[self.exam.setting.type_reciprocal])
                 elif i == 12:
                     for i, rb in enumerate(self.power_options):
                         if rb.isChecked():

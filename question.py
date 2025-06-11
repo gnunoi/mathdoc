@@ -208,7 +208,7 @@ class Question():
         self.time_used = ''
         self.user_input = ''
         self.user_answer = ''
-        self.user_rusults = []
+        self.user_results = []
 
     def Generate(self):
         pass
@@ -271,6 +271,7 @@ class Question():
             "＋": "+", "➕": "+", "➖": "-", "×": "*", "✖": "*", "÷": "/",
         }
         user_input = self.user_input.strip()
+        # print(user_input)
         if user_input == '':
             return False
         for old, new in replace_map.items():
@@ -285,6 +286,7 @@ class Question():
             self.user_results.append(result)
         except:
             pass
+        # print(self.user_results)
         return True
 
     def ProcessCalculation(self):
@@ -308,6 +310,14 @@ class Question():
         else:
             return r"\dfrac{" + str(numerator) + "}{" + str(denominator) + "}"
 
+    def HasDuplicates(self, numbers):
+        has_duplicates = False
+        for num in numbers:
+            # print(num, numbers.count(num))
+            if numbers.count(num) > 1:
+                has_duplicates = True
+                break
+        return has_duplicates
 """
 类名称：QuestionRL
 题目类型：从右向左求值，即答案是表达式，题目是数值
@@ -332,7 +342,6 @@ class QuestionFactor(QuestionRL):
         super().__init__(type=3, subtype = subtype, range = range)
         self.name = "质因数分解"
         self.comments = ""
-        # self.Generate()
 
     def IsPrime(self, num):
         """判断一个数是否为质数"""
@@ -610,7 +619,93 @@ class Question24Point(QuestionRL):
             self.is_correct = False
         return self.is_correct
 
+class QuestionReciprocal(QuestionRL): # 倒数之和题型
+    def __init__(self, subtype, range):
+        super().__init__(type=11, subtype = subtype, range = range)
+        self.name = "倒数之和"
+        self.comments = "在(  )内填入不同的自然数。"
 
+    def Generate(self):
+        self.BeforeGenerate()
+        subtype = self.subtype[0]
+        n = self.RandInt(2, 15)
+        self.numbers = [Fraction(1, n)]
+        if subtype == 0: # 两个倒数之和
+            self.question = f'1/(  ) + 1/(  ) = 1/{n}'
+            self.correct_answer = [n+1, n*(n+1)]
+            lhs = '\\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)}'
+        elif subtype == 1: # 三个倒数之和
+            self.question = f'1/(  ) + 1/(  ) + 1/(  ) = 1/{n}'
+            self.correct_answer = [n+2, n*(n+1), (n+1)*(n+2)]
+            lhs = '\\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)}'
+        elif subtype == 2: # 四个倒数之和
+            self.question = f'1/(  ) + 1/(  ) + 1/(  ) + 1/(  ) = 1/{n}'
+            self.correct_answer = [n+3, n*(n+1), (n+1)*(n+2), (n+2)*(n+3)]
+            lhs = '\\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)} + \\dfrac{1}{(\\quad)}'
+        try:
+            print(self.question)
+            rhs = f'\\dfrac{{1}}{{{n}}}'
+            latex = r'${} = {}$'.format(lhs, rhs)
+            self.Latex2PNG(latex, self.png_file)
+        except:
+            pass
+        self.AfterGenerate()
+
+    def BeforeJudgeAnswer(self):
+        self.user_answer = self.user_answer.strip().replace(',', ' ').replace('，', ' ')
+        self.user_answer = list(map(int, self.user_answer.split()))
+
+    def JudgeAnswer(self):
+        super().BeforeJudgeAnswer()
+        self.BeforeJudgeAnswer()
+        self.end_time = datetime.now()
+        self.time_used = round((self.end_time - self.start_time).total_seconds(), 1)
+
+        subtype = self.subtype[0]
+        try:
+            if self.HasDuplicates(self.user_answer) or len(self.user_answer) != subtype + 2: # 输入数字个数符合要求且不相等
+                self.is_correct = False
+                return False
+            answer = 0
+            for r in self.user_answer:
+                answer += Fraction(1, r)
+            # print(answer, self.numbers[0])
+            if answer == self.numbers[0]:
+                self.is_correct = True
+            else:
+                self.is_correct = False
+        except:
+            pass
+        return self.is_correct
+
+    def CheckTips(self):
+        subtype = self.subtype[0]
+        if len(self.user_answer) != subtype + 2: # 输入的数字个数不正确
+            self.check_tips = f'要求输入{subtype + 2}个不同的自然数，实际输入了{len(self.user_answer)}个。'
+            return
+        for num in self.user_answer:
+            if self.user_answer.count(num) > 1:
+                self.check_tips = f'{num}出现{self.user_answer.count(num)}次。'
+                return
+        answer = 0
+        for i, r in enumerate(self.user_answer):
+            answer += Fraction(1, r)
+            if i == 0:
+                str_answer = f'1 / {r}'
+            else:
+                str_answer += f' + 1 / {r}'
+        if answer != self.numbers[0]:
+            self.check_tips = f'左式 = {str_answer} = {answer} ≠ {self.numbers[0]}'
+
+    def AnswerTips(self):
+        subtype = self.subtype[0]
+        n = Fraction(1, self.numbers[0])
+
+        if subtype == 0:
+            self.answer_tips = f'1 / {n + 1} + 1 / {n*(n+1)} = 1 / {n}，正确答案：{n+1}, {n*(n+1)}'
+        elif subtype == 1:
+            self.answer_tips = f'1 / {n + 2} + 1 / {n*(n+1)} + 1 / {(n+1)*(n+2)} = 1 / {n}，正确答案：{n+2}, {n*(n+1)}, {(n+1)*(n+2)}'
+            self.answer_tips += f'\n1 / {2*n} + 1 / {3*n} + 1 / {6*n} = 1 / {n}，正确答案：{2*n}, {3*n}, {6*n}'
 
 """
 类名称：QuestionLR
@@ -1816,7 +1911,6 @@ class QuestionVolume(QuestionLR):
         except:
             pass
 
-# class Question
 class QuestionPower(QuestionLR):
     def __init__(self, subtype=[0]):
         self.power = [
@@ -1862,6 +1956,7 @@ class QuestionPower(QuestionLR):
         elif sub_type == 5:
             self.GeneratePowerPower()
         latex = r'${}$'.format(self.formula)
+        print(latex)
         self.Latex2PNG(latex, self.png_file)
         self.AfterGenerate()
         print(self.question)
