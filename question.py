@@ -458,6 +458,8 @@ class QuestionFactor(QuestionRL):
         try:
             if subtype == 0:
                 self.user_answer = self.user_answer.strip().replace('*', ' ')
+                self.user_answer = self.user_answer.replace(',', '')
+                self.user_answer = self.user_answer.replace('，', '')
                 self.user_answer = self.user_answer.split()
                 print(self.user_answer)
                 for i in range(len(self.user_answer)):
