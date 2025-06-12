@@ -1,4 +1,7 @@
 # MathDoc Application
+## [Release V1.9.5](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.5)
+1、修正发送导师邮箱的BUG。
+
 ## [Release V1.9.4](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.4)
 1、增加倒数之和题型。
 

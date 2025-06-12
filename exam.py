@@ -122,7 +122,6 @@ class Exam:
             column_names = [column[1] for column in columns]
             selected_columns = column_names[1:]
             query = f"SELECT {', '.join(selected_columns)} FROM {table_name}"
-            # print(query)
 
         if type == 0:
             db.cursor.execute(f"{query}")
@@ -141,13 +140,16 @@ class Exam:
 
 
     def SendRecords(self):
-        print('答题记录发送邮件...')
+        print(f'答题记录发送邮件到本人邮箱：{self.user.email}...')
         local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.mail.subject = f'{self.user.email}在{local_time}发来的作业'
-        self.mail.Send(attach=self.wb.fullpath) # 给服务器邮箱发送邮件
-        self.mail.Send(receiver=self.user.email, attach=self.wb.fullpath) # 给本人邮箱发送邮件
-        if not self.user.mentor_email is None and self.user.mentor_email.find('@'):
-            self.mail.Send(receiver=self.user.mentor_email, attach=self.wb.fullpath)  # 给本人邮箱发送邮件
+        self.mail.Send(attach=self.wb.fullpath) # 给服务器默认邮箱发送答题记录
+        self.mail.Send(receiver=self.user.email, attach=self.wb.fullpath) # 给本人邮箱发送答题记录
+
+        if self.user.mentor_email is not None and self.user.mentor_email.find('@') != -1:
+            print(f'答题记录发送邮件到导师邮箱：{self.user.mentor_email}...')
+            self.mail.Send(receiver=self.user.mentor_email, attach=self.wb.fullpath)  # 给导师邮箱发送答题记录
+
         print('答题记录邮件发送完毕')
 
     def SendDB(self):
