@@ -47,7 +47,9 @@ def GetFontSize():
         base_font_size = 54
         big_font_size = 80
         huge_font_size = 90
-    base_font_size = 54 # DJF
+    # DJF
+    if False:
+        base_font_size = 54
     return int(dpi), base_font_size
 
 """
