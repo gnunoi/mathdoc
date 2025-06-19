@@ -3135,13 +3135,13 @@ class QuestionSequence(QuestionLR): # 数列题型
         n0 = self.RandInt(1, 3)
         d = self.RandInt(1, 2)
         n = 4
-        s = [self.primes[n0 + i * d]for i in range(n)]
+        self.numbers = [n0, d, n]
+        s = [self.primes[n0 + i * d] for i in range(n)]
         self.question = ''
         for i in range(n):
             self.question += f'{s[i]}, '
         self.question += ' (    )'
         self.correct_answer = self.primes[n0 + n * d]
-        self.numbers = [n0, d, n]
         print(self.question, self.correct_answer)
 
     def GenerateSD(self): # 平方差
@@ -3160,7 +3160,6 @@ class QuestionSequence(QuestionLR): # 数列题型
             self.question += f'{s[i]}, '
         self.question += ' (    )'
         self.correct_answer = (a + n * da) ** 2 - (b + n * db) ** 2
-
         print(self.question, self.correct_answer)
 
     def GenerateSS(self): # 平方和
@@ -3264,6 +3263,13 @@ class QuestionSequence(QuestionLR): # 数列题型
         else:
             self.check_tips += f'{s[n - 2]} + ({s[n - 1]}) ≠ {self.user_answer}'
 
+    def CheckTipsPS(self):
+        n0, d, n = self.numbers
+        si = [n0 + i * d for i in range(n+1)]
+        sp = [self.primes[n0 + i * d] for i in range(n+1)]
+        self.user_answer = int(self.user_answer)
+        self.check_tips = f'{sp[:-1]})分别是第{si[:-1]}个质数，第{si[n]}个质数不是{self.user_answer}'
+
     def AnswerTips(self):
         try:
             if self.subtype[0] == 0:
@@ -3326,3 +3332,10 @@ class QuestionSequence(QuestionLR): # 数列题型
             self.answer_tips += f'正确答案 = {s[n-2]} + {s[n-1]} = {self.correct_answer}'
         else:
             self.answer_tips += f'正确答案 = {s[n - 2]} + ({s[n - 1]}) = {self.correct_answer}'
+
+    def AnswerTipsPS(self):
+        n0, d, n = self.numbers
+        si = [n0 + i * d for i in range(n+1)]
+        sp = [self.primes[n0 + i * d] for i in range(n+1)]
+        self.user_answer = int(self.user_answer)
+        self.answer_tips = f'{sp[:-1]}分别是第{si[:-1]}个质数，第{si[n]}个质数为{self.correct_answer}'
