@@ -3209,13 +3209,13 @@ class QuestionSequence(QuestionLR): # 数列题型
             elif subtype == 1:
                 self.CheckTipsGS()
             elif subtype == 2:
-                self.CheckTipsPS()
-            elif subtype == 3:
-                self.CheckTipsSD()
-            elif subtype == 4:
-                self.CheckTipsSS()
-            elif subtype == 5:
                 self.CheckTipsFib()
+            elif subtype == 3:
+                self.CheckTipsPS()
+            elif subtype == 4:
+                self.CheckTipsSD()
+            elif subtype == 5:
+                self.CheckTipsSS()
         except:
             self.check_tips = '无效的答案'
 
@@ -3249,6 +3249,21 @@ class QuestionSequence(QuestionLR): # 数列题型
         else:
             self.check_tips += f'{s[n-1]} × ({d}) ≠ {self.user_answer}'
 
+    def CheckTipsFib(self):
+        a, b, n = self.numbers
+        s = [a, b]
+        self.user_answer = int(self.user_answer)
+        for i in range(2, n):
+            s.append(s[i-2] + s[i-1])
+        if s[1] >= 0:
+            self.check_tips = f'{s[2]} = {s[0]} + {s[1]}'
+        else:
+            self.check_tips = f'{s[2]} = {s[0]} + ({s[1]})'
+        if s[n-1] >= 0:
+            self.check_tips += f'{s[n-2]} + {s[n-1]} ≠ {self.user_answer}'
+        else:
+            self.check_tips += f'{s[n - 2]} + ({s[n - 1]}) ≠ {self.user_answer}'
+
     def AnswerTips(self):
         try:
             if self.subtype[0] == 0:
@@ -3256,13 +3271,13 @@ class QuestionSequence(QuestionLR): # 数列题型
             elif self.subtype[0] == 1:
                 self.AnswerTipsGS()
             elif self.subtype[0] == 2:
-                self.AnswerTipsPS()
-            elif self.subtype[0] == 3:
-                self.AnswerTipsSD()
-            elif self.subtype[0] == 4:
-                self.AnswerTipsSS()
-            elif self.subtype[0] == 5:
                 self.AnswerTipsFib()
+            elif self.subtype[0] == 3:
+                self.AnswerTipsPS()
+            elif self.subtype[0] == 4:
+                self.AnswerTipsSD()
+            elif self.subtype[0] == 5:
+                self.AnswerTipsSS()
         except:
             self.answer_tips = '无效的答案'
 
@@ -3296,3 +3311,18 @@ class QuestionSequence(QuestionLR): # 数列题型
             self.answer_tips += f'{s[n-1]} × {d} = {self.correct_answer}'
         else:
             self.answer_tips += f'{s[n-1]} × ({d}) = {self.correct_answer}'
+
+    def AnswerTipsFib(self):
+        a, b, n = self.numbers
+        s = [a, b]
+        self.user_answer = int(self.user_answer)
+        for i in range(2, n):
+            s.append(s[i-2] + s[i-1])
+        if s[1] >= 0:
+            self.answer_tips = f'{s[2]} = {s[0]} + {s[1]}'
+        else:
+            self.answer_tips = f'{s[2]} = {s[0]} + ({s[1]})'
+        if s[n-1] >= 0:
+            self.answer_tips += f'正确答案 = {s[n-2]} + {s[n-1]} = {self.correct_answer}'
+        else:
+            self.answer_tips += f'正确答案 = {s[n - 2]} + ({s[n - 1]}) = {self.correct_answer}'
