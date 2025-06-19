@@ -3152,7 +3152,7 @@ class QuestionSequence(QuestionLR): # 数列题型
                 break
         da = self.RandInt(1, 2)
         db = self.RandInt(1, 2)
-        n = 5
+        n = 4
         self.numbers = [a, b, da, db, n]
         s = [(a + i * da) ** 2 - (b + i * db) ** 2 for i in range(n)]
         self.question = ''
@@ -3172,12 +3172,14 @@ class QuestionSequence(QuestionLR): # 数列题型
         db = self.RandInt(1, 2)
         n = 5
         self.numbers = [a, b, da, db, n]
-        s = [(a + i * da) ** 2 + (b + i * db) ** 2 for i in range(n)]
+        sa = [a + i*da for i in range(n+1)]
+        sb = [b + i*db for i in range(n+1)]
+        sd = [sa[i] ** 2 + sb[i] ** 2 for i in range(n+1)]
         self.question = ''
         for i in range(n):
-            self.question += f'{s[i]}, '
+            self.question += f'{sd[i]}, '
         self.question += ' (    )'
-        self.correct_answer = (a + n * da) ** 2 + (b + n * db) ** 2
+        self.correct_answer = sd[n]
 
         print(self.question, self.correct_answer)
 
@@ -3270,6 +3272,30 @@ class QuestionSequence(QuestionLR): # 数列题型
         self.user_answer = int(self.user_answer)
         self.check_tips = f'{sp[:-1]})分别是第{si[:-1]}个质数，第{si[n]}个质数不是{self.user_answer}'
 
+    def CheckTipsSD(self):
+        a, b, da, db, n = self.numbers
+        sa = [a + i*da for i in range(n+1)]
+        sb = [b + i*db for i in range(n+1)]
+        sd = [sa[i] ** 2 - sb[i] ** 2 for i in range(n+1)]
+        self.user_answer = int(self.user_answer)
+        self.check_tips = f'{sd[0]} = {sa[0]}*{sa[0]} - {sb[0]}*{sb[0]}'
+        self.check_tips += f'，{sd[1]} = {sa[1]}*{sa[1]} - {sb[1]}*{sb[1]}'
+        self.check_tips += f'\n{sd[2]} = {sa[2]}*{sa[2]} - {sb[2]}*{sb[2]}'
+        self.check_tips += f'，{sd[3]} = {sa[3]}*{sa[3]} - {sb[3]}*{sb[3]}'
+        self.check_tips += f'，{sa[n]}*{sa[n]} - {sb[n]}*{sb[n]} ≠ {self.user_answer}'
+
+    def CheckTipsSS(self):
+        a, b, da, db, n = self.numbers
+        sa = [a + i*da for i in range(n+1)]
+        sb = [b + i*db for i in range(n+1)]
+        sd = [sa[i] ** 2 + sb[i] ** 2 for i in range(n+1)]
+        self.user_answer = int(self.user_answer)
+        self.check_tips = f'{sd[0]} = {sa[0]}*{sa[0]} + {sb[0]}*{sb[0]}'
+        self.check_tips += f'，{sd[1]} = {sa[1]}*{sa[1]} + {sb[1]}*{sb[1]}'
+        self.check_tips += f'\n{sd[2]} = {sa[2]}*{sa[2]} + {sb[2]}*{sb[2]}'
+        self.check_tips += f'，{sd[3]} = {sa[3]}*{sa[3]} + {sb[3]}*{sb[3]}'
+        self.check_tips += f'，{sa[n]}*{sa[n]} + {sb[n]}*{sb[n]} ≠ {self.user_answer}'
+
     def AnswerTips(self):
         try:
             if self.subtype[0] == 0:
@@ -3339,3 +3365,31 @@ class QuestionSequence(QuestionLR): # 数列题型
         sp = [self.primes[n0 + i * d] for i in range(n+1)]
         self.user_answer = int(self.user_answer)
         self.answer_tips = f'{sp[:-1]}分别是第{si[:-1]}个质数，第{si[n]}个质数为{self.correct_answer}'
+
+    def AnswerTipsSD(self):
+        a, b, da, db, n = self.numbers
+        sa = [a + i*da for i in range(n+1)]
+        sb = [b + i*db for i in range(n+1)]
+        sd = [sa[i] ** 2 - sb[i] ** 2 for i in range(n+1)]
+        print(sd)
+        dsd = [sd[i+1] - sd[i] for i in range(n)]
+        ddsd = [dsd[i+1] - dsd[i] for i in range(n-1)]
+        self.answer_tips = f'方法一：正确答案 = {sa[n]}*{sa[n]} - {sb[n]}*{sb[n]} = {self.correct_answer}'
+        self.answer_tips += f'\n原数列的逐项差为：{dsd[:-1]}，逐项差的逐项差为：{ddsd[:-1]}'
+        str_dsd = f'{dsd[n-1]}' if dsd[n-1] >= 0 else f'({dsd[n-1]})'
+        str_ddsd = f'{ddsd[n-2]}' if ddsd[n-2] >= 0 else f'({ddsd[n-2]})'
+        self.answer_tips += f'，正确答案 = {sd[n-1]} + {str_dsd} + {str_ddsd} = {self.correct_answer}'
+
+    def AnswerTipsSS(self):
+        a, b, da, db, n = self.numbers
+        sa = [a + i*da for i in range(n+1)]
+        sb = [b + i*db for i in range(n+1)]
+        sd = [sa[i] ** 2 + sb[i] ** 2 for i in range(n+1)]
+        print(sd)
+        dsd = [sd[i+1] - sd[i] for i in range(n)]
+        ddsd = [dsd[i+1] - dsd[i] for i in range(n-1)]
+        self.answer_tips = f'方法一：正确答案 = {sa[n]}*{sa[n]} + {sb[n]}*{sb[n]} = {self.correct_answer}'
+        self.answer_tips += f'\n原数列的逐项差为：{dsd[:-1]}，逐项差的逐项差为：{ddsd[:-1]}'
+        str_dsd = f'{dsd[n-1]}' if dsd[n-1] >= 0 else f'({dsd[n-1]})'
+        str_ddsd = f'{ddsd[n-2]}' if ddsd[n-2] >= 0 else f'({ddsd[n-2]})'
+        self.answer_tips += f'，正确答案 = {sd[n-1]} + {str_dsd} + {str_ddsd} = {self.correct_answer}'
