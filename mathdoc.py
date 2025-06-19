@@ -122,12 +122,13 @@ class MathDoc(QWidget):
             QRadioButton('乘幂运算'),  # type = 12
             QRadioButton('一元一次方程'),  # type = 13
             QRadioButton('解方程'),  # type = 14
+            QRadioButton('数列'),  # type = 15
         ]
         self.type_options[self.exam.setting.type].setChecked(True)
         for i, rb in enumerate(self.type_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            type_layout.addWidget(rb, i % 5, i // 5)  # 每两行一个新列，确保两列布局
+            type_layout.addWidget(rb, i % 4, i // 4)  # 每两行一个新列，确保两列布局
         self.type_group.setLayout(type_layout)
         control_panel.addWidget(self.type_group, 1)
 
