@@ -3375,8 +3375,8 @@ class QuestionSequence(QuestionLR): # 数列题型
         dsd = [sd[i+1] - sd[i] for i in range(n)]
         ddsd = [dsd[i+1] - dsd[i] for i in range(n-1)]
         self.answer_tips = f'方法一：正确答案 = {sa[n]}*{sa[n]} - {sb[n]}*{sb[n]} = {self.correct_answer}'
-        self.answer_tips += f'\n原数列的逐项差为：{dsd[:-1]}，逐项差的逐项差为：{ddsd[:-1]}'
-        str_dsd = f'{dsd[n-1]}' if dsd[n-1] >= 0 else f'({dsd[n-1]})'
+        self.answer_tips += f'\n方法二：原数列的逐项差为：{dsd[:-1]}，逐项差的逐项差为：{ddsd[:-1]}'
+        str_dsd = f'{dsd[n-2]}' if dsd[n-1] >= 0 else f'({dsd[n-2]})'
         str_ddsd = f'{ddsd[n-2]}' if ddsd[n-2] >= 0 else f'({ddsd[n-2]})'
         self.answer_tips += f'，正确答案 = {sd[n-1]} + {str_dsd} + {str_ddsd} = {self.correct_answer}'
 
@@ -3389,7 +3389,7 @@ class QuestionSequence(QuestionLR): # 数列题型
         dsd = [sd[i+1] - sd[i] for i in range(n)]
         ddsd = [dsd[i+1] - dsd[i] for i in range(n-1)]
         self.answer_tips = f'方法一：正确答案 = {sa[n]}*{sa[n]} + {sb[n]}*{sb[n]} = {self.correct_answer}'
-        self.answer_tips += f'\n原数列的逐项差为：{dsd[:-1]}，逐项差的逐项差为：{ddsd[:-1]}'
-        str_dsd = f'{dsd[n-1]}' if dsd[n-1] >= 0 else f'({dsd[n-1]})'
+        self.answer_tips += f'\n方法二：原数列的逐项差为：{dsd[:-1]}，逐项差的逐项差为：{ddsd[:-1]}'
+        str_dsd = f'{dsd[n-2]}' if dsd[n-2] >= 0 else f'({dsd[n-2]})'
         str_ddsd = f'{ddsd[n-2]}' if ddsd[n-2] >= 0 else f'({ddsd[n-2]})'
         self.answer_tips += f'，正确答案 = {sd[n-1]} + {str_dsd} + {str_ddsd} = {self.correct_answer}'
