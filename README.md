@@ -1,4 +1,7 @@
 # MathDoc Application
+## [Release V1.9.6](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.6)
+1、增加数列题型。
+
 ## [Release V1.9.5](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.5)
 1、修正发送导师邮箱的BUG。
 

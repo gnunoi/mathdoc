@@ -47,7 +47,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.06.12(V1.9.5)"
+        self.version = "2025.06.19(V1.9.6)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.primary_screen = QApplication.primaryScreen()
         self.physical_size = self.primary_screen.physicalSize()
@@ -599,6 +599,7 @@ class MathDoc(QWidget):
             set([self.power_group]),  # type = 12 # 乘幂运算题型
             set([self.eq1v1d_group, self.eq1v1d_group2, self.range_groups[4]]),  # type = 13 # 一元一次方程
             set([self.equation_group, self.range_groups[4]]),  # type = 14 # 解方程题型
+            set([self.sequence_group]),  # type = 15 # 数列题型
         ]
         self.sets = set([])
         for s in self.set_list:
