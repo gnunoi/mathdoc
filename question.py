@@ -3233,6 +3233,8 @@ class QuestionSequence(QuestionLR): # 数列题型
     def GenerateASM(self): # 等差数列
         a0 = self.RandInt(1, 5)
         b0 = self.RandInt(1, 5)
+        if a0 > b0:
+            a0, b0 = b0, a0
         while True:
             da = self.RandInt(1, 3)
             if da != 0:
