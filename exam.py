@@ -491,6 +491,7 @@ class Setting:
     def Write(self):
         db = self.db
         for key in self.default.keys():
+            print(key, getattr(self, key))
             value = str(getattr(self, key))
             db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))
         db.connect.commit()

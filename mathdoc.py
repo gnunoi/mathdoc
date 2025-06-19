@@ -446,20 +446,23 @@ class MathDoc(QWidget):
         # 数列题型
         self.sequence_group = QGroupBox("数列问题")
         self.sequence_group.setFont(self.base_font)
-        sequence_layout = QVBoxLayout()
+        sequence_layout = QGridLayout()
         self.sequence_options = [
             QRadioButton('等差数列'),  # 0
             QRadioButton('等比数列'),  # 1
-            QRadioButton('质数相关数列'),  # 2
-            QRadioButton('震荡数列'),  # 3
-            QRadioButton('其它数列'),  # 2
+            QRadioButton('质数数列'),  # 2
+            QRadioButton('平方差数列'),  # 3
+            QRadioButton('平方和数列'),  # 4
+            QRadioButton('综合数列一'),  # 5
+            QRadioButton('综合数列二'),  # 6
+            QRadioButton('综合数列三'),  # 7
         ]
         if not any(rb.isChecked() for rb in self.sequence_options):
             self.sequence_options[self.exam.setting.type_sequence].setChecked(True)
-        for rb in self.sequence_options:
+        for i, rb in enumerate(self.sequence_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            sequence_layout.addWidget(rb)
+            sequence_layout.addWidget(rb, i % 5, i // 5)
         self.sequence_group.setLayout(sequence_layout)
         control_panel.addWidget(self.sequence_group, 1)
 
@@ -841,10 +844,11 @@ class MathDoc(QWidget):
             elif i == 15:
                 for i, rb in enumerate(self.sequence_options):
                     if rb.isChecked():
-                        self.exam.setting.type_equation = i
+                        self.exam.setting.type_sequence = i
+                        print(self.exam.setting.type_sequence)
                         break
                 self.exam.UpdateSetting(type=self.exam.setting.type,
-                                        subtype = [self.exam.setting.type_equation],
+                                        subtype = [self.exam.setting.type_sequence],
                                         range = [self.exam.setting.min_coefficient,
                                                  self.exam.setting.max_coefficient,
                                                  self.exam.setting.min_constant,

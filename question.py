@@ -131,6 +131,12 @@ class Question():
         self.try_numbers = 1000
         self.path = self.GetPath()
         self.png_file = os.path.join(self.path, 'question.png')
+        self.primes = [
+            2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+            53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107,
+            109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167,
+            173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229
+        ]
 
     def GetPath(self):
         home = os.path.expanduser("~")
@@ -3071,7 +3077,93 @@ class QuestionSequence(QuestionLR): # 数列题型
     def __init__(self, subtype):
         super().__init__(type=15, subtype = subtype)
         self.name = "数列问题"
-        self.comments = "在(  )内填入数字。"
+        self.comments = "在(    )内填入数字。"
 
     def Generate(self):
-        pass
+        subtype = self.subtype[0]
+        print(subtype)
+
+        self.BeforeGenerate()
+
+        if subtype == 0: # 等差数列
+            self.GenerateArithmeticSequence()
+        elif subtype == 1: # 等比数列
+            self.GenerateGeometricSequence()
+        elif subtype == 2: # 质数数列
+            self.GeneratePrimeSequence()
+        elif subtype == 3: # 平方差
+            self.GenerateSquareDifference()
+        self.AfterGenerate()
+
+        print(self.start_time)
+
+    def GenerateArithmeticSequence(self): # 等差数列
+        a0 = self.RandInt(-20, 20)
+        while True:
+            d = self.RandInt(-10, 10)
+            if d != 0:
+                break
+        n = 3
+        print(a0, d, n)
+        a = [a0 + i * d for i in range(n)]
+        self.question = ''
+        for i in range(n):
+            self.question += f'{a[i]}, '
+        self.question += ' (    )'
+        self.correct_answer = a0 + n * d
+        self.numbers = [a0, d, n]
+        print(self.question, self.correct_answer)
+
+    def GenerateGeometricSequence(self): # 等比数列
+        while True:
+            a0 = self.RandInt(-5, 5)
+            if a0 != 0:
+                break
+        while True:
+            d = self.RandInt(-5, 5)
+            if d != 0 and d != 1:
+                break
+        n = 3
+        print(a0, d, n)
+        a = [a0 * d ** i for i in range(n)]
+        self.question = ''
+        for i in range(n):
+            self.question += f'{a[i]}, '
+        self.question += ' (    )'
+        self.correct_answer = a0 * d**n
+        self.numbers = [a0, d, n]
+        print(self.question, self.correct_answer)
+
+    def GeneratePrimeSequence(self): # 质数
+        n0 = self.RandInt(1, 3)
+        d = self.RandInt(1, 2)
+        n = 4
+        print(n0, d, n)
+        a = [self.primes[n0 + i * d]for i in range(n)]
+        self.question = ''
+        for i in range(n):
+            self.question += f'{a[i]}, '
+        self.question += ' (    )'
+        self.correct_answer = self.primes[n0 + n * d]
+        self.numbers = [n0, d, n]
+        print(self.question, self.correct_answer)
+
+    def GenerateSquareDifference(self): # 平方差
+        a = self.RandInt(1, 6)
+        while True:
+            b = self.RandInt(1, 3)
+            if b != a:
+                break
+        da = self.RandInt(1, 2)
+        db = self.RandInt(1, 2)
+        n = 5
+        print(a, b, da, db, n)
+        self.numbers = [a, b, da, db, n]
+        s = [(a + i * da) ** 2 - (b + i * db) ** 2 for i in range(n)]
+        self.question = ''
+        for i in range(n):
+            self.question += f'{s[i]}, '
+        self.question += ' (    )'
+        self.correct_answer = (a + n * da) ** 2 - (b + n * db) ** 2
+
+        print(self.question, self.correct_answer)
