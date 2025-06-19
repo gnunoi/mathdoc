@@ -450,19 +450,17 @@ class MathDoc(QWidget):
         self.sequence_options = [
             QRadioButton('等差数列'),  # 0
             QRadioButton('等比数列'),  # 1
-            QRadioButton('质数数列'),  # 2
-            QRadioButton('平方差数列'),  # 3
-            QRadioButton('平方和数列'),  # 4
-            QRadioButton('综合数列一'),  # 5
-            QRadioButton('综合数列二'),  # 6
-            QRadioButton('综合数列三'),  # 7
+            QRadioButton('斐波那契数列'),  # 2
+            QRadioButton('质数数列'),  # 3
+            QRadioButton('平方差数列'),  # 4
+            QRadioButton('平方和数列'),  # 5
         ]
         if not any(rb.isChecked() for rb in self.sequence_options):
             self.sequence_options[self.exam.setting.type_sequence].setChecked(True)
         for i, rb in enumerate(self.sequence_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            sequence_layout.addWidget(rb, i % 5, i // 5)
+            sequence_layout.addWidget(rb, i % 3, i // 3)
         self.sequence_group.setLayout(sequence_layout)
         control_panel.addWidget(self.sequence_group, 1)
 

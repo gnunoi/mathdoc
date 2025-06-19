@@ -2245,7 +2245,6 @@ class QuestionEq1v1d(QuestionLR):
     def Generate(self):
         self.BeforeGenerate()
         subtype = self.subtype
-        print(subtype)
         if subtype[0] == 0:
             if subtype[1] == 0:
                 self.GenerateEq1v1d_00()
@@ -3081,40 +3080,39 @@ class QuestionSequence(QuestionLR): # 数列题型
 
     def Generate(self):
         subtype = self.subtype[0]
-        print(subtype)
-
         self.BeforeGenerate()
 
         if subtype == 0: # 等差数列
-            self.GenerateArithmeticSequence()
+            self.GenerateAS()
         elif subtype == 1: # 等比数列
-            self.GenerateGeometricSequence()
-        elif subtype == 2: # 质数数列
-            self.GeneratePrimeSequence()
-        elif subtype == 3: # 平方差
-            self.GenerateSquareDifference()
+            self.GenerateGS()
+        elif subtype == 2:  # 斐波那契
+            self.GenerateFib()
+        elif subtype == 3: # 质数数列
+            self.GeneratePS()
+        elif subtype == 4: # 平方差
+            self.GenerateSD()
+        elif subtype == 5: # 平方和
+            self.GenerateSS()
         self.AfterGenerate()
 
-        print(self.start_time)
-
-    def GenerateArithmeticSequence(self): # 等差数列
+    def GenerateAS(self): # 等差数列
         a0 = self.RandInt(-20, 20)
         while True:
             d = self.RandInt(-10, 10)
             if d != 0:
                 break
         n = 3
-        print(a0, d, n)
-        a = [a0 + i * d for i in range(n)]
+        s = [a0 + i * d for i in range(n)]
         self.question = ''
         for i in range(n):
-            self.question += f'{a[i]}, '
+            self.question += f'{s[i]}, '
         self.question += ' (    )'
         self.correct_answer = a0 + n * d
         self.numbers = [a0, d, n]
         print(self.question, self.correct_answer)
 
-    def GenerateGeometricSequence(self): # 等比数列
+    def GenerateGS(self): # 等比数列
         while True:
             a0 = self.RandInt(-5, 5)
             if a0 != 0:
@@ -3124,31 +3122,29 @@ class QuestionSequence(QuestionLR): # 数列题型
             if d != 0 and d != 1:
                 break
         n = 3
-        print(a0, d, n)
-        a = [a0 * d ** i for i in range(n)]
+        self.numbers = [a0, d, n]
+        s = [a0 * d ** i for i in range(n)]
         self.question = ''
         for i in range(n):
-            self.question += f'{a[i]}, '
+            self.question += f'{s[i]}, '
         self.question += ' (    )'
         self.correct_answer = a0 * d**n
-        self.numbers = [a0, d, n]
         print(self.question, self.correct_answer)
 
-    def GeneratePrimeSequence(self): # 质数
+    def GeneratePS(self): # 质数
         n0 = self.RandInt(1, 3)
         d = self.RandInt(1, 2)
         n = 4
-        print(n0, d, n)
-        a = [self.primes[n0 + i * d]for i in range(n)]
+        s = [self.primes[n0 + i * d]for i in range(n)]
         self.question = ''
         for i in range(n):
-            self.question += f'{a[i]}, '
+            self.question += f'{s[i]}, '
         self.question += ' (    )'
         self.correct_answer = self.primes[n0 + n * d]
         self.numbers = [n0, d, n]
         print(self.question, self.correct_answer)
 
-    def GenerateSquareDifference(self): # 平方差
+    def GenerateSD(self): # 平方差
         a = self.RandInt(1, 6)
         while True:
             b = self.RandInt(1, 3)
@@ -3157,7 +3153,6 @@ class QuestionSequence(QuestionLR): # 数列题型
         da = self.RandInt(1, 2)
         db = self.RandInt(1, 2)
         n = 5
-        print(a, b, da, db, n)
         self.numbers = [a, b, da, db, n]
         s = [(a + i * da) ** 2 - (b + i * db) ** 2 for i in range(n)]
         self.question = ''
@@ -3167,3 +3162,137 @@ class QuestionSequence(QuestionLR): # 数列题型
         self.correct_answer = (a + n * da) ** 2 - (b + n * db) ** 2
 
         print(self.question, self.correct_answer)
+
+    def GenerateSS(self): # 平方和
+        a = self.RandInt(1, 6)
+        while True:
+            b = self.RandInt(1, 3)
+            if b != a:
+                break
+        da = self.RandInt(1, 2)
+        db = self.RandInt(1, 2)
+        n = 5
+        self.numbers = [a, b, da, db, n]
+        s = [(a + i * da) ** 2 + (b + i * db) ** 2 for i in range(n)]
+        self.question = ''
+        for i in range(n):
+            self.question += f'{s[i]}, '
+        self.question += ' (    )'
+        self.correct_answer = (a + n * da) ** 2 + (b + n * db) ** 2
+
+        print(self.question, self.correct_answer)
+
+    def GenerateFib(self):  # 平方和
+        a = self.RandInt(-5, 5)
+        while True:
+            b = self.RandInt(-3, 3)
+            if b != a:
+                break
+        n = 4
+        self.numbers = [a, b, n]
+        s = [a, b]
+        for i in range(2, n):
+            s.append(s[i-2] + s[i-1])
+        self.question = ''
+        for i in range(n):
+            self.question += f'{s[i]}, '
+        self.question += ' (    )'
+        self.correct_answer = s[n-2] + s[n-1]
+
+        print(self.question, self.correct_answer)
+
+    def CheckTips(self):
+        try:
+            subtype = self.subtype[0]
+            if subtype == 0:
+                self.CheckTipsAS()
+            elif subtype == 1:
+                self.CheckTipsGS()
+            elif subtype == 2:
+                self.CheckTipsPS()
+            elif subtype == 3:
+                self.CheckTipsSD()
+            elif subtype == 4:
+                self.CheckTipsSS()
+            elif subtype == 5:
+                self.CheckTipsFib()
+        except:
+            self.check_tips = '无效的答案'
+
+    def CheckTipsAS(self):
+        a0, d, n = self.numbers
+        s = [a0 + i * d for i in range(n)]
+        self.user_answer = int(self.user_answer)
+        if d >= 0:
+            if s[0] >= 0:
+                self.check_tips = f'{s[1]} - {s[0]} = {d}'
+            else:
+                self.check_tips = f'{s[1]} - ({s[0]}) = {d}'
+            self.check_tips += f'，{s[n-1]} + {d} ≠ {self.user_answer}'
+        else:
+            if s[1] >= 0:
+                self.check_tips = f'{s[0]} - {s[1]} = {-d}'
+            else:
+                self.check_tips = f'{s[0]} - ({s[1]}) = {-d}'
+            self.check_tips += f'，{s[n-1]} - {-d} ≠ {self.user_answer}'
+
+    def CheckTipsGS(self):
+        [a0, d, n] = self.numbers
+        s = [a0 * d ** i for i in range(n)]
+        self.user_answer = int(self.user_answer)
+        if s[0] >= 0:
+            self.check_tips = f'{s[1]} ÷ {s[0]} = {d}，'
+        else:
+            self.check_tips = f'{s[1]} ÷ ({s[0]}) = {d}，'
+        if d > 0:
+            self.check_tips += f'{s[n-1]} × {d} ≠ {self.user_answer}'
+        else:
+            self.check_tips += f'{s[n-1]} × ({d}) ≠ {self.user_answer}'
+
+    def AnswerTips(self):
+        try:
+            if self.subtype[0] == 0:
+                self.AnswerTipsAS()
+            elif self.subtype[0] == 1:
+                self.AnswerTipsGS()
+            elif self.subtype[0] == 2:
+                self.AnswerTipsPS()
+            elif self.subtype[0] == 3:
+                self.AnswerTipsSD()
+            elif self.subtype[0] == 4:
+                self.AnswerTipsSS()
+            elif self.subtype[0] == 5:
+                self.AnswerTipsFib()
+        except:
+            self.answer_tips = '无效的答案'
+
+    def AnswerTipsAS(self):
+        a0, d, n = self.numbers
+        s = [a0 + i * d for i in range(n)]
+        if d >= 0:
+            if s[0] >= 0:
+                self.answer_tips = f'{s[1]} - {s[0]} = {d}'
+            else:
+                self.answer_tips = f'{s[1]} - ({s[0]}) = {d}'
+            self.answer_tips += f'，正确答案 = {s[n-1]} + {d} = {self.correct_answer}'
+        else:
+            if s[1] >= 0:
+                self.answer_tips = f'{s[0]} - {s[1]} = {-d}'
+            else:
+                self.answer_tips = f'{s[0]} - ({s[1]}) = {-d}'
+            self.answer_tips += f'，正确答案 = {s[n-1]} - {-d} = {self.correct_answer}'
+
+        print(self.answer_tips)
+
+    def AnswerTipsGS(self):
+        [a0, d, n] = self.numbers
+        s = [a0 * d ** i for i in range(n)]
+        self.user_answer = int(self.user_answer)
+        if s[0] >= 0:
+            self.answer_tips = f'{s[1]} ÷ {s[0]} = {d}，'
+        else:
+            self.answer_tips = f'{s[1]} ÷ ({s[0]}) = {d}，'
+        if d > 0:
+            self.answer_tips += f'{s[n-1]} × {d} = {self.correct_answer}'
+        else:
+            self.answer_tips += f'{s[n-1]} × ({d}) = {self.correct_answer}'

@@ -491,7 +491,6 @@ class Setting:
     def Write(self):
         db = self.db
         for key in self.default.keys():
-            print(key, getattr(self, key))
             value = str(getattr(self, key))
             db.cursor.execute("INSERT OR REPLACE INTO Setting (Key, Value) VALUES (?, ?)", (key, value))
         db.connect.commit()
@@ -899,9 +898,6 @@ class Review:
         if self.df.empty: # 空表格
             print(f'Exam01表格不存在或为空表')
             return
-        # if not pd.isna(self.df.loc[0]['Type']) or not pd.isna(self.df.loc[0]['Subtype']):
-        #     print('Exam01数据表的记录类型、子类型完整')
-        #     return
         self.df = pd.read_sql_query(f"SELECT * FROM {self.table_name};", self.db.connect)
         self.df['Question'] = self.df['Question'].str.replace('24点', '计算24点')
         self.df['Question'] = self.df['Question'].str.replace('计算计算24点', '计算24点')
@@ -910,12 +906,7 @@ class Review:
             type, subtype = self.JudgeType(question)
             self.df.at[index, 'Type'] = type
             self.df.at[index, 'Subtype'] = str(subtype)
-        # print(self.df.to_string())
-        # self.data = [tuple(row) for row in self.df.itertuples(index=False)] # 是否带索引列
         self.data = [tuple(row.values) for _, row in self.df.iterrows()] # 另一种方法导出所有行的数据，忽略索引列
-        # for row in self.data:
-        #     print(row)
-        # 将结果写回数据库
         try:
             self.db.connect.commit()  # 提交之前的事务
             for index, row in self.df.iterrows():
@@ -926,7 +917,7 @@ class Review:
                 """
                 self.db.cursor.execute(update_sql, (row['Type'], row['Subtype'], row['ID']))
             self.db.connect.commit()
-            print("数据更新成功")
+            # print("数据更新成功")
         except sqlite3.Error as e:
             print(f"数据库错误：{e}")
             self.db.connect.rollback()  # 回滚事务
