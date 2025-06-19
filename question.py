@@ -3066,3 +3066,12 @@ class QuestionEquation(QuestionLR):
             self.answer_tips = f'delta = 0, x1 = x2 = {r1}'
         else:
             self.answer_tips = f'delta = {delta}, x1 = {r1 + r2}, x2 = {r1 - r2}'
+
+class QuestionSequence(QuestionLR): # 数列题型
+    def __init__(self, subtype):
+        super().__init__(type=15, subtype = subtype)
+        self.name = "数列问题"
+        self.comments = "在(  )内填入数字。"
+
+    def Generate(self):
+        pass

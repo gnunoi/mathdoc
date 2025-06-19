@@ -72,10 +72,44 @@ class Exam:
         self.review = Review(self.db)
         self.wb = Workbook(self.user.username)
         self.mail = Mail()
-        # self.ReadSetting()
-        # self.Dump(self.setting)
-        # self.Dump(self)
         self.q = self.CreateQuestion()
+
+    def CreateQuestion(self):
+        if self.type == 0: # 计算24点
+            return Question24Point(subtype=self.subtype, range=self.range)
+        elif self.type == 1: # 乘法速算
+            return QuestionQC(subtype=self.subtype, range=self.range)
+        elif self.type == 2: # 四则运算
+            return Question4AO(subtype=self.subtype, range=self.range)
+        elif self.type == 3: # 质因数分解
+            return QuestionFactor(subtype=self.subtype, range=self.range)
+        elif self.type == 4:  # 单位换算
+            return QuestionConversion(subtype=self.subtype)
+        elif self.type == 5:  # 分数运算
+            return QuestionFraction(subtype=self.subtype)
+        elif self.type == 6:  # 小数运算
+            return QuestionDecimal(subtype=self.subtype)
+        elif self.type == 7:  # 比例运算
+            return QuestionRatio(subtype=self.subtype)
+        elif self.type == 8:  # 周长问题
+            return QuestionPerimeter(subtype=self.subtype)
+        elif self.type == 9:  # 面积问题
+            return QuestionArea(subtype=self.subtype)
+        elif self.type == 10:  # 体积问题
+            return QuestionVolume(subtype=self.subtype)
+        elif self.type == 11:  # 倒数之和
+            return QuestionReciprocal(subtype=self.subtype, range=self.range)
+        elif self.type == 12:  # 乘幂运算
+            return QuestionPower(subtype=self.subtype)
+        elif self.type == 13:  # 一元一次方程
+            return QuestionEq1v1d(subtype=self.subtype, range=self.range)
+        elif self.type == 14:  # 解方程
+            return QuestionEquation(subtype=self.subtype, range=self.range)
+        elif self.type == 15:  # 数列
+            return QuestionSequence(subtype=self.subtype)
+        else:
+            print(f'{self.type}: 无效的类型')
+            return None
 
     def Dump(self, obj = None):
         if obj == None:
@@ -138,6 +172,23 @@ class Exam:
         wb = Workbook(filename = filename)
         wb.Save(data)
 
+    def Generate(self):
+        """
+        在已做题目中查重，保证题目不重复
+        :return:
+        """
+        q = self.q
+        q.Generate()
+
+        count = 0
+        ql = self.record.question_list
+        for count in range(100):
+            count += 1
+            if q.question in ql:
+                q.Generate()
+            else:
+                return True
+        return False
 
     def SendRecords(self):
         print(f'答题记录发送邮件到本人邮箱：{self.user.email}...')
@@ -166,41 +217,6 @@ class Exam:
         if subtype is not None: self.subtype = subtype
         if range is not None: self.range = range
         self.q = self.CreateQuestion()
-
-    def CreateQuestion(self):
-        if self.type == 0: # 0: 计算24点
-            return Question24Point(subtype=self.subtype, range=self.range)
-        elif self.type == 1: # 1: 乘法速算
-            return QuestionQC(subtype=self.subtype, range=self.range)
-        elif self.type == 2: # 2: 四则运算
-            return Question4AO(subtype=self.subtype, range=self.range)
-        elif self.type == 3: # 3: 质因数分解
-            return QuestionFactor(subtype=self.subtype, range=self.range)
-        elif self.type == 4:  # 4: 单位换算
-            return QuestionConversion(subtype=self.subtype)
-        elif self.type == 5:  # 5: 分数运算
-            return QuestionFraction(subtype=self.subtype)
-        elif self.type == 6:  # 6: 小数运算
-            return QuestionDecimal(subtype=self.subtype)
-        elif self.type == 7:  # 7: 比例运算
-            return QuestionRatio(subtype=self.subtype)
-        elif self.type == 8:  # 8: 周长问题
-            return QuestionPerimeter(subtype=self.subtype)
-        elif self.type == 9:  # 9: 面积问题
-            return QuestionArea(subtype=self.subtype)
-        elif self.type == 10:  # 10: 体积问题
-            return QuestionVolume(subtype=self.subtype)
-        elif self.type == 11:  # 11: 倒数之和
-            return QuestionReciprocal(subtype=self.subtype, range=self.range)
-        elif self.type == 12:  # 12: 乘幂运算
-            return QuestionPower(subtype=self.subtype)
-        elif self.type == 13:  # 13: 一元一次方程
-            return QuestionEq1v1d(subtype=self.subtype, range=self.range)
-        elif self.type == 14:  # 14: 解方程
-            return QuestionEquation(subtype=self.subtype, range=self.range)
-        else:
-            print(f'{self.type}: 无效的类型')
-            return None
 
     def SubmitAnswer(self):
         q = self.q
@@ -234,24 +250,6 @@ class Exam:
             self.record.Append(q)
             self.record.correct_number += 1
             self.record.question_number += 1
-
-    def Generate(self):
-        """
-        在已做题目中查重，保证题目不重复
-        :return:
-        """
-        q = self.q
-        q.Generate()
-
-        count = 0
-        ql = self.record.question_list
-        for count in range(100):
-            count += 1
-            if q.question in ql:
-                q.Generate()
-            else:
-                return True
-        return False
 
     def Register(self):
         while not self.user.IsCompleted():

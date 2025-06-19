@@ -708,135 +708,147 @@ class MathDoc(QWidget):
             self.num_edit[4][2].setText(str(self.exam.setting.min_constant))
             self.num_edit[4][3].setText(str(self.exam.setting.max_constant))
         for i, rb in enumerate(self.type_options):
-            if rb.isChecked():
-                self.exam.setting.type = i
-                self.ChangeState()
-                if i == 0:
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype = [0],
-                                            range = [self.exam.setting.min_24point,
-                                                     self.exam.setting.max_24point])
-                elif i == 1:
-                    for i, rb in enumerate(self.qc_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_qc = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype = [self.exam.setting.type_qc],
-                                            range = [self.exam.setting.min_qc,
-                                                     self.exam.setting.max_qc])
-                elif i == 2:
-                    for i in range(4):
-                        if self.radio_terms[i].isChecked():
-                            self.exam.setting.sn_term = i
-                    for i in range(5):
-                        if self.radio_operator[i].isChecked():
-                            self.exam.setting.sn_operator = i
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype = [self.exam.setting.sn_term,
-                                                       self.exam.setting.sn_operator],
-                                            range = [self.exam.setting.min_addend,
-                                                     self.exam.setting.max_addend,
-                                                     self.exam.setting.min_divisor,
-                                                     self.exam.setting.max_divisor])
-                elif i == 3:
-                    for i, rb in enumerate(self.factor_radios):
-                        if rb.isChecked():
-                            self.exam.setting.factor_type = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype = [self.exam.setting.factor_type],
-                                            range = [self.exam.setting.min_composite,
-                                                     self.exam.setting.max_composite])
-                elif i == 4 :
-                    for i, rb in enumerate(self.conversion_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_conversion = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_conversion])
-                elif i == 5 :
-                    for i, rb in enumerate(self.fraction_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_fraction = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_fraction])
-                elif i == 6 :
-                    for i, rb in enumerate(self.decimal_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_decimal = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_decimal])
-                elif i == 7 :
-                    for i, rb in enumerate(self.ratio_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_ratio = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_ratio])
-                elif i == 8 :
-                    for i, rb in enumerate(self.perimeter_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_perimeter = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_perimeter])
-                elif i == 9 :
-                    for i, rb in enumerate(self.area_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_area = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_area])
-                elif i == 10 :
-                    for i, rb in enumerate(self.volume_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_volume = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_volume])
-                elif i == 11:
-                    for i, rb in enumerate(self.reciprocal_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_reciprocal = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_reciprocal])
-                elif i == 12:
-                    for i, rb in enumerate(self.power_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_power = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_power])
-                elif i == 13:
-                    for i, rb in enumerate(self.eq1v1d_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_eq1v1d = i
-                            break
-                    for i, rb in enumerate(self.eq1v1d_options2):
-                        if rb.isChecked():
-                            self.exam.setting.type_eq1v1d_form = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype=[self.exam.setting.type_eq1v1d, self.exam.setting.type_eq1v1d_form],
-                                            range=[self.exam.setting.min_coefficient,
-                                                   self.exam.setting.max_coefficient,
-                                                   self.exam.setting.min_constant,
-                                                   self.exam.setting.max_constant])
-                elif i == 14:
-                    for i, rb in enumerate(self.equation_options):
-                        if rb.isChecked():
-                            self.exam.setting.type_equation = i
-                            break
-                    self.exam.UpdateSetting(type=self.exam.setting.type,
-                                            subtype = [self.exam.setting.type_equation],
-                                            range = [self.exam.setting.min_coefficient,
-                                                     self.exam.setting.max_coefficient,
-                                                     self.exam.setting.min_constant,
-                                                     self.exam.setting.max_constant])
+            if not rb.isChecked():
+                continue
+            self.exam.setting.type = i
+            self.ChangeState()
+            if i == 0:
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype = [0],
+                                        range = [self.exam.setting.min_24point,
+                                                 self.exam.setting.max_24point])
+            elif i == 1:
+                for i, rb in enumerate(self.qc_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_qc = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype = [self.exam.setting.type_qc],
+                                        range = [self.exam.setting.min_qc,
+                                                 self.exam.setting.max_qc])
+            elif i == 2:
+                for i in range(4):
+                    if self.radio_terms[i].isChecked():
+                        self.exam.setting.sn_term = i
+                for i in range(5):
+                    if self.radio_operator[i].isChecked():
+                        self.exam.setting.sn_operator = i
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype = [self.exam.setting.sn_term,
+                                                   self.exam.setting.sn_operator],
+                                        range = [self.exam.setting.min_addend,
+                                                 self.exam.setting.max_addend,
+                                                 self.exam.setting.min_divisor,
+                                                 self.exam.setting.max_divisor])
+            elif i == 3:
+                for i, rb in enumerate(self.factor_radios):
+                    if rb.isChecked():
+                        self.exam.setting.factor_type = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype = [self.exam.setting.factor_type],
+                                        range = [self.exam.setting.min_composite,
+                                                 self.exam.setting.max_composite])
+            elif i == 4 :
+                for i, rb in enumerate(self.conversion_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_conversion = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_conversion])
+            elif i == 5 :
+                for i, rb in enumerate(self.fraction_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_fraction = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_fraction])
+            elif i == 6 :
+                for i, rb in enumerate(self.decimal_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_decimal = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_decimal])
+            elif i == 7 :
+                for i, rb in enumerate(self.ratio_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_ratio = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_ratio])
+            elif i == 8 :
+                for i, rb in enumerate(self.perimeter_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_perimeter = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_perimeter])
+            elif i == 9 :
+                for i, rb in enumerate(self.area_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_area = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_area])
+            elif i == 10 :
+                for i, rb in enumerate(self.volume_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_volume = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_volume])
+            elif i == 11:
+                for i, rb in enumerate(self.reciprocal_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_reciprocal = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_reciprocal])
+            elif i == 12:
+                for i, rb in enumerate(self.power_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_power = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_power])
+            elif i == 13:
+                for i, rb in enumerate(self.eq1v1d_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_eq1v1d = i
+                        break
+                for i, rb in enumerate(self.eq1v1d_options2):
+                    if rb.isChecked():
+                        self.exam.setting.type_eq1v1d_form = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype=[self.exam.setting.type_eq1v1d, self.exam.setting.type_eq1v1d_form],
+                                        range=[self.exam.setting.min_coefficient,
+                                               self.exam.setting.max_coefficient,
+                                               self.exam.setting.min_constant,
+                                               self.exam.setting.max_constant])
+            elif i == 14:
+                for i, rb in enumerate(self.equation_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_equation = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype = [self.exam.setting.type_equation],
+                                        range = [self.exam.setting.min_coefficient,
+                                                 self.exam.setting.max_coefficient,
+                                                 self.exam.setting.min_constant,
+                                                 self.exam.setting.max_constant])
+            elif i == 15:
+                for i, rb in enumerate(self.sequence_options):
+                    if rb.isChecked():
+                        self.exam.setting.type_equation = i
+                        break
+                self.exam.UpdateSetting(type=self.exam.setting.type,
+                                        subtype = [self.exam.setting.type_equation],
+                                        range = [self.exam.setting.min_coefficient,
+                                                 self.exam.setting.max_coefficient,
+                                                 self.exam.setting.min_constant,
+                                                 self.exam.setting.max_constant])
         self.exam.setting.Write()
         self.UpdateQuestion()
         self.answer_input.clear() # 更新题目以后，清除用户答案
