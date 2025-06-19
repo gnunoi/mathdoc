@@ -47,7 +47,7 @@ class MathDoc(QWidget):
         super().__init__()
         self.appname = "数字博士"
         self.author = "致慧星空工作室出品"
-        self.version = "2025.06.19(V1.9.6)"
+        self.version = "2025.06.20(V1.9.7)"
         self.title = f"{self.appname}({self.author})，版本：{self.version}"
         self.primary_screen = QApplication.primaryScreen()
         self.physical_size = self.primary_screen.physicalSize()
@@ -454,13 +454,15 @@ class MathDoc(QWidget):
             QRadioButton('质数数列'),  # 3
             QRadioButton('平方差数列'),  # 4
             QRadioButton('平方和数列'),  # 5
+            QRadioButton('二阶等差数列'),  # 6
+            QRadioButton('等差数列的乘积'),  # 7
         ]
         if not any(rb.isChecked() for rb in self.sequence_options):
             self.sequence_options[self.exam.setting.type_sequence].setChecked(True)
         for i, rb in enumerate(self.sequence_options):
             rb.setFont(self.base_font)
             rb.toggled.connect(self.UpdateSettings)
-            sequence_layout.addWidget(rb, i % 3, i // 3)
+            sequence_layout.addWidget(rb, i % 4, i // 4)
         self.sequence_group.setLayout(sequence_layout)
         control_panel.addWidget(self.sequence_group, 1)
 

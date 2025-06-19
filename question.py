@@ -359,6 +359,11 @@ class Question():
         factors.sort()  # 对因数列表进行排序
         return factors
 
+    def StrNumber(self, num):
+        if num >= 0:
+            return f'{num}'
+        else:
+            return f'({num})'
 
 """
 类名称：QuestionRL
@@ -3094,6 +3099,10 @@ class QuestionSequence(QuestionLR): # 数列题型
             self.GenerateSD()
         elif subtype == 5: # 平方和
             self.GenerateSS()
+        elif subtype == 6: # 二阶等差
+            self.GenerateSOAS()
+        elif subtype == 7: # 等差乘积
+            self.GenerateASM()
         self.AfterGenerate()
 
     def GenerateAS(self): # 等差数列
@@ -3103,13 +3112,13 @@ class QuestionSequence(QuestionLR): # 数列题型
             if d != 0:
                 break
         n = 3
+        self.numbers = [a0, d, n]
         s = [a0 + i * d for i in range(n)]
         self.question = ''
         for i in range(n):
             self.question += f'{s[i]}, '
         self.question += ' (    )'
         self.correct_answer = a0 + n * d
-        self.numbers = [a0, d, n]
         print(self.question, self.correct_answer)
 
     def GenerateGS(self): # 等比数列
@@ -3129,6 +3138,24 @@ class QuestionSequence(QuestionLR): # 数列题型
             self.question += f'{s[i]}, '
         self.question += ' (    )'
         self.correct_answer = a0 * d**n
+        print(self.question, self.correct_answer)
+
+    def GenerateFib(self):  # 平方和
+        a = self.RandInt(-5, 5)
+        while True:
+            b = self.RandInt(-3, 3)
+            if b != a:
+                break
+        n = 4
+        self.numbers = [a, b, n]
+        s = [a, b]
+        for i in range(2, n):
+            s.append(s[i-2] + s[i-1])
+        self.question = ''
+        for i in range(n):
+            self.question += f'{s[i]}, '
+        self.question += ' (    )'
+        self.correct_answer = s[n-2] + s[n-1]
         print(self.question, self.correct_answer)
 
     def GeneratePS(self): # 质数
@@ -3183,23 +3210,45 @@ class QuestionSequence(QuestionLR): # 数列题型
 
         print(self.question, self.correct_answer)
 
-    def GenerateFib(self):  # 平方和
-        a = self.RandInt(-5, 5)
+    def GenerateSOAS(self): # 二阶等差数列
+        a0 = self.RandInt(1, 10)
         while True:
-            b = self.RandInt(-3, 3)
-            if b != a:
+            d1 = self.RandInt(1, 5)
+            if d1 != 0:
                 break
-        n = 4
-        self.numbers = [a, b, n]
-        s = [a, b]
-        for i in range(2, n):
-            s.append(s[i-2] + s[i-1])
+        while True:
+            d2 = self.RandInt(1, 5)
+            if d2 != 0:
+                break
+        n = 5
+        self.numbers = [a0, d1, d2, n]
+        s = [a0 + i * d1 + i*(i-1)//2*d2 for i in range(n+1)]
         self.question = ''
         for i in range(n):
             self.question += f'{s[i]}, '
         self.question += ' (    )'
-        self.correct_answer = s[n-2] + s[n-1]
+        self.correct_answer = s[-1]
+        print(self.question, self.correct_answer)
 
+    def GenerateASM(self): # 等差数列
+        a0 = self.RandInt(1, 5)
+        b0 = self.RandInt(1, 5)
+        while True:
+            da = self.RandInt(1, 3)
+            if da != 0:
+                break
+        while True:
+            db = self.RandInt(1, 3)
+            if db != 0:
+                break
+        n = 4
+        self.numbers = [a0, b0, da, db, n]
+        s = [(a0+i*da)*(b0+i*db) for i in range(n+1)]
+        self.question = ''
+        for i in range(n):
+            self.question += f'{s[i]}, '
+        self.question += ' (    )'
+        self.correct_answer = s[n]
         print(self.question, self.correct_answer)
 
     def CheckTips(self):
@@ -3217,6 +3266,10 @@ class QuestionSequence(QuestionLR): # 数列题型
                 self.CheckTipsSD()
             elif subtype == 5:
                 self.CheckTipsSS()
+            elif subtype == 6:
+                self.CheckTipsSOAS()
+            elif subtype == 7:
+                self.CheckTipsASM()
         except:
             self.check_tips = '无效的答案'
 
@@ -3296,6 +3349,25 @@ class QuestionSequence(QuestionLR): # 数列题型
         self.check_tips += f'，{sd[3]} = {sa[3]}*{sa[3]} + {sb[3]}*{sb[3]}'
         self.check_tips += f'，{sa[n]}*{sa[n]} + {sb[n]}*{sb[n]} ≠ {self.user_answer}'
 
+    def CheckTipsSOAS(self): # 二阶等差数列
+        a0, d1, d2, n = self.numbers
+        s = [a0 + i * d1 + i*(i-1)//2*d2 for i in range(n+1)]
+        ds = [s[i+1] - s[i] for i in range(n)]
+        dds = [ds[i+1] - ds[i] for i in range(n-1)]
+        self.user_answer = int(self.user_answer)
+        self.check_tips = f'一阶差分数列：{ds[:-1]}，二阶差分数列：{dds[:-1]}，{s[n-1]} + {ds[n-2]} + {dds[n-2]} ≠ {self.user_answer}'
+
+    def CheckTipsASM(self): # 二阶等差数列
+        a0, b0, da, db, n = self.numbers
+        sa = [a0 + i * da for i in range(n+1)]
+        sb = [b0 + i * db for i in range(n+1)]
+        s = [sa[i] * sb[i] for i in range(n+1)]
+        self.user_answer = int(self.user_answer)
+        self.check_tips = ''
+        for i in range(n):
+            self.check_tips += f'{s[i]} = {sa[i]} * {sb[i]}，'
+        self.check_tips += f'{sa[n]} * {sb[n]} ≠ {self.user_answer}'
+
     def AnswerTips(self):
         try:
             if self.subtype[0] == 0:
@@ -3310,6 +3382,10 @@ class QuestionSequence(QuestionLR): # 数列题型
                 self.AnswerTipsSD()
             elif self.subtype[0] == 5:
                 self.AnswerTipsSS()
+            elif self.subtype[0] == 6:
+                self.AnswerTipsSOAS()
+            elif self.subtype[0] == 7:
+                self.AnswerTipsASM()
         except:
             self.answer_tips = '无效的答案'
 
@@ -3393,3 +3469,17 @@ class QuestionSequence(QuestionLR): # 数列题型
         str_dsd = f'{dsd[n-2]}' if dsd[n-2] >= 0 else f'({dsd[n-2]})'
         str_ddsd = f'{ddsd[n-2]}' if ddsd[n-2] >= 0 else f'({ddsd[n-2]})'
         self.answer_tips += f'，正确答案 = {sd[n-1]} + {str_dsd} + {str_ddsd} = {self.correct_answer}'
+
+    def AnswerTipsSOAS(self): # 二阶等差数列
+        a0, d1, d2, n = self.numbers
+        s = [a0 + i * d1 + i*(i-1)//2*d2 for i in range(n+1)]
+        ds = [s[i+1] - s[i] for i in range(n)]
+        dds = [ds[i+1] - ds[i] for i in range(n-1)]
+        self.answer_tips = f'一阶差分数列：{ds[:-1]}，二阶差分数列：{dds[:-1]}，{s[n-1]} + {ds[n-2]} + {dds[n-2]} = {self.correct_answer}'
+
+    def AnswerTipsASM(self): # 二阶等差数列
+        a0, b0, da, db, n = self.numbers
+        sa = [a0 + i * da for i in range(n+1)]
+        sb = [b0 + i * db for i in range(n+1)]
+        s = [sa[i] * sb[i] for i in range(n+1)]
+        self.answer_tips = f'{sa[n]} * {sb[n]} = {self.correct_answer}'

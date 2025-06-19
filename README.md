@@ -1,4 +1,8 @@
 # MathDoc Application
+## [Release V1.9.7](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.7)
+1、增加二阶等差数列子题型。
+2、增加等差数列乘积子题型。
+
 ## [Release V1.9.6](https://github.com/gnunoi/mathdoc/releases/tag/V1.9.6)
 1、增加数列题型。
 
