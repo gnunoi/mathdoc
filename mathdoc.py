@@ -202,24 +202,6 @@ class MathDoc(QWidget):
         self.operator_group.setLayout(operator_layout)
         control_panel.addWidget(self.operator_group, 1)
 
-        # 方程题型
-        self.equation_group = QGroupBox("方程类型")
-        self.equation_group.setFont(self.base_font)
-        equation_layout = QVBoxLayout()
-        self.equation_options = [
-            QRadioButton('一元一次方程'),  # 0
-            QRadioButton('二元一次方程组'),  # 1
-            QRadioButton('一元二次方程'),  # 2
-        ]
-        if not any(rb.isChecked() for rb in self.equation_options):
-            self.equation_options[self.exam.setting.type_equation].setChecked(True)
-        for rb in self.equation_options:
-            rb.setFont(self.base_font)
-            rb.toggled.connect(self.UpdateSettings)
-            equation_layout.addWidget(rb)
-        self.equation_group.setLayout(equation_layout)
-        control_panel.addWidget(self.equation_group, 1)
-
         # 单位换算题型
         self.conversion_group = QGroupBox("单位换算题型")
         self.conversion_group.setFont(self.base_font)
@@ -442,6 +424,44 @@ class MathDoc(QWidget):
             eq1v1d_layout.addWidget(rb, i % 4, i // 4)
         self.eq1v1d_group2.setLayout(eq1v1d_layout)
         control_panel.addWidget(self.eq1v1d_group2, 1)
+
+        # 方程题型
+        self.equation_group = QGroupBox("方程类型")
+        self.equation_group.setFont(self.base_font)
+        equation_layout = QVBoxLayout()
+        self.equation_options = [
+            QRadioButton('一元一次方程'),  # 0
+            QRadioButton('二元一次方程组'),  # 1
+            QRadioButton('一元二次方程'),  # 2
+        ]
+        if not any(rb.isChecked() for rb in self.equation_options):
+            self.equation_options[self.exam.setting.type_equation].setChecked(True)
+        for rb in self.equation_options:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            equation_layout.addWidget(rb)
+        self.equation_group.setLayout(equation_layout)
+        control_panel.addWidget(self.equation_group, 1)
+
+        # 数列题型
+        self.sequence_group = QGroupBox("数列问题")
+        self.sequence_group.setFont(self.base_font)
+        sequence_layout = QVBoxLayout()
+        self.sequence_options = [
+            QRadioButton('等差数列'),  # 0
+            QRadioButton('等比数列'),  # 1
+            QRadioButton('质数相关数列'),  # 2
+            QRadioButton('震荡数列'),  # 3
+            QRadioButton('其它数列'),  # 2
+        ]
+        if not any(rb.isChecked() for rb in self.sequence_options):
+            self.sequence_options[self.exam.setting.type_sequence].setChecked(True)
+        for rb in self.sequence_options:
+            rb.setFont(self.base_font)
+            rb.toggled.connect(self.UpdateSettings)
+            sequence_layout.addWidget(rb)
+        self.sequence_group.setLayout(sequence_layout)
+        control_panel.addWidget(self.sequence_group, 1)
 
         # 数值范围
         self.range_groups = []

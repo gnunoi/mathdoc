@@ -458,6 +458,7 @@ class Setting:
             'type_eq1v1d': 0,
             'type_eq1v1d_form': 0,
             'type_equation': 0,
+            'type_sequence': 0,
         }
         self.CreateTable()
         self.Read()
