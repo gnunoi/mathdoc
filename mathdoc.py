@@ -75,11 +75,15 @@ class MathDoc(QWidget):
             self.base_font_size = 54
             self.big_font_size = 80
             self.huge_font_size = 90
-        # DJF
-        if False:
+
+        mode = 2
+        if mode == 0: # DJF
             self.base_font_size = 18
             self.big_font_size = 28
             self.huge_font_size = 32
+        elif mode == 1: # 演示模式
+            self.big_font_size = 144
+
 
         self.set_list = []
         self.sets = set([])
